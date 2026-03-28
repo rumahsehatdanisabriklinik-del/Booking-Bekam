@@ -4,7 +4,7 @@
    ================================================ */
 
 // ── KONFIGURASI (Ganti URL ini dengan URL deploy Anda) ──────────────────────
-const GAS_URL = "https://script.google.com/macros/s/AKfycbztsQ8SHN0Z6LmDNqXz0VxYS3wUHcrkv28Ad1YF-9g-Xx6_X3Q8c01CXEAZFH8zyDYINA/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwhg41HuBaxQdVnJQMKqjyT7uWvveXuIE6VTG7Tct7ZzsgntDe3TcYFjCqQ1q_0Hl7wBA/exec";
 
 // ── ELEMENT REFERENCES ──────────────────────────────────────────────────────
 const terapisSelect   = document.getElementById('terapis');
@@ -74,40 +74,33 @@ function setLoadingBtn(isLoading) {
     btnSpinner.style.display = isLoading ? "block" : "none";
 }
 
-// ── LOAD AWAL: Terapis + Setting Klinik (Paralel) ───────────────────────────
+// ── LOAD AWAL: Terapis + Setting Klinik (Digabung) ───────────────────────────
 async function loadInitialData() {
     try {
-        const [resTerapis, resSetting] = await Promise.all([
-            fetch(`${GAS_URL}?action=getTerapis`),
-            fetch(`${GAS_URL}?action=getSettings`)
-        ]);
+        const response = await fetch(`${GAS_URL}?action=getInitData`);
+        if (!response.ok) throw new Error("Gagal terhubung ke server klinik.");
 
-        if (!resTerapis.ok || !resSetting.ok) throw new Error("Gagal terhubung ke server klinik.");
+        const hasil = await response.json();
+        if (hasil.status !== 'success') throw new Error(hasil.message);
 
-        const [hasilTerapis, hasilSetting] = await Promise.all([
-            resTerapis.json(),
-            resSetting.json()
-        ]);
+        const dataTerapis = hasil.data.terapis;
+        const dataSetting = hasil.data.setting;
 
         // Simpan data terapis
-        if (hasilTerapis.status === 'success') {
-            allTerapisData = hasilTerapis.data;
-        } else throw new Error(hasilTerapis.message);
+        allTerapisData = dataTerapis;
 
         // Isi dropdown Sesi Bekam dari Spreadsheet
-        if (hasilSetting.status === 'success') {
-            const sesiList = hasilSetting.data.sesiBekam || [];
-            sesiBekamSelect.innerHTML = '<option value="" disabled selected>-- Pilih Layanan --</option>';
-            sesiList.forEach(sesi => {
-                const opt = document.createElement('option');
-                opt.value = opt.textContent = sesi;
-                sesiBekamSelect.appendChild(opt);
-            });
-        // Simpan daftar hari libur untuk validasi frontend
-            hariLiburList = hasilSetting.data.hariLibur || [];
+        const sesiList = dataSetting.sesiBekam || [];
+        sesiBekamSelect.innerHTML = '<option value="" disabled selected>-- Pilih Layanan --</option>';
+        sesiList.forEach(sesi => {
+            const opt = document.createElement('option');
+            opt.value = opt.textContent = sesi;
+            sesiBekamSelect.appendChild(opt);
+        });
 
-            sesiBekamSelect.disabled = false;
-        } else throw new Error(hasilSetting.message);
+        // Simpan daftar hari libur untuk validasi frontend
+        hariLiburList = dataSetting.hariLibur || [];
+        sesiBekamSelect.disabled = false;
 
         // Aktifkan radio gender & tombol submit
         document.querySelectorAll('input[name="jenisKelamin"]').forEach(r => r.disabled = false);
