@@ -110,6 +110,7 @@ body {
 }
 
 .hero h1 span {
+    color: var(--emerald-600); /* Fallback warna jika gradient gagal */
     background: linear-gradient(135deg, var(--emerald-600), var(--emerald-400));
     -webkit-background-clip: text;
     background-clip: text;
