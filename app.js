@@ -27,7 +27,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // Batasi tanggal minimal hari ini
     tanggalSelect.setAttribute('min', new Date().toISOString().split('T')[0]);
     loadInitialData();
+    
+    // Pasang listener untuk update progress bar secara real-time
+    const allInputs = document.querySelectorAll('input, select');
+    allInputs.forEach(input => {
+        input.addEventListener('change', updateProgressBar);
+        input.addEventListener('input', updateProgressBar);
+    });
 });
+
+// ── PROGRESS BAR LOGIC ──────────────────────────────────────────────────────
+function updateProgressBar() {
+    const requiredInputs = document.querySelectorAll('input[required]:not([type="radio"]), select[required], input[type="radio"]:checked');
+    const totalRequired = 7; // Nama, NoHP, Gender, Terapis, Tanggal, Waktu, Sesi
+    
+    let filledCount = 0;
+    
+    // Cek input teks & select
+    const textAndSelects = document.querySelectorAll('input[required]:not([type="radio"]), select[required]');
+    textAndSelects.forEach(input => {
+        if (input.value && !input.disabled) filledCount++;
+    });
+    
+    // Cek radio gender
+    const genderChecked = document.querySelector('input[name="jenisKelamin"]:checked');
+    if (genderChecked) filledCount++;
+    
+    // Hitung persentase (minimal 5% biar kelihatan ada barnya)
+    const percentage = Math.max(5, (filledCount / totalRequired) * 100);
+    document.getElementById('progressBar').style.width = percentage + '%';
+}
 
 // ── UI HELPERS ──────────────────────────────────────────────────────────────
 function showAlert(message, type = 'error') {
