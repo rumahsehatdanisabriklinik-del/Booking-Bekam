@@ -406,6 +406,121 @@ body {
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
+/* ── SUCCESS OVERLAY & TICKET ── */
+.success-overlay {
+    text-align: center;
+    padding: 1rem 0;
+    animation: fadeIn 0.5s ease;
+}
+
+.success-icon-wrap {
+    width: 80px;
+    height: 80px;
+    background: var(--emerald-50);
+    color: var(--emerald-600);
+    font-size: 3rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.1);
+}
+
+.success-overlay h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--emerald-900);
+    margin-bottom: 0.5rem;
+}
+
+.success-sub {
+    color: var(--slate-600);
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+}
+
+.ticket-card {
+    background: var(--slate-50);
+    border: 1.5px dashed var(--slate-200);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    text-align: left;
+}
+
+.ticket-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+    padding-bottom: 0.75rem;
+}
+
+.ticket-row:last-child {
+    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.ticket-row span {
+    font-size: 0.8rem;
+    color: var(--slate-400);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.ticket-row strong {
+    font-size: 0.95rem;
+    color: var(--slate-900);
+    font-weight: 700;
+}
+
+.btn-wa {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #25d366;
+    color: white;
+    text-decoration: none;
+    padding: 1.15rem;
+    border-radius: 18px;
+    font-weight: 800;
+    font-size: 1rem;
+    box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
+    transition: all 0.3s;
+    margin-bottom: 1.25rem;
+}
+
+.btn-wa:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(37, 211, 102, 0.4);
+    filter: brightness(1.1);
+}
+
+.btn-reset {
+    background: none;
+    border: none;
+    color: var(--slate-400);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 0 auto;
+    transition: color 0.2s;
+}
+
+.btn-reset:hover { color: var(--emerald-600); }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
 /* ── MOBILE ── */
 @media (max-width: 480px) {
     .card-body { padding: 1.5rem; }

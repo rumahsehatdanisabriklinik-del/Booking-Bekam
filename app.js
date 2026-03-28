@@ -4,7 +4,7 @@
    ================================================ */
 
 // ── KONFIGURASI (Ganti URL ini dengan URL deploy Anda) ──────────────────────
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzVmvBoO5y4uqtxbTS6B0mUsjhCMPK9XWLHZ7KcWf5A3PSwK6u8SgcllH8y1Kdoj5ocng/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwFzxRyDYtOCCZ3qhJR6AzMgr1qQPSUxlRYX1VNQXiTGqzH6v2X2TIR5vnbFfbJ7Popxg/exec";
 
 // ── ELEMENT REFERENCES ──────────────────────────────────────────────────────
 const terapisSelect   = document.getElementById('terapis');
@@ -203,18 +203,30 @@ async function checkAvailability() {
 // ── SUBMIT BOOKING ───────────────────────────────────────────────────────────
 async function submitBooking() {
     const genderEl = document.querySelector('input[name="jenisKelamin"]:checked');
+    const namaInput = document.getElementById('nama');
+    const nohpInput = document.getElementById('nohp');
+    
+    // 1. Validasi Input Dasar
     const formData = {
         jenisKelamin : genderEl?.value || '',
         terapis      : terapisSelect.value,
         sesiBekam    : sesiBekamSelect.value,
         tanggal      : tanggalSelect.value,
         waktu        : waktuSelect.value,
-        nama         : document.getElementById('nama').value.trim(),
-        nohp         : document.getElementById('nohp').value.trim()
+        nama         : namaInput.value.trim(),
+        nohp         : nohpInput.value.trim()
     };
 
     if (Object.values(formData).some(v => !v)) {
         showAlert("Harap lengkapi semua kolom sebelum booking!", 'error');
+        return;
+    }
+
+    // 2. Validasi Nomor HP (Contoh: minimal 10 digit, harus angka)
+    const phoneClean = formData.nohp.replace(/[^0-9]/g, '');
+    if (phoneClean.length < 10) {
+        showAlert("Nomor HP tidak valid. Masukkan minimal 10 digit angka.", 'error');
+        nohpInput.focus();
         return;
     }
 
@@ -231,15 +243,8 @@ async function submitBooking() {
         const result = await res.json();
 
         if (result.status === 'success') {
-            showAlert("✅ " + result.message, 'success');
-            // Reset form (sebagian)
-            document.getElementById('nama').value = '';
-            document.getElementById('nohp').value = '';
-            waktuSelect.innerHTML   = '<option value="" disabled selected>Pilih terapis dan tanggal dulu</option>';
-            waktuSelect.disabled    = true;
-            terapisSelect.innerHTML = '<option value="" disabled selected>Pilih jenis kelamin terlebih dahulu</option>';
-            terapisSelect.disabled  = true;
-            document.querySelectorAll('input[name="jenisKelamin"]').forEach(r => r.checked = false);
+            // Tampilkan Halaman Sukses Digital
+            showSuccessScreen(result.data);
         } else throw new Error(result.message);
 
     } catch (err) {
@@ -247,4 +252,29 @@ async function submitBooking() {
     } finally {
         setLoadingBtn(false);
     }
+}
+
+// ── TAMPILKAN HALAMAN SUKSES ──────────────────────────────────────────────────
+function showSuccessScreen(data) {
+    const formEl    = document.getElementById('bookingForm');
+    const overlayEl = document.getElementById('successOverlay');
+    
+    // Isi data ticket
+    document.getElementById('resNama').textContent    = data.nama;
+    document.getElementById('resTerapis').textContent = data.terapis;
+    document.getElementById('resWaktu').textContent   = `${data.tanggal} jam ${data.waktu}`;
+    
+    // Pasang link WA
+    const waLink = document.getElementById('waLink');
+    waLink.href = data.whatsappUrl;
+
+    // Sembunyikan form, munculkan sukses
+    formEl.style.display = 'none';
+    overlayEl.style.display = 'block';
+    
+    // Update progress bar ke 100%
+    document.getElementById('progressBar').style.width = '100%';
+    
+    // Scroll ke atas kartu
+    document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
 }

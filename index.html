@@ -151,6 +151,42 @@
                 <div id="alertBox" class="alert"></div>
 
             </form>
+
+            <!-- ── SUCCESS OVERLAY (Hidden by default) ── -->
+            <div id="successOverlay" class="success-overlay" style="display: none;">
+                <div class="success-content">
+                    <div class="success-icon-wrap">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>Booking Berhasil!</h3>
+                    <p class="success-sub">Jadwal Anda telah tercatat di sistem kami.</p>
+                    
+                    <div class="ticket-card">
+                        <div class="ticket-row">
+                            <span>Nama Pasien</span>
+                            <strong id="resNama">-</strong>
+                        </div>
+                        <div class="ticket-row">
+                            <span>Terapis</span>
+                            <strong id="resTerapis">-</strong>
+                        </div>
+                        <div class="ticket-row">
+                            <span>Waktu</span>
+                            <strong id="resWaktu">-</strong>
+                        </div>
+                    </div>
+
+                    <a href="#" id="waLink" class="btn-wa" target="_blank">
+                        <i class="fab fa-whatsapp"></i>
+                        Konfirmasi via WhatsApp
+                    </a>
+                    
+                    <button type="button" class="btn-reset" onclick="location.reload()">
+                        <i class="fas fa-redo"></i> Booking Lagi
+                    </button>
+                </div>
+            </div>
+
         </div>
     </div>
 
