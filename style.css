@@ -37,7 +37,7 @@ body {
     position: relative;
 }
 
-/* Background Blobs Animation */
+/* Background Blobs Animation - OPTIMIZED */
 .bg-blobs {
     position: fixed;
     top: 0;
@@ -45,14 +45,16 @@ body {
     width: 100%;
     height: 100%;
     z-index: -1;
-    filter: blur(80px);
-    opacity: 0.6;
+    filter: blur(40px); /* Dikurangi dari 80px agar lebih ringan */
+    opacity: 0.5;
+    pointer-events: none;
 }
 
 .blob-1, .blob-2, .blob-3 {
     position: absolute;
     border-radius: 50%;
-    animation: move 20s infinite alternate ease-in-out;
+    animation: move 25s infinite alternate ease-in-out;
+    will-change: transform; /* Optimasi GPU */
 }
 
 .blob-1 {
@@ -116,17 +118,14 @@ body {
 
 .hero p { color: var(--slate-600); font-size: 1rem; font-weight: 500; }
 
-/* ── CARD (GLASSMORPHISM) ── */
+/* ── CARD ── */
 .card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: white; /* Hapus glassmorphism berat agar tidak lag */
+    border: 1px solid var(--slate-200);
     border-radius: 32px;
     box-shadow:
-        0 4px 6px -1px rgba(0, 0, 0, 0.1),
-        0 2px 4px -2px rgba(0, 0, 0, 0.1),
-        0 20px 40px -10px rgba(6, 78, 59, 0.1);
+        0 10px 25px -5px rgba(6, 78, 59, 0.05),
+        0 20px 48px -12px rgba(0, 0, 0, 0.05);
     width: 100%;
     max-width: 520px;
     overflow: hidden;
@@ -253,6 +252,9 @@ body {
     color: var(--slate-900);
     background: white;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    appearance: none; /* Hilangkan panah browser bawaan */
+    -webkit-appearance: none;
+    -moz-appearance: none;
 }
 
 .form-control:focus {
