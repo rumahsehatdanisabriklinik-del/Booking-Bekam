@@ -109,14 +109,6 @@ body {
     margin-bottom: 0.75rem;
 }
 
-.hero h1 span {
-    color: var(--emerald-600); /* Fallback warna jika gradient gagal */
-    background: linear-gradient(135deg, var(--emerald-600), var(--emerald-400));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
 .hero p { color: var(--slate-600); font-size: 1rem; font-weight: 500; }
 
 /* ── CARD ── */
