@@ -13,98 +13,87 @@
 
     <style>
         .admin-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 15px 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(10px);
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.85); padding: 16px 24px;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.04); position: sticky; top: 0; z-index: 100;
+            backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.5);
         }
-        .admin-nav h2 { margin: 0; font-size: 1.2rem; color: var(--primary); }
-        .btn-logout { background: #ffebee; color: #c62828; border: none; padding: 6px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .admin-nav h2 { margin: 0; font-size: 1.25rem; color: var(--emerald-800); font-weight: 800; display:flex; align-items:center; gap:8px;}
+        .btn-logout { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 8px 18px; border-radius: 12px; cursor: pointer; font-weight: 700; transition: all 0.2s; display:flex; align-items:center; gap:6px;}
+        .btn-logout:hover { background: #fee2e2; transform: scale(1.05); }
         
-        .dashboard-container { padding: 20px; max-width: 800px; margin: 0 auto; }
+        .dashboard-container { padding: 25px 20px; max-width: 900px; margin: 0 auto; position: relative; z-index: 2;}
         
         /* Login Screen */
-        #loginScreen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 80vh;
-        }
-
+        #loginScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 85vh; position: relative; z-index: 2;}
+        .login-card { background: rgba(255,255,255,0.9); backdrop-filter: blur(15px); border: 1px solid white; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); padding: 40px 30px; text-align: center; max-width: 420px; width: 90%; }
+        
         /* Card list admin */
+        @keyframes slideUpIn { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
         .admin-card {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.04);
-            border-left: 5px solid var(--primary);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(6, 78, 59, 0.04); border: 1px solid rgba(6, 78, 59, 0.05);
+            border-left: 6px solid var(--emerald-500); display: flex; flex-direction: column; gap: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); animation: slideUpIn 0.4s ease-out forwards;
         }
-        .batal-card { border-left-color: #c62828; background: #fafafa; }
-        .selesai-card { border-left-color: #2e7d32; background: #fafafa;}
+        .admin-card:hover { transform: translateY(-4px); box-shadow: 0 15px 35px rgba(6, 78, 59, 0.08); }
+        .batal-card { border-left-color: #ef4444; background: #fffcfc; }
+        .selesai-card { border-left-color: #10b981; background: #fcfdfd;}
         
         .ac-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .ac-title { font-size: 1.1rem; font-weight: 700; color: #333; margin: 0;}
-        .ac-subtitle { font-size: 0.85rem; color: #666; }
+        .ac-title { font-size: 1.15rem; font-weight: 800; color: #1e293b; margin: 0; display:flex; align-items:center; gap:8px;}
+        .ac-subtitle { font-size: 0.85rem; color: #64748b; font-weight: 600; margin-top: 4px; display:inline-block; background: #f1f5f9; padding: 4px 10px; border-radius: 20px;}
         
-        .ac-body { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.9rem; background: #f9f9f9; padding: 10px; border-radius: 8px; }
+        .ac-body { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px dashed #cbd5e1; }
+        .ac-body p { margin:0; display:flex; flex-direction:column; gap:2px; }
+        .ac-body p strong { color: #64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; }
+        .ac-body p span { font-weight:700; color:#0f172a; }
         
-        .ac-actions { display: flex; gap: 10px; margin-top: 5px; }
-        .btn-sm { flex: 1; padding: 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; text-align: center; }
-        .btn-selesai { background: #e8f5e9; color: #2e7d32; }
-        .btn-batal { background: #ffebee; color: #c62828; }
-        .btn-sm:hover { opacity: 0.8; }
+        .ac-actions { display: flex; gap: 12px; margin-top: 8px; }
+        .btn-sm { flex: 1; padding: 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; border: none; text-align: center; transition: all 0.2s; display:flex; justify-content:center; align-items:center; gap:6px;}
+        .btn-selesai { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;}
+        .btn-batal { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;}
+        .btn-sm:hover { transform: scale(1.03); filter: brightness(0.95); }
         
         .filter-bar {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            background: white;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex; gap: 12px; margin-bottom: 25px; background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(10px); padding: 12px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            overflow-x: auto; /* Untuk layar kecil */
         }
         .filter-btn {
-            background: none;
-            border: 1px solid #ddd;
-            padding: 5px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9rem;
+            background: white; border: 1px solid #e2e8f0; padding: 8px 20px; border-radius: 30px;
+            cursor: pointer; font-size: 0.9rem; font-weight: 700; color: #64748b; transition: all 0.3s;
+            white-space: nowrap;
         }
+        .filter-btn:hover { background: #f8fafc; color: #0f172a; }
         .filter-btn.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
+            background: var(--emerald-600); color: white; border-color: var(--emerald-600);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
         }
-
     </style>
 </head>
-<body style="background: #f0f4f8;">
+<body style="background: #f0f9ff;">
+    
+    <!-- Animasi Background Latar Belakang -->
+    <div class="bg-blobs">
+        <div class="blob-1"></div>
+        <div class="blob-2"></div>
+        <div class="blob-3"></div>
+    </div>
 
     <!-- Laman Login -->
     <div id="loginScreen">
-        <div class="card" style="max-width: 400px; width: 90%;">
-            <div class="card-body" style="text-align: center;">
-                <div style="font-size: 3rem; color: var(--primary); margin-bottom: 20px;">
+        <div class="login-card">
+            <div style="text-align: center;">
+                <div style="font-size: 3.5rem; color: var(--emerald-600); margin-bottom: 20px; filter: drop-shadow(0 4px 6px rgba(5,150,105,0.2));">
                     <i class="fas fa-user-shield"></i>
                 </div>
-                <h2>Portal Admin</h2>
-                <p style="margin-bottom: 20px; color: #666;">Silakan masukkan PIN rahasia untuk mengakses sistem.</p>
+                <h2 style="font-weight: 800; color: var(--slate-900); font-size: 1.8rem;">Portal Admin</h2>
+                <p style="margin-bottom: 25px; color: var(--slate-600); font-weight: 500;">Silakan masukkan PIN rahasia untuk mengakses kendali sistem.</p>
                 <form id="formLogin" onsubmit="event.preventDefault(); doLogin();">
-                    <input type="password" id="adminPin" class="form-control" placeholder="Masukkan PIN" required style="text-align: center; font-size: 1.2rem; letter-spacing: 5px;">
-                    <button type="submit" class="btn-submit" id="btnLogin" style="margin-top: 15px;">Masuk</button>
-                    <div id="loginAlert" style="color: red; margin-top: 10px; display: none;">PIN Salah!</div>
+                    <input type="password" id="adminPin" class="form-control" placeholder="Masukkan PIN" required style="text-align: center; font-size: 1.5rem; letter-spacing: 8px; padding: 15px; border-radius: 16px; border: 2px solid var(--emerald-300);">
+                    <button type="submit" class="btn-submit" id="btnLogin" style="margin-top: 20px; border-radius: 16px; padding: 15px; font-size: 1.1rem;"><i class="fas fa-door-open"></i> Akses Dasbor</button>
+                    <div id="loginAlert" style="color: #dc2626; margin-top: 15px; display: none; font-weight: 700; background: #fee2e2; padding: 10px; border-radius: 8px;">PIN Salah!</div>
                 </form>
             </div>
         </div>
