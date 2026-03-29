@@ -309,6 +309,98 @@ body {
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
 }
 
+/* ── PILL SELECTION CARDS ── */
+.pill-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.pill-btn {
+    flex: 1 1 calc(50% - 12px);
+    background: white;
+    border: 2px solid var(--slate-200);
+    color: var(--slate-600);
+    padding: 14px 12px;
+    border-radius: 16px;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+}
+
+.pill-btn.full-width {
+    flex: 1 1 100%;
+}
+
+.pill-btn:hover:not(.disabled) {
+    border-color: var(--emerald-300);
+    color: var(--emerald-700);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(6, 78, 59, 0.05);
+}
+
+.pill-btn.active {
+    background: var(--emerald-50);
+    border-color: var(--emerald-600);
+    color: var(--emerald-800);
+    box-shadow: 0 6px 15px rgba(16, 185, 129, 0.15);
+}
+
+.pill-btn.disabled {
+    background: var(--slate-50);
+    border-color: var(--slate-200);
+    color: var(--slate-400);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.pill-placeholder {
+    width: 100%;
+    text-align: center;
+    color: var(--slate-400);
+    font-size: 0.9rem;
+    font-style: italic;
+    padding: 15px;
+    background: rgba(248, 250, 252, 0.6);
+    border: 1px dashed var(--slate-300);
+    border-radius: 16px;
+}
+
+/* ── HORIZONTAL DATE STRIP ── */
+.date-strip {
+    display: flex; overflow-x: auto; gap: 12px; padding-bottom: 12px; margin-top: 10px;
+    scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
+}
+.date-strip::-webkit-scrollbar { height: 6px; }
+.date-strip::-webkit-scrollbar-track { background: var(--slate-100); border-radius: 10px; }
+.date-strip::-webkit-scrollbar-thumb { background: var(--slate-300); border-radius: 10px; }
+
+.date-card {
+    flex: 0 0 calc(25% - 10px); min-width: 75px; background: white; border: 2px solid var(--slate-200);
+    border-radius: 16px; padding: 12px 5px; text-align: center; cursor: pointer; transition: all 0.25s;
+    user-select: none; scroll-snap-align: start; box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+@media (max-width: 480px) { .date-card { flex: 0 0 calc(30% - 10px); min-width: 70px; } }
+
+.date-card .dc-day { font-size: 0.8rem; font-weight: 700; color: var(--slate-500); text-transform: uppercase; }
+.date-card .dc-date { font-size: 1.4rem; font-weight: 800; color: var(--slate-800); line-height: 1.1; }
+.date-card .dc-month { font-size: 0.75rem; font-weight: 600; color: var(--slate-500); }
+
+.date-card:hover:not(.disabled) { border-color: var(--emerald-300); transform: translateY(-3px); box-shadow: 0 8px 15px rgba(6, 78, 59, 0.05); }
+.date-card.active { background: var(--emerald-500); border-color: var(--emerald-600); box-shadow: 0 6px 15px rgba(16, 185, 129, 0.25); transform: translateY(-3px); }
+.date-card.active .dc-day, .date-card.active .dc-date, .date-card.active .dc-month { color: white; }
+.date-card.disabled { background: var(--slate-50); border-color: var(--slate-200); cursor: not-allowed; opacity: 0.6; }
+
 /* ── BUTTON ── */
 .btn-submit {
     width: 100%;

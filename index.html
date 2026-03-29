@@ -106,31 +106,29 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="terapis">Terapis</label>
-                    <div class="input-wrap select-wrap">
-                        <i class="fas fa-user-md icon"></i>
-                        <select id="terapis" class="form-control" required disabled onchange="checkAvailability()">
-                            <option value="" disabled selected>Pilih jenis kelamin terlebih dahulu</option>
-                        </select>
+                    <label>Terapis</label>
+                    <div id="gridTerapis" class="pill-grid">
+                        <div class="pill-placeholder">Pilih jenis kelamin terlebih dahulu</div>
                     </div>
+                    <!-- Target state manager untuk nilai Terapis -->
+                    <input type="hidden" id="terapis" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="tanggal">Tanggal Reservasi</label>
-                    <div class="input-wrap">
-                        <i class="fas fa-calendar icon"></i>
-                        <input type="date" id="tanggal" class="form-control" required onchange="checkAvailability()">
+                    <label>Pilih Tanggal Reservasi</label>
+                    <div id="gridTanggal" class="date-strip">
+                        <div class="pill-placeholder"><i class="fas fa-spinner fa-spin"></i> Menyiapkan kalender...</div>
                     </div>
+                    <input type="hidden" id="tanggal" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="waktu">Slot Waktu Tersedia</label>
-                    <div class="input-wrap select-wrap">
-                        <i class="fas fa-clock icon"></i>
-                        <select id="waktu" class="form-control" required disabled>
-                            <option value="" disabled selected>Pilih terapis dan tanggal dulu</option>
-                        </select>
+                    <label>Slot Waktu Tersedia</label>
+                    <div id="gridWaktu" class="pill-grid">
+                        <div class="pill-placeholder">Pilih terapis dan tanggal dulu</div>
                     </div>
+                    <!-- Target state manager untuk nilai Waktu -->
+                    <input type="hidden" id="waktu" required>
                 </div>
 
                 <!-- STEP 3: Pilih Layanan -->
@@ -141,13 +139,12 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="sesiBekam">Jenis Sesi / Paket</label>
-                    <div class="input-wrap select-wrap">
-                        <i class="fas fa-briefcase-medical icon"></i>
-                        <select id="sesiBekam" class="form-control" required disabled>
-                            <option value="" disabled selected>Memuat layanan klinik...</option>
-                        </select>
+                    <label>Jenis Sesi / Paket Layanan</label>
+                    <div id="gridSesi" class="pill-grid">
+                        <div class="pill-placeholder">Memuat layanan klinik...</div>
                     </div>
+                    <!-- Target state manager untuk nilai Layanan -->
+                    <input type="hidden" id="sesiBekam" required>
                 </div>
 
                 <button type="submit" id="btnSubmit" class="btn-submit" disabled>

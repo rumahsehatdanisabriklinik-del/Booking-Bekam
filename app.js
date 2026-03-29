@@ -7,10 +7,35 @@
 // (Berpindah ke config.js)
 
 // ── ELEMENT REFERENCES ──────────────────────────────────────────────────────
-const terapisSelect   = document.getElementById('terapis');
-const sesiBekamSelect = document.getElementById('sesiBekam');
-const tanggalSelect   = document.getElementById('tanggal');
-const waktuSelect     = document.getElementById('waktu');
+const gridTerapis     = document.getElementById('gridTerapis');
+const gridWaktu       = document.getElementById('gridWaktu');
+const gridSesi        = document.getElementById('gridSesi');
+const gridTanggal     = document.getElementById('gridTanggal');
+
+const terapisInput    = document.getElementById('terapis');
+const waktuInput      = document.getElementById('waktu');
+const sesiBekamInput  = document.getElementById('sesiBekam');
+const tanggalSelect   = document.getElementById('tanggal'); // hidden input
+
+// ── HELPER PILL SELECTION ───────────────────────────────────────────────────
+function selectPill(clickedBtn, grid, hiddenInput, value, triggerAvailability = false) {
+    if (clickedBtn.classList.contains('disabled')) return;
+    
+    // Hapus class active dari semua pill di dalam grid
+    const peers = grid.querySelectorAll('.pill-btn');
+    peers.forEach(p => p.classList.remove('active'));
+    
+    // Tambahkan class active ke pill yang diklik
+    clickedBtn.classList.add('active');
+    
+    // Isi nilai ke input tersembunyi
+    hiddenInput.value = value;
+    
+    // Jika itu pilihan Terapis dan tanggal sudah ada, cari slot
+    if (triggerAvailability) {
+        checkAvailability();
+    }
+}
 const btnSubmit       = document.getElementById('btnSubmit');
 const btnSpinner      = document.getElementById('btnSpinner');
 const btnText         = document.querySelector('.btn-text');
@@ -91,16 +116,20 @@ async function loadInitialData() {
 
         // Isi dropdown Sesi Bekam dari Spreadsheet
         const sesiList = dataSetting.sesiBekam || [];
-        sesiBekamSelect.innerHTML = '<option value="" disabled selected>-- Pilih Layanan --</option>';
+        gridSesi.innerHTML = '';
         sesiList.forEach(sesi => {
-            const opt = document.createElement('option');
-            opt.value = opt.textContent = sesi;
-            sesiBekamSelect.appendChild(opt);
+            const btn = document.createElement('div');
+            btn.className = 'pill-btn full-width';
+            btn.innerHTML = `<i class="fas fa-briefcase-medical"></i> ${sesi}`;
+            btn.onclick = () => selectPill(btn, gridSesi, sesiBekamInput, sesi, false);
+            gridSesi.appendChild(btn);
         });
 
         // Simpan daftar hari libur untuk validasi frontend
         hariLiburList = dataSetting.hariLibur || [];
-        sesiBekamSelect.disabled = false;
+
+        // Bangun kalender kartu (Date Strip)
+        buildDateStrip();
 
         // Aktifkan radio gender & tombol submit
         document.querySelectorAll('input[name="jenisKelamin"]').forEach(r => r.disabled = false);
@@ -113,29 +142,81 @@ async function loadInitialData() {
     }
 }
 
+// ── DATE STRIP BUILDER — 30 Hari ke Depan ────────────────────────────────────
+const NAMA_HARI_PENDEK   = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+const NAMA_BULAN_PENDEK  = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+
+function buildDateStrip() {
+    gridTanggal.innerHTML = '';
+    const today = new Date();
+
+    for (let i = 0; i < 30; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() + i);
+
+        const year   = d.getFullYear();
+        const month  = String(d.getMonth() + 1).padStart(2, '0');
+        const day    = String(d.getDate()).padStart(2, '0');
+        const isoStr = `${year}-${month}-${day}`;
+        const hariIdx = d.getDay();
+
+        const isLibur = hariLiburList.includes(hariIdx);
+
+        const card = document.createElement('div');
+        card.className = 'date-card' + (isLibur ? ' disabled' : '');
+        card.innerHTML = `
+            <span class="dc-day">${NAMA_HARI_PENDEK[hariIdx]}</span>
+            <span class="dc-date">${d.getDate()}</span>
+            <span class="dc-month">${NAMA_BULAN_PENDEK[d.getMonth()]}</span>
+        `;
+
+        if (isLibur) {
+            // Tambahkan tooltip singkat tanda klinik tutup
+            card.title = 'Klinik tutup hari ini';
+        } else {
+            card.onclick = () => {
+                // Hapus active dari semua
+                gridTanggal.querySelectorAll('.date-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                tanggalSelect.value = isoStr;
+                // Scroll sedikit agar kartu aktif kelihatan di tengah
+                card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                // Reset slot waktu
+                gridWaktu.innerHTML = '<div class="pill-placeholder"><i class="fas fa-spinner fa-spin"></i> Mengecek ketersediaan...</div>';
+                waktuInput.value = '';
+                checkAvailability();
+            };
+        }
+
+        gridTanggal.appendChild(card);
+    }
+}
+
 // ── FILTER TERAPIS BERDASARKAN GENDER ───────────────────────────────────────
 function filterTerapis() {
     const genderKlien = document.querySelector('input[name="jenisKelamin"]:checked')?.value;
     if (!genderKlien) return;
 
-    terapisSelect.innerHTML = '<option value="" disabled selected>-- Pilih Terapis --</option>';
-    waktuSelect.innerHTML   = '<option value="" disabled selected>Pilih terapis dan tanggal dulu</option>';
-    waktuSelect.disabled    = true;
+    gridTerapis.innerHTML = '<div class="pill-placeholder">-- Pilih Terapis --</div>';
+    gridWaktu.innerHTML   = '<div class="pill-placeholder">Pilih terapis dan tanggal dulu</div>';
+    terapisInput.value = '';
+    waktuInput.value   = '';
     hideAlert();
 
     const cocok = allTerapisData.filter(t => t.gender === genderKlien);
 
     if (cocok.length === 0) {
-        terapisSelect.innerHTML = '<option value="" disabled selected>Terapis tidak tersedia</option>';
-        terapisSelect.disabled  = true;
+        gridTerapis.innerHTML = '<div class="pill-placeholder" style="color:#e11d48">Terapis tidak tersedia</div>';
         showAlert(`Belum ada Terapis ${genderKlien} yang tersedia saat ini.`, 'error');
     } else {
+        gridTerapis.innerHTML = '';
         cocok.forEach(t => {
-            const opt = document.createElement('option');
-            opt.value = opt.textContent = t.nama;
-            terapisSelect.appendChild(opt);
+            const btn = document.createElement('div');
+            btn.className = 'pill-btn';
+            btn.innerHTML = `<i class="fas fa-user-md"></i> ${t.nama}`;
+            btn.onclick = () => selectPill(btn, gridTerapis, terapisInput, t.nama, true);
+            gridTerapis.appendChild(btn);
         });
-        terapisSelect.disabled = false;
         checkAvailability(); // Refresh slot jika tanggal sudah dipilih
     }
 }
@@ -147,16 +228,16 @@ function validateHariLibur(tanggal) {
     if (hariLiburList.includes(hariAngka)) {
         showAlert(`⛔ Klinik tutup setiap hari ${NAMA_HARI[hariAngka]}. Silakan pilih tanggal lain.`, 'error');
         tanggalSelect.value = ''; // Kosongkan tanggal
-        waktuSelect.innerHTML = '<option value="" disabled selected>Pilih terapis dan tanggal dulu</option>';
-        waktuSelect.disabled  = true;
+        gridWaktu.innerHTML = '<div class="pill-placeholder">Pilih terapis dan tanggal dulu</div>';
+        waktuInput.value = '';
         return false;
     }
     return true;
 }
 
 // ── CEK KETERSEDIAAN SLOT JAM ────────────────────────────────────────────────
-async function checkAvailability() {
-    const trp = terapisSelect.value;
+function checkAvailability() {
+    const trp = terapisInput.value;
     const tgl = tanggalSelect.value;
     if (!trp || !tgl) return;
 
@@ -165,40 +246,41 @@ async function checkAvailability() {
 
     // Cegah spam klik dengan mengunci input selama loading
     tanggalSelect.disabled = true;
-    terapisSelect.disabled = true;
 
-    waktuSelect.innerHTML = '<option value="" disabled selected>⏳ Mengecek ketersediaan...</option>';
-    waktuSelect.disabled  = true;
+    gridWaktu.innerHTML = '<div class="pill-placeholder"><i class="fas fa-spinner fa-spin"></i> Mengecek ketersediaan...</div>';
+    waktuInput.value = '';
     hideAlert();
 
-    try {
-        const res    = await fetch(`${GAS_URL}?action=cekWaktu&tanggal=${tgl}&terapis=${encodeURIComponent(trp)}`);
-        if (!res.ok) throw new Error("Masalah jaringan.");
-        const result = await res.json();
-
-        if (result.status === 'success') {
-            if (result.data.length === 0) {
-                waktuSelect.innerHTML = '<option value="" disabled selected>Penuh / Klinik Libur</option>';
-                showAlert(result.info || "Semua slot penuh atau klinik libur hari ini.", 'error');
-            } else {
-                waktuSelect.innerHTML = '<option value="" disabled selected>-- Pilih Slot Waktu --</option>';
-                result.data.forEach(j => {
-                    const opt = document.createElement('option');
-                    opt.value = opt.textContent = j;
-                    waktuSelect.appendChild(opt);
-                });
-                waktuSelect.disabled = false;
-            }
-        } else throw new Error(result.message);
-
-    } catch (err) {
-        waktuSelect.innerHTML = '<option value="" disabled selected>Gagal memuat slot</option>';
-        showAlert("Gagal mengecek jadwal: " + err.message, 'error');
-    } finally {
-        // Buka kembali kuncian input setelah loading selesai/gagal
-        tanggalSelect.disabled = false;
-        terapisSelect.disabled = false;
-    }
+    return fetch(`${GAS_URL}?action=cekWaktu&tanggal=${tgl}&terapis=${encodeURIComponent(trp)}`)
+        .then(res => {
+            if (!res.ok) throw new Error("Masalah jaringan.");
+            return res.json();
+        })
+        .then(result => {
+            if (result.status === 'success') {
+                if (result.data.length === 0) {
+                    gridWaktu.innerHTML = '<div class="pill-placeholder" style="color:#e11d48">Penuh / Libur</div>';
+                    showAlert(result.info || "Semua slot penuh atau klinik libur hari ini.", 'error');
+                } else {
+                    gridWaktu.innerHTML = '';
+                    result.data.forEach(j => {
+                        const btn = document.createElement('div');
+                        btn.className = 'pill-btn';
+                        btn.innerHTML = `<i class="fas fa-clock"></i> ${j}`;
+                        btn.onclick = () => selectPill(btn, gridWaktu, waktuInput, j, false);
+                        gridWaktu.appendChild(btn);
+                    });
+                }
+            } else throw new Error(result.message);
+        })
+        .catch(err => {
+            gridWaktu.innerHTML = '<div class="pill-placeholder">Gagal memuat slot</div>';
+            showAlert("Gagal mengecek jadwal: " + err.message, 'error');
+        })
+        .finally(() => {
+            // Buka kembali kuncian input
+            tanggalSelect.disabled = false;
+        });
 }
 
 // ── SUBMIT BOOKING ───────────────────────────────────────────────────────────
