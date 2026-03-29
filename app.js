@@ -296,17 +296,25 @@ async function submitBooking() {
     
     // 1. Validasi Input Dasar
     const formData = {
-        jenisKelamin : genderEl?.value || '',
-        terapis      : terapisSelect.value,
-        sesiBekam    : sesiBekamSelect.value,
-        tanggal      : tanggalSelect.value,
-        waktu        : waktuSelect.value,
+        jenisKelamin : genderEl?.value       || '',
+        terapis      : terapisInput.value    || '',   // dari pill grid terapis
+        sesiBekam    : sesiBekamInput.value  || '',   // dari pill grid sesi
+        tanggal      : tanggalSelect.value   || '',   // dari hidden date strip
+        waktu        : waktuInput.value      || '',   // dari pill grid waktu
         nama         : namaInput.value.trim(),
         nohp         : nohpInput.value.trim()
     };
 
     if (Object.values(formData).some(v => !v)) {
-        showAlert("Harap lengkapi semua kolom sebelum booking!", 'error');
+        // Tampilkan pesan yang lebih spesifik
+        if (!formData.jenisKelamin) { showAlert("⚠️ Silakan pilih Jenis Kelamin terlebih dahulu.", 'error'); return; }
+        if (!formData.nama)         { showAlert("⚠️ Harap isi Nama Lengkap Anda.", 'error'); return; }
+        if (!formData.nohp)         { showAlert("⚠️ Harap isi Nomor HP / WhatsApp Anda.", 'error'); return; }
+        if (!formData.terapis)      { showAlert("⚠️ Silakan pilih Terapis.", 'error'); return; }
+        if (!formData.tanggal)      { showAlert("⚠️ Silakan pilih Tanggal Reservasi.", 'error'); return; }
+        if (!formData.waktu)        { showAlert("⚠️ Silakan pilih Slot Waktu.", 'error'); return; }
+        if (!formData.sesiBekam)    { showAlert("⚠️ Silakan pilih Jenis Layanan.", 'error'); return; }
+        showAlert("⚠️ Harap lengkapi semua kolom sebelum booking!", 'error');
         return;
     }
 
