@@ -15,7 +15,7 @@ async function doLogin() {
     const pin = document.getElementById('adminPin').value;
     const btn = document.getElementById('btnLogin');
     const alert = document.getElementById('loginAlert');
-    alert.style.display = 'none';
+    alert.classList.add('hidden');
     
     const originalText = btn.innerHTML;
     btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Mengecek...`;
@@ -35,7 +35,7 @@ async function verifyPin(pin) {
         if (result.status === 'success') {
             localStorage.setItem('adminPin', pin);
             document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('dashboardScreen').style.display = 'grid';
+            document.getElementById('dashboardScreen').style.display = '';
             switchTab('booking');
         } else {
             throw new Error(result.message);
@@ -43,7 +43,7 @@ async function verifyPin(pin) {
     } catch (err) {
         const al = document.getElementById('loginAlert');
         al.textContent = err.message || "Gagal menghubungi server";
-        al.style.display = 'block';
+        al.classList.remove('hidden');
         localStorage.removeItem('adminPin');
     }
 }
@@ -88,7 +88,7 @@ async function loadDashboardData(pin) {
     const loader = document.getElementById('loadingDash');
     const container = document.getElementById('listPasien');
     
-    loader.style.display = 'grid';
+    loader.classList.remove('hidden');
     container.innerHTML = '';
 
     try {
@@ -99,12 +99,12 @@ async function loadDashboardData(pin) {
             allData = result.data;
             renderData();
         } else {
-            container.innerHTML = `<div class="error-toast"><i class="fas fa-exclamation-triangle"></i> ERROR: ${result.message}</div>`;
+            container.innerHTML = `<div class="col-span-full w-full bg-red-50 text-red-600 border border-red-200 p-4 rounded-xl flex items-center gap-3 font-bold"><i class="fas fa-exclamation-triangle flex-shrink-0"></i> <span>ERROR: ${result.message}</span></div>`;
         }
     } catch (err) {
-        container.innerHTML = `<div class="error-toast">Gagal memuat data: ${err.message}</div>`;
+        container.innerHTML = `<div class="col-span-full w-full bg-red-50 text-red-600 border border-red-200 p-4 rounded-xl flex items-center gap-3 font-bold"><i class="fas fa-exclamation-triangle flex-shrink-0"></i> <span>Gagal memuat data: ${err.message}</span></div>`;
     } finally {
-        loader.style.display = 'none';
+        loader.classList.add('hidden');
     }
 }
 
@@ -112,7 +112,7 @@ async function loadLaporanData(pin) {
     const loader = document.getElementById('loadingLaporan');
     const container = document.getElementById('isiLaporan');
     
-    loader.style.display = 'grid';
+    loader.classList.remove('hidden');
     container.innerHTML = '';
 
     try {
@@ -122,12 +122,12 @@ async function loadLaporanData(pin) {
         if (result.status === 'success') {
             renderLaporan(result.data);
         } else {
-            container.innerHTML = `<div class="error-toast">Gagal: ${result.message}</div>`;
+            container.innerHTML = `<div class="w-full bg-red-50 text-red-600 border border-red-200 p-4 rounded-xl font-bold">Gagal: ${result.message}</div>`;
         }
     } catch (err) {
-        container.innerHTML = `<div class="error-toast">Error: ${err.message}</div>`;
+        container.innerHTML = `<div class="w-full bg-red-50 text-red-600 border border-red-200 p-4 rounded-xl font-bold">Error: ${err.message}</div>`;
     } finally {
-        loader.style.display = 'none';
+        loader.classList.add('hidden');
     }
 }
 
@@ -150,7 +150,7 @@ function renderData() {
     container.innerHTML = '';
 
     if (!allData || allData.length === 0) {
-        container.innerHTML = `<div class="pill-placeholder">Tidak ada data reservasi sama sekali.</div>`;
+        container.innerHTML = `<div class="col-span-full w-full text-center p-8 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-bold">Tidak ada data reservasi sama sekali.</div>`;
         return;
     }
 
@@ -174,43 +174,53 @@ function renderData() {
     });
 
     if (displayData.length === 0) {
-        container.innerHTML = `<div class="pill-placeholder">Tidak ada data yang cocok dengan pencarian Bapak.</div>`;
+        container.innerHTML = `<div class="col-span-full w-full text-center p-8 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-bold">Tidak ada data yang cocok dengan pencarian Bapak.</div>`;
         return;
     }
 
     displayData.forEach(p => {
         const st = (p.status || "Terjadwal").toLowerCase();
-        let badgeClass = "badge-terjadwal";
+        let badgeClass = "bg-blue-50 text-blue-600 border-blue-200 ring-1 ring-blue-100";
         let actionBtn = "";
 
         if (st === "batal" || st === "cancel" || st === "dibatalkan") {
-            badgeClass = "badge-batal";
-            actionBtn = `<div style="color: #ef4444; font-weight: 800; font-size:0.8rem; padding: 10px; text-align:center;"><i class="fas fa-times-circle"></i> Reservasi Dibatalkan</div>`;
+            badgeClass = "bg-red-50 text-red-600 border-red-200 ring-1 ring-red-100";
+            actionBtn = `<div class="bg-red-50/50 rounded-xl p-3 text-red-500 font-extrabold text-xs text-center border border-red-100"><i class="fas fa-times-circle"></i> Reservasi Dibatalkan</div>`;
         } else if (st === "selesai") {
-            badgeClass = "badge-selesai";
-            actionBtn = `<div style="color: #10b981; font-weight: 800; font-size:0.8rem; padding: 10px; text-align:center;"><i class="fas fa-check-double"></i> Layanan Selesai</div>`;
+            badgeClass = "bg-emerald-50 text-emerald-600 border-emerald-200 ring-1 ring-emerald-100";
+            actionBtn = `<div class="bg-emerald-50 rounded-xl p-3 text-emerald-600 font-extrabold text-xs text-center border border-emerald-100"><i class="fas fa-check-double text-emerald-500"></i> Layanan Selesai</div>`;
         } else {
+            badgeClass = "bg-blue-50 text-blue-600 border-blue-200 ring-1 ring-blue-100";
             actionBtn = `
-                <div class="ac-actions">
-                    <button class="btn-sm btn-selesai" onclick="updateStatus('${p.row}', 'Selesai')"><i class="fas fa-check"></i> Selesai</button>
-                    <button class="btn-sm btn-batal" onclick="updateStatus('${p.row}', 'Batal')"><i class="fas fa-times"></i> Batal</button>
+                <div class="flex items-center gap-3 pt-4 border-t border-slate-100">
+                    <button class="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl text-xs transition-colors shadow-sm shadow-emerald-500/20" onclick="updateStatus('${p.row}', 'Selesai')"><i class="fas fa-check mr-1"></i> Selesai</button>
+                    <button class="flex-1 py-2.5 bg-white border border-red-200 hover:bg-red-50 text-red-500 hover:text-red-600 font-bold rounded-xl text-xs transition-colors" onclick="updateStatus('${p.row}', 'Batal')"><i class="fas fa-times mr-1"></i> Batal</button>
                 </div>
             `;
         }
 
         container.innerHTML += `
-            <div class="admin-card">
-                <div class="ac-header">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-shadow p-5 flex flex-col gap-4">
+                <div class="flex justify-between items-start pb-4 border-b border-dashed border-slate-100">
                     <div>
-                        <h3 class="ac-title"> ${p.nama}</h3>
-                        <div class="ac-subtitle"><i class="fas fa-phone-alt" style="font-size:0.7rem"></i> ${p.hp}</div>
+                        <h3 class="text-base font-extrabold text-slate-800 uppercase tracking-wide">${p.nama}</h3>
+                        <div class="flex items-center gap-1.5 text-slate-500 text-xs font-bold mt-1.5"><i class="fab fa-whatsapp text-emerald-500"></i> ${p.hp}</div>
                     </div>
-                    <span class="badge ${badgeClass}">${st}</span>
+                    <span class="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border ${badgeClass}">${st}</span>
                 </div>
-                <div class="ac-body">
-                    <p><strong>Waktu & Tanggal</strong><span><i class="far fa-clock"></i> ${p.waktu} &bull; ${p.tanggal}</span></p>
-                    <p><strong>Terapis</strong><span><i class="far fa-user"></i> ${p.terapis}</span></p>
-                    <p style="grid-column: span 2"><strong>Layanan</strong><span><i class="fas fa-notes-medical"></i> ${p.layanan}</span></p>
+                <div class="grid grid-cols-2 gap-y-4 gap-x-2 text-xs">
+                    <div class="col-span-2 sm:col-span-1 border border-slate-100 p-3 rounded-xl bg-slate-50">
+                        <span class="block text-slate-400 font-bold uppercase text-[9px] mb-1">Tanggal & Waktu</span>
+                        <strong class="text-slate-700 flex items-center gap-1.5"><i class="far fa-clock text-slate-400"></i> ${p.waktu} &bull; ${p.tanggal}</strong>
+                    </div>
+                    <div class="col-span-2 sm:col-span-1 border border-slate-100 p-3 rounded-xl bg-slate-50">
+                        <span class="block text-slate-400 font-bold uppercase text-[9px] mb-1">Terapis</span>
+                        <strong class="text-slate-700 flex items-center gap-1.5"><i class="far fa-user text-slate-400"></i> ${p.terapis}</strong>
+                    </div>
+                    <div class="col-span-2 border border-emerald-100 p-3 rounded-xl bg-emerald-50/50">
+                        <span class="block text-emerald-600/60 font-bold uppercase text-[9px] mb-1">Layanan</span>
+                        <strong class="text-emerald-800 flex items-center gap-1.5"><i class="fas fa-notes-medical text-emerald-500"></i> ${p.layanan}</strong>
+                    </div>
                 </div>
                 ${actionBtn}
             </div>
@@ -226,94 +236,113 @@ function renderLaporan(data) {
     const maxTotal = Math.max(...data.perLayanan.map(l => l.jumlah), 1);
 
     let html = `
-        <div class="stat-grid">
-            <div class="stat-card-premium">
-                <div class="s-header">
-                    <div class="s-icon" style="background:#f0fdf4; color:#16a34a"><i class="fas fa-check-double"></i></div>
-                    <div class="s-num">${ringkasan.selesai}</div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white p-5 rounded-3xl border border-emerald-50 shadow-sm flex flex-col hover:-translate-y-1 transition-transform">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-inner shadow-emerald-600/10"><i class="fas fa-check-double"></i></div>
+                    <span class="text-3xl font-black text-slate-800 tracking-tight">${ringkasan.selesai}</span>
                 </div>
-                <div class="s-label">Selesai</div>
+                <div class="text-slate-400 text-xs font-bold uppercase tracking-widest mt-auto">Selesai</div>
             </div>
-            <div class="stat-card-premium">
-                <div class="s-header">
-                    <div class="s-icon" style="background:#eff6ff; color:#2563eb"><i class="fas fa-clock"></i></div>
-                    <div class="s-num">${ringkasan.terjadwal}</div>
+            <div class="bg-white p-5 rounded-3xl border border-blue-50 shadow-sm flex flex-col hover:-translate-y-1 transition-transform">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shadow-inner shadow-blue-600/10"><i class="fas fa-clock"></i></div>
+                    <span class="text-3xl font-black text-slate-800 tracking-tight">${ringkasan.terjadwal}</span>
                 </div>
-                <div class="s-label">Terjadwal</div>
+                <div class="text-slate-400 text-xs font-bold uppercase tracking-widest mt-auto">Terjadwal</div>
             </div>
-            <div class="stat-card-premium">
-                <div class="s-header">
-                    <div class="s-icon" style="background:#fef2f2; color:#dc2626"><i class="fas fa-user-times"></i></div>
-                    <div class="s-num">${ringkasan.batal}</div>
+            <div class="bg-white p-5 rounded-3xl border border-red-50 shadow-sm flex flex-col hover:-translate-y-1 transition-transform">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center text-xl shadow-inner shadow-red-600/10"><i class="fas fa-user-times"></i></div>
+                    <span class="text-3xl font-black text-slate-800 tracking-tight">${ringkasan.batal}</span>
                 </div>
-                <div class="s-label">Dibatalkan</div>
+                <div class="text-slate-400 text-xs font-bold uppercase tracking-widest mt-auto">Dibatalkan</div>
             </div>
-            <div class="stat-card-premium">
-                <div class="s-header">
-                    <div class="s-icon" style="background:#faf5ff; color:#7c3aed"><i class="fas fa-users-viewfinder"></i></div>
-                    <div class="s-num">${ringkasan.pasienUnik}</div>
+            <div class="bg-white p-5 rounded-3xl border border-purple-50 shadow-sm flex flex-col hover:-translate-y-1 transition-transform">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shadow-inner shadow-purple-600/10"><i class="fas fa-users-viewfinder"></i></div>
+                    <span class="text-3xl font-black text-slate-800 tracking-tight">${ringkasan.pasienUnik}</span>
                 </div>
-                <div class="s-label">Total Pasien</div>
+                <div class="text-slate-400 text-xs font-bold uppercase tracking-widest mt-auto">Total Pasien</div>
             </div>
         </div>
 
-        <div class="premium-table-wrap">
-            <h4><i class="fas fa-chart-line"></i> Grafik Layanan Terpopuler</h4>
-            <div style="display:flex; flex-direction:column; gap:16px; margin: 20px 0;">
-                ${data.perLayanan.map(l => {
-                    const pct = (l.jumlah / maxTotal) * 100;
-                    return `
-                        <div style="display:flex; flex-direction:column; gap:6px;">
-                            <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">
-                                <span>${l.nama}</span>
-                                <span>${l.jumlah}</span>
-                            </div>
-                            <div style="height:12px; background:#f1f5f9; border-radius:20px; overflow:hidden;">
-                                <div style="width:${pct}%; height:100%; background:linear-gradient(90deg, #10b981, #34d399); border-radius:20px;"></div>
-                            </div>
-                        </div>
-                    `;
-                }).join('')}
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+            <!-- Col 1 -->
+            <div class="space-y-6">
+                <!-- Top Layanan -->
+                <div class="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-8 shadow-sm">
+                    <h4 class="text-slate-800 font-extrabold text-lg mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 text-emerald-600 flex items-center justify-center text-sm shadow-inner"><i class="fas fa-chart-line"></i></span> Layanan Terpopuler</h4>
+                    <div class="flex flex-col gap-5">
+                        ${data.perLayanan.map(l => {
+                            const pct = (l.jumlah / maxTotal) * 100;
+                            return `
+                                <div class="flex flex-col gap-2 group">
+                                    <div class="flex justify-between text-sm font-bold text-slate-700">
+                                        <span>${l.nama}</span>
+                                        <span class="bg-slate-50 text-slate-500 px-2 py-0.5 rounded-md text-xs group-hover:bg-emerald-50 group-hover:text-emerald-700 transition-colors">${l.jumlah} sesi</span>
+                                    </div>
+                                    <div class="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full transition-all duration-1000 origin-left" style="width:${pct}%"></div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <!-- Kontribusi Terapis -->
+                <div class="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-8 shadow-sm overflow-hidden">
+                    <h4 class="text-slate-800 font-extrabold text-lg mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-50 text-indigo-600 flex items-center justify-center text-sm shadow-inner"><i class="fas fa-user-md"></i></span> Efisiensi Terapis</h4>
+                    <div class="overflow-x-auto -mx-6 px-6 md:mx-0 md:px-0">
+                        <table class="w-full min-w-[400px] text-left border-collapse">
+                            <thead><tr class="text-[10px] text-slate-400 uppercase tracking-widest border-b border-slate-100"><th class="pb-3 font-bold pr-2">Terapis</th><th class="pb-3 font-bold text-center px-2">Selesai/Total</th><th class="pb-3 font-bold px-2 w-[120px]">Efisiensi</th></tr></thead>
+                            <tbody class="divide-y divide-slate-50">
+                                ${data.perTerapis.map(t => {
+                                    const efisiensi = Math.round((t.selesai / (t.total || 1)) * 100);
+                                    return `
+                                        <tr class="hover:bg-slate-50/50 transition-colors group">
+                                            <td class="py-4 font-bold text-slate-700 text-sm flex items-center gap-2.5 pr-2"><div class="w-7 h-7 rounded-full bg-slate-100 text-slate-400 group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-colors flex items-center justify-center text-xs"><i class="fas fa-user"></i></div> ${t.nama}</td>
+                                            <td class="py-4 font-bold text-slate-500 text-sm text-center px-2">${t.selesai} <span class="text-slate-300 font-normal px-0.5">/</span> ${t.total}</td>
+                                            <td class="py-4 pl-2">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="font-extrabold text-xs ${efisiensi > 70 ? 'text-emerald-600' : 'text-amber-500'} w-9">${efisiensi}%</span>
+                                                    <div class="h-1.5 flex-1 bg-slate-100 rounded-full overflow-hidden"><div class="h-full ${efisiensi > 70 ? 'bg-emerald-500' : 'bg-amber-400'} rounded-full" style="width: ${efisiensi}%"></div></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div class="premium-table-wrap">
-            <h4><i class="fas fa-user-md"></i> Kontribusi Terapis</h4>
-            <table class="premium-table">
-                <thead><tr><th>Nama Terapis</th><th>Selesai</th><th>Efisiensi</th></tr></thead>
-                <tbody>
-                    ${data.perTerapis.map(t => {
-                        const efisiensi = Math.round((t.selesai / (t.total || 1)) * 100);
-                        return `
-                            <tr>
-                                <td><div style="display:flex; align-items:center; gap:10px;"><i class="fas fa-circle-user" style="color:var(--slate-300)"></i> ${t.nama}</div></td>
-                                <td>${t.selesai} / ${t.total}</td>
-                                <td>
-                                    <span style="font-weight:800; color:var(--emerald-600)">${efisiensi}%</span>
-                                    <div class="bar-mini" style="width: ${efisiensi}%"></div>
-                                </td>
-                            </tr>
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
-        </div>
-
-        <div class="premium-table-wrap">
-            <h4><i class="fas fa-crown" style="color:#eab308"></i> Loyalitas Pasien (Top 10)</h4>
-            <table class="premium-table">
-                <thead><tr><th>Nama Pasien</th><th>Kontak</th><th>Kunjungan</th><th>Terakhir</th></tr></thead>
-                <tbody>
-                    ${data.pasienList.slice(0, 10).map(p => `
-                        <tr>
-                            <td>${p.nama}</td>
-                            <td>${p.hp}</td>
-                            <td><span class="badge badge-selesai">${p.kunjungan}x Visit</span></td>
-                            <td style="font-size:0.8rem; color:#666;">${p.terakhir}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
+            <!-- Col 2: Top Pasien -->
+            <div class="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-8 shadow-sm h-fit">
+                <h4 class="text-slate-800 font-extrabold text-lg mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-100 to-amber-50 text-yellow-600 flex items-center justify-center text-sm shadow-inner"><i class="fas fa-crown"></i></span> Loyalitas Pasien (Top 10)</h4>
+                <div class="overflow-x-auto -mx-6 px-6 md:mx-0 md:px-0 hide-scrollbar">
+                    <table class="w-full min-w-[500px] text-left border-collapse">
+                        <thead><tr class="text-[10px] text-slate-400 uppercase tracking-widest border-b border-slate-100"><th class="pb-3 font-bold pr-4">Nama Pasien</th><th class="pb-3 font-bold px-2">Kontak</th><th class="pb-3 font-bold px-2 text-center">Visit</th><th class="pb-3 font-bold pl-2 text-right">Terakhir</th></tr></thead>
+                        <tbody class="divide-y divide-slate-50">
+                            ${data.pasienList.slice(0, 10).map((p, idx) => `
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="py-3.5 pr-4">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-xs font-black ${idx < 3 ? 'text-amber-500 bg-amber-50' : 'text-slate-400 bg-slate-100'} w-6 h-6 rounded flex items-center justify-center shrink-0">${idx + 1}</span>
+                                            <span class="font-extrabold text-slate-700 text-sm truncate max-w-[140px]" title="${p.nama}">${p.nama}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3.5 px-2 text-emerald-600 font-bold text-xs"><i class="fab fa-whatsapp opacity-70 mr-1"></i> ${p.hp}</td>
+                                    <td class="py-3.5 px-2 text-center"><span class="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 px-2 py-0.5 rounded-md text-[10px] font-black uppercase shadow-sm">${p.kunjungan}x</span></td>
+                                    <td class="py-3.5 pl-2 font-bold text-slate-400 text-[11px] text-right whitespace-nowrap">${p.terakhir}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     `;
 
@@ -325,7 +354,7 @@ async function updateStatus(row, newStatus) {
 
     const pin = localStorage.getItem('adminPin');
     const loader = document.getElementById('loadingDash');
-    loader.style.display = 'grid';
+    loader.classList.remove('hidden');
 
     try {
         const res = await fetch(GAS_URL, {
@@ -341,6 +370,6 @@ async function updateStatus(row, newStatus) {
     } catch(err) {
         alert("Gagal menghubungi server pusat.");
     } finally {
-        loader.style.display = 'none';
+        loader.classList.add('hidden');
     }
 }

@@ -9,9 +9,64 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            200: '#a7f3d0',
+                            300: '#6ee7b7',
+                            400: '#34d399',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <link rel="stylesheet" href="style.css">
+
+    <style type="text/tailwindcss">
+        @layer components {
+            .nav-item {
+                @apply flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-all cursor-pointer w-full text-left;
+            }
+            .nav-item.active {
+                @apply bg-emerald-50 text-emerald-700 shadow-sm ring-1 ring-emerald-100;
+            }
+            .sidebar-menu button i { @apply w-5 text-center text-lg; }
+            .sidebar-menu button.active i { @apply text-emerald-600; }
+            
+            .bn-item {
+                @apply flex flex-col items-center justify-center w-full py-2 text-slate-400 gap-1;
+            }
+            .bn-item.active { @apply text-emerald-600; }
+            .bn-item i { @apply text-xl mb-0.5; }
+            .bn-item span { @apply text-[10px] font-bold; }
+            
+            .pill {
+                @apply px-4 py-1.5 rounded-full text-sm font-bold bg-white border-2 border-slate-200 text-slate-500 hover:border-emerald-300 hover:text-emerald-700 transition-colors shadow-sm cursor-pointer whitespace-nowrap;
+            }
+            .pill.active {
+                @apply bg-emerald-50 border-emerald-500 text-emerald-800 ring-2 ring-emerald-500/20;
+            }
+        }
+    </style>
 </head>
-<body class="admin-body">
+<body class="bg-slate-50 min-h-screen text-slate-800 antialiased overflow-x-hidden relative">
     
     <!-- Animasi Background Pasif -->
     <div class="bg-blobs">
@@ -20,110 +75,114 @@
     </div>
 
     <!-- ── MODUL LOGIN ── -->
-    <div id="loginScreen" class="login-wrapper">
-        <div class="login-luxury-card">
-            <div class="login-header">
-                <div class="login-logo">
-                    <i class="fas fa-shield-halved"></i>
-                </div>
-                <h2>Akses Manajemen</h2>
-                <p>Rumah Sehat Dani Sabri</p>
+    <div id="loginScreen" class="flex min-h-screen items-center justify-center p-4 relative z-20">
+        <div class="bg-white/90 backdrop-blur-xl border border-white/60 p-10 md:p-12 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 w-full max-w-md text-center">
+            <div class="w-20 h-20 bg-emerald-600 text-white text-3xl rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-emerald-600/20 rotate-3 hover:rotate-0 transition-transform duration-300">
+                <i class="fas fa-shield-halved"></i>
             </div>
-            <form id="formLogin" onsubmit="event.preventDefault(); doLogin();" class="login-form">
-                <div class="pin-input-group">
-                    <input type="password" id="adminPin" maxlength="8" placeholder="••••" required autofocus>
-                    <small>Masukkan PIN Keamanan</small>
+            <h2 class="text-3xl font-extrabold text-slate-900 mb-1">Akses Manajemen</h2>
+            <p class="text-slate-500 font-medium mb-10">Rumah Sehat Dani Sabri</p>
+            
+            <form id="formLogin" onsubmit="event.preventDefault(); doLogin();" class="space-y-6">
+                <div>
+                    <input type="password" id="adminPin" maxlength="8" placeholder="••••" required autofocus class="w-full bg-white border-2 border-slate-200 rounded-2xl p-4 text-center text-4xl tracking-[0.5em] text-slate-800 transition-all focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm placeholder:text-slate-300">
+                    <small class="block mt-3 text-slate-400 font-bold uppercase text-xs tracking-widest">Masukkan PIN Keamanan</small>
                 </div>
-                <button type="submit" id="btnLogin" class="btn-primary-luxury">
+                <button type="submit" id="btnLogin" class="w-full bg-slate-900 text-white rounded-2xl py-4 text-lg font-bold flex items-center justify-center gap-3 hover:-translate-y-1 hover:bg-black hover:shadow-xl hover:shadow-slate-900/20 transition-all duration-300">
                     <span>Masuk ke Sistem</span>
                     <i class="fas fa-arrow-right"></i>
                 </button>
-                <div id="loginAlert" class="error-toast" style="display: none;"></div>
+                <div id="loginAlert" class="hidden mt-4 bg-red-50 text-red-600 border border-red-200 p-3 rounded-xl font-bold text-sm animate-slide-in"></div>
             </form>
         </div>
     </div>
 
     <!-- ── MODUL DESBOR UTAMA ── -->
-    <div id="dashboardScreen" class="dashboard-layout" style="display: none;">
+    <div id="dashboardScreen" style="display: none;" class="min-h-screen lg:grid lg:grid-cols-[280px_1fr] relative z-10 w-full bg-slate-50/50">
         
         <!-- Sidebar Navigation (Desktop) -->
-        <aside class="sidebar">
-            <div class="sidebar-brand">
-                <i class="fas fa-hand-holding-medical"></i>
+        <aside class="hidden lg:flex bg-white/80 backdrop-blur-md border-r border-slate-200 flex-col h-screen sticky top-0 p-6 z-30">
+            <div class="flex items-center gap-3 text-emerald-800 text-xl font-extrabold mb-12 px-2 hover:scale-105 transition-transform origin-left">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <i class="fas fa-hand-holding-medical"></i>
+                </div>
                 <span>RS Dani Sabri</span>
             </div>
-            <nav class="sidebar-menu">
+            <nav class="sidebar-menu flex flex-col gap-2 flex-1">
                 <button id="tabBooking" class="nav-item active" onclick="switchTab('booking')">
                     <i class="fas fa-calendar-alt"></i>
                     <span>Reservasi</span>
                 </button>
                 <button id="tabLaporan" class="nav-item" onclick="switchTab('laporan')">
-                    <i class="fas fa-analytics"></i>
-                    <span>Laporan</span>
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Laporan &amp; Analitik</span>
                 </button>
             </nav>
-            <div class="sidebar-footer">
-                <button onclick="logout()" class="btn-logout-minimal">
-                    <i class="fas fa-power-off"></i>
-                    <span>Keluar</span>
+            <div class="mt-auto pt-6 border-t border-slate-100">
+                <button onclick="logout()" class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-red-500 hover:bg-red-50 w-full transition-colors">
+                    <i class="fas fa-power-off w-5 text-center"></i>
+                    <span>Keluar Sistem</span>
                 </button>
             </div>
         </aside>
 
         <!-- Main Content Area -->
-        <main class="main-content">
+        <main class="flex flex-col h-full min-h-screen pb-20 lg:pb-0">
             
-            <header class="topbar">
-                <div class="topbar-left">
-                    <h1 id="pageTitle">Manajemen Reservasi</h1>
-                    <p id="pageSubtitle">Pantau dan kelola jadwal pasien hari ini.</p>
+            <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-20 px-6 py-5 flex justify-between items-center sm:px-8">
+                <div>
+                    <h1 id="pageTitle" class="text-2xl font-extrabold text-slate-900 tracking-tight">Manajemen Reservasi</h1>
+                    <p id="pageSubtitle" class="text-slate-500 font-medium text-sm mt-0.5">Pantau dan kelola jadwal pasien hari ini.</p>
                 </div>
-                <div class="topbar-right">
-                    <div class="admin-status">
-                        <span class="status-indicator online"></span>
-                        <span>Administrator</span>
-                    </div>
+                <div class="hidden sm:flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-full border border-slate-200 shadow-sm">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_theme('colors.emerald.500')] animate-pulse"></span>
+                    <span class="text-sm font-bold text-slate-700">Administrator</span>
                 </div>
             </header>
 
-            <div class="content-body">
+            <div class="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto">
                 
                 <!-- Konten: Booking & Reservasi -->
-                <div id="tabContentBooking" class="tab-pane">
+                <div id="tabContentBooking" class="animate-slide-in">
                     
-                    <div class="action-bar-luxury">
-                        <div class="filter-pills">
+                    <div class="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-6">
+                        <div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 hide-scrollbar">
                             <button class="pill active" onclick="applyFilter('semua')">Semua</button>
                             <button class="pill" onclick="applyFilter('terjadwal')">Terjadwal</button>
                             <button class="pill" onclick="applyFilter('hariini')">Hari Ini</button>
                         </div>
-                        <div class="search-box-luxury">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="searchPasien" placeholder="Cari nama atau nomor HP..." oninput="handleSearch(this.value)">
+                        <div class="relative w-full md:w-64 shrink-0">
+                            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="searchPasien" placeholder="Cari nama / nomor WA..." oninput="handleSearch(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-full py-2.5 pl-10 pr-4 text-sm font-medium focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all">
                         </div>
                     </div>
 
-                    <div id="loadingDash" class="skeleton-loader" style="display: none;">
-                        <div class="sk-card"></div>
-                        <div class="sk-card"></div>
+                    <div id="loadingDash" class="hidden grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Skeleton Loader -->
+                        <div class="bg-slate-200 animate-pulse h-48 rounded-2xl"></div>
+                        <div class="bg-slate-200 animate-pulse h-48 rounded-2xl"></div>
+                        <div class="bg-slate-200 animate-pulse h-48 rounded-2xl hidden md:block"></div>
                     </div>
                     
-                    <div id="listPasien" class="data-grid"></div>
+                    <!-- Grid Container untuk Pasien -->
+                    <div id="listPasien" class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6"></div>
                 </div>
 
                 <!-- Konten: Laporan -->
-                <div id="tabContentLaporan" class="tab-pane" style="display:none;">
-                    <div id="loadingLaporan" class="skeleton-loader" style="display: none;">
-                        <div class="sk-grid"></div>
+                <div id="tabContentLaporan" class="hidden animate-slide-in">
+                    <div id="loadingLaporan" class="hidden">
+                        <div class="w-full h-64 bg-slate-200 animate-pulse rounded-2xl mb-6"></div>
+                        <div class="w-full h-80 bg-slate-200 animate-pulse rounded-2xl"></div>
                     </div>
-                    <div id="isiLaporan"></div>
+                    <!-- Grid Layout Untuk Report di-generate oleh admin.js -->
+                    <div id="isiLaporan" class="space-y-6"></div>
                 </div>
 
             </div>
         </main>
 
         <!-- Bottom Navigation (Mobile Only) -->
-        <nav class="bottom-nav">
+        <nav class="lg:hidden fixed bottom-0 top-auto left-0 right-0 bg-white border-t border-slate-200 flex justify-around p-2 z-30 pb-safe">
             <button class="bn-item active" onclick="switchTab('booking')">
                 <i class="fas fa-calendar-alt"></i>
                 <span>Booking</span>
