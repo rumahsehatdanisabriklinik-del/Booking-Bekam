@@ -3,8 +3,8 @@
    app.js
    ================================================ */
 
-// ── KONFIGURASI (Ganti URL ini dengan URL deploy Anda) ──────────────────────
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwlfdDr5QV8ISdk68gI5_Bd9tC_1qo4SaXoETY1KauKm7JWsJFJ7plofcQ-aFV-sKhq0A/exec";
+// ── KONFIGURASI ─────────────────────────────────────────────────────────────
+// (URL Deploy Google Apps Script sekarang ditarik otomatis dari 'config.js')
 
 // ── ELEMENT REFERENCES ──────────────────────────────────────────────────────
 const terapisSelect   = document.getElementById('terapis');
