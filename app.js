@@ -49,8 +49,6 @@ const NAMA_HARI = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
 
 // ── INIT ────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-    // Batasi tanggal minimal hari ini
-    tanggalSelect.setAttribute('min', new Date().toISOString().split('T')[0]);
     loadInitialData();
     
     // Pasang listener untuk update progress bar secara real-time
