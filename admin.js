@@ -82,7 +82,10 @@ async function loadDashboardData(pin) {
             allData = result.data;
             renderData();
         } else {
-            logout();
+            // Jika error dari server, tampilkan pesannya
+            container.innerHTML = `<div style="color:#dc2626; text-align:center; padding:20px; background:#fee2e2; border-radius:12px; font-weight:700;">
+                <i class="fas fa-exclamation-triangle"></i> ERROR: ${result.message}
+            </div>`;
         }
     } catch (err) {
         container.innerHTML = `<div style="color:red; text-align:center;">Gagal memuat data: ${err.message}</div>`;
