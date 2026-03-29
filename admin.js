@@ -1,6 +1,8 @@
 let allData = [];
+let filteredData = [];
 let currentFilter = 'semua';
 let currentTab = 'booking';
+let searchQuery = "";
 
 document.addEventListener('DOMContentLoaded', () => {
     const savedPin = localStorage.getItem('adminPin');
@@ -12,14 +14,16 @@ document.addEventListener('DOMContentLoaded', () => {
 async function doLogin() {
     const pin = document.getElementById('adminPin').value;
     const btn = document.getElementById('btnLogin');
-    document.getElementById('loginAlert').style.display = 'none';
+    const alert = document.getElementById('loginAlert');
+    alert.style.display = 'none';
     
-    btn.textContent = "Mengecek...";
+    const originalText = btn.innerHTML;
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Mengecek...`;
     btn.disabled = true;
 
     await verifyPin(pin);
 
-    btn.textContent = "Masuk";
+    btn.innerHTML = originalText;
     btn.disabled = false;
 }
 
@@ -31,8 +35,8 @@ async function verifyPin(pin) {
         if (result.status === 'success') {
             localStorage.setItem('adminPin', pin);
             document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('dashboardScreen').style.display = 'block';
-            switchTab('booking'); // Default tab
+            document.getElementById('dashboardScreen').style.display = 'grid';
+            switchTab('booking');
         } else {
             throw new Error(result.message);
         }
@@ -45,6 +49,7 @@ async function verifyPin(pin) {
 }
 
 function logout() {
+    if(!confirm("Anda akan keluar dari sistem manajemen?")) return;
     localStorage.removeItem('adminPin');
     location.reload();
 }
@@ -52,17 +57,29 @@ function logout() {
 function switchTab(tab) {
     currentTab = tab;
     const pin = localStorage.getItem('adminPin');
+    const title = document.getElementById('pageTitle');
+    const sub   = document.getElementById('pageSubtitle');
 
     // UI Tab Update
-    document.getElementById('tabBooking').classList.toggle('active', tab === 'booking');
-    document.getElementById('tabLaporan').classList.toggle('active', tab === 'laporan');
+    document.querySelectorAll('.nav-item, .bn-item').forEach(el => {
+        const target = el.getAttribute('onclick');
+        if (target && target.includes(tab)) {
+            el.classList.add('active');
+        } else {
+            el.classList.remove('active');
+        }
+    });
     
     document.getElementById('tabContentBooking').style.display = tab === 'booking' ? 'block' : 'none';
     document.getElementById('tabContentLaporan').style.display = tab === 'laporan' ? 'block' : 'none';
 
     if (tab === 'booking') {
+        title.textContent = "Manajemen Reservasi";
+        sub.textContent   = "Pantau dan kelola jadwal pasien hari ini.";
         loadDashboardData(pin);
     } else {
+        title.textContent = "Laporan & Analitik";
+        sub.textContent   = "Data statistik performa klinik Bapak.";
         loadLaporanData(pin);
     }
 }
@@ -71,7 +88,7 @@ async function loadDashboardData(pin) {
     const loader = document.getElementById('loadingDash');
     const container = document.getElementById('listPasien');
     
-    loader.style.display = 'block';
+    loader.style.display = 'grid';
     container.innerHTML = '';
 
     try {
@@ -82,13 +99,10 @@ async function loadDashboardData(pin) {
             allData = result.data;
             renderData();
         } else {
-            // Jika error dari server, tampilkan pesannya
-            container.innerHTML = `<div style="color:#dc2626; text-align:center; padding:20px; background:#fee2e2; border-radius:12px; font-weight:700;">
-                <i class="fas fa-exclamation-triangle"></i> ERROR: ${result.message}
-            </div>`;
+            container.innerHTML = `<div class="error-toast"><i class="fas fa-exclamation-triangle"></i> ERROR: ${result.message}</div>`;
         }
     } catch (err) {
-        container.innerHTML = `<div style="color:red; text-align:center;">Gagal memuat data: ${err.message}</div>`;
+        container.innerHTML = `<div class="error-toast">Gagal memuat data: ${err.message}</div>`;
     } finally {
         loader.style.display = 'none';
     }
@@ -98,7 +112,7 @@ async function loadLaporanData(pin) {
     const loader = document.getElementById('loadingLaporan');
     const container = document.getElementById('isiLaporan');
     
-    loader.style.display = 'block';
+    loader.style.display = 'grid';
     container.innerHTML = '';
 
     try {
@@ -108,10 +122,10 @@ async function loadLaporanData(pin) {
         if (result.status === 'success') {
             renderLaporan(result.data);
         } else {
-            container.innerHTML = `<div style="color:red; text-align:center;">Gagal: ${result.message}</div>`;
+            container.innerHTML = `<div class="error-toast">Gagal: ${result.message}</div>`;
         }
     } catch (err) {
-        container.innerHTML = `<div style="color:red; text-align:center;">Error: ${err.message}</div>`;
+        container.innerHTML = `<div class="error-toast">Error: ${err.message}</div>`;
     } finally {
         loader.style.display = 'none';
     }
@@ -119,9 +133,15 @@ async function loadLaporanData(pin) {
 
 function applyFilter(filterMode) {
     currentFilter = filterMode;
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('onclick').includes(filterMode));
+    document.querySelectorAll('.pill').forEach(btn => {
+        const clickAttr = btn.getAttribute('onclick');
+        btn.classList.toggle('active', clickAttr && clickAttr.includes(filterMode));
     });
+    renderData();
+}
+
+function handleSearch(val) {
+    searchQuery = val.toLowerCase().trim();
     renderData();
 }
 
@@ -130,7 +150,7 @@ function renderData() {
     container.innerHTML = '';
 
     if (!allData || allData.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding: 20px; color:#aaa;">Tidak ada data reservasi.</div>`;
+        container.innerHTML = `<div class="pill-placeholder">Tidak ada data reservasi sama sekali.</div>`;
         return;
     }
 
@@ -138,27 +158,37 @@ function renderData() {
     const todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
     
     let displayData = allData.filter(item => {
-        if (currentFilter === 'terjadwal') return (item.status || "Terjadwal").toLowerCase() === 'terjadwal';
-        if (currentFilter === 'hariini') return item.tanggal === todayStr;
-        return true;
+        // Filter Mode
+        let isMatchMode = true;
+        if (currentFilter === 'terjadwal') isMatchMode = (item.status || "Terjadwal").toLowerCase() === 'terjadwal';
+        else if (currentFilter === 'hariini') isMatchMode = item.tanggal === todayStr;
+
+        // Search Query
+        let isMatchSearch = true;
+        if (searchQuery) {
+            isMatchSearch = (item.nama || "").toLowerCase().includes(searchQuery) || 
+                            (item.hp || "").toLowerCase().includes(searchQuery);
+        }
+
+        return isMatchMode && isMatchSearch;
     });
 
     if (displayData.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding: 20px; color:#aaa;">Tidak ada data yang cocok.</div>`;
+        container.innerHTML = `<div class="pill-placeholder">Tidak ada data yang cocok dengan pencarian Bapak.</div>`;
         return;
     }
 
     displayData.forEach(p => {
         const st = (p.status || "Terjadwal").toLowerCase();
-        let borderClass = "";
+        let badgeClass = "badge-terjadwal";
         let actionBtn = "";
 
         if (st === "batal" || st === "cancel" || st === "dibatalkan") {
-            borderClass = "batal-card";
-            actionBtn = `<div style="color: #ef4444; font-weight: bold; font-size:0.9rem;"><i class="fas fa-times-circle"></i> Dibatalkan</div>`;
+            badgeClass = "badge-batal";
+            actionBtn = `<div style="color: #ef4444; font-weight: 800; font-size:0.8rem; padding: 10px; text-align:center;"><i class="fas fa-times-circle"></i> Reservasi Dibatalkan</div>`;
         } else if (st === "selesai") {
-            borderClass = "selesai-card";
-            actionBtn = `<div style="color: #10b981; font-weight: bold; font-size:0.9rem;"><i class="fas fa-check-double"></i> Selesai</div>`;
+            badgeClass = "badge-selesai";
+            actionBtn = `<div style="color: #10b981; font-weight: 800; font-size:0.8rem; padding: 10px; text-align:center;"><i class="fas fa-check-double"></i> Layanan Selesai</div>`;
         } else {
             actionBtn = `
                 <div class="ac-actions">
@@ -169,20 +199,18 @@ function renderData() {
         }
 
         container.innerHTML += `
-            <div class="admin-card ${borderClass}">
+            <div class="admin-card">
                 <div class="ac-header">
                     <div>
-                        <h3 class="ac-title"><i class="fas fa-user-circle"></i> ${p.nama}</h3>
-                        <div class="ac-subtitle">${p.hp} &bull; ${p.terapis}</div>
+                        <h3 class="ac-title"> ${p.nama}</h3>
+                        <div class="ac-subtitle"><i class="fas fa-phone-alt" style="font-size:0.7rem"></i> ${p.hp}</div>
                     </div>
-                    <div style="text-align:right;">
-                        <div style="font-weight: 800; color:var(--emerald-700); font-size: 1.1rem;">${p.waktu}</div>
-                        <div style="font-size:0.8rem; color:#888; font-weight:600;">${p.tanggal}</div>
-                    </div>
+                    <span class="badge ${badgeClass}">${st}</span>
                 </div>
                 <div class="ac-body">
-                    <p><strong>Layanan</strong><span>${p.layanan}</span></p>
-                    <p><strong>Status</strong><span>${st.toUpperCase()}</span></p>
+                    <p><strong>Waktu & Tanggal</strong><span><i class="far fa-clock"></i> ${p.waktu} &bull; ${p.tanggal}</span></p>
+                    <p><strong>Terapis</strong><span><i class="far fa-user"></i> ${p.terapis}</span></p>
+                    <p style="grid-column: span 2"><strong>Layanan</strong><span><i class="fas fa-notes-medical"></i> ${p.layanan}</span></p>
                 </div>
                 ${actionBtn}
             </div>
@@ -193,75 +221,94 @@ function renderData() {
 function renderLaporan(data) {
     const container = document.getElementById('isiLaporan');
     const ringkasan = data.ringkasan;
+    
+    // Bar Chart Sederhana menggunakan CSS-Grid & Persentase
+    const maxTotal = Math.max(...data.perLayanan.map(l => l.jumlah), 1);
 
     let html = `
         <div class="stat-grid">
-            <div class="stat-card green">
-                <div class="stat-icon" style="color:#059669"><i class="fas fa-check-circle"></i></div>
-                <div class="stat-num">${ringkasan.selesai}</div>
-                <div class="stat-label">Selesai</div>
+            <div class="stat-card-premium">
+                <div class="s-header">
+                    <div class="s-icon" style="background:#f0fdf4; color:#16a34a"><i class="fas fa-check-double"></i></div>
+                    <div class="s-num">${ringkasan.selesai}</div>
+                </div>
+                <div class="s-label">Selesai</div>
             </div>
-            <div class="stat-card blue">
-                <div class="stat-icon" style="color:#2563eb"><i class="fas fa-clock"></i></div>
-                <div class="stat-num">${ringkasan.terjadwal}</div>
-                <div class="stat-label">Terjadwal</div>
+            <div class="stat-card-premium">
+                <div class="s-header">
+                    <div class="s-icon" style="background:#eff6ff; color:#2563eb"><i class="fas fa-clock"></i></div>
+                    <div class="s-num">${ringkasan.terjadwal}</div>
+                </div>
+                <div class="s-label">Terjadwal</div>
             </div>
-            <div class="stat-card red">
-                <div class="stat-icon" style="color:#dc2626"><i class="fas fa-times-circle"></i></div>
-                <div class="stat-num">${ringkasan.batal}</div>
-                <div class="stat-label">Batal</div>
+            <div class="stat-card-premium">
+                <div class="s-header">
+                    <div class="s-icon" style="background:#fef2f2; color:#dc2626"><i class="fas fa-user-times"></i></div>
+                    <div class="s-num">${ringkasan.batal}</div>
+                </div>
+                <div class="s-label">Dibatalkan</div>
             </div>
-            <div class="stat-card purple">
-                <div class="stat-icon" style="color:#7c3aed"><i class="fas fa-users"></i></div>
-                <div class="stat-num">${ringkasan.pasienUnik}</div>
-                <div class="stat-label">Pasien Unik</div>
+            <div class="stat-card-premium">
+                <div class="s-header">
+                    <div class="s-icon" style="background:#faf5ff; color:#7c3aed"><i class="fas fa-users-viewfinder"></i></div>
+                    <div class="s-num">${ringkasan.pasienUnik}</div>
+                </div>
+                <div class="s-label">Total Pasien</div>
             </div>
         </div>
 
-        <div class="laporan-section">
-            <h4><i class="fas fa-user-md"></i> Performa Terapis</h4>
-            <table class="laporan-table">
-                <thead><tr><th>Terapis</th><th>Selesai</th><th>Total</th></tr></thead>
+        <div class="premium-table-wrap">
+            <h4><i class="fas fa-chart-line"></i> Grafik Layanan Terpopuler</h4>
+            <div style="display:flex; flex-direction:column; gap:16px; margin: 20px 0;">
+                ${data.perLayanan.map(l => {
+                    const pct = (l.jumlah / maxTotal) * 100;
+                    return `
+                        <div style="display:flex; flex-direction:column; gap:6px;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">
+                                <span>${l.nama}</span>
+                                <span>${l.jumlah}</span>
+                            </div>
+                            <div style="height:12px; background:#f1f5f9; border-radius:20px; overflow:hidden;">
+                                <div style="width:${pct}%; height:100%; background:linear-gradient(90deg, #10b981, #34d399); border-radius:20px;"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+
+        <div class="premium-table-wrap">
+            <h4><i class="fas fa-user-md"></i> Kontribusi Terapis</h4>
+            <table class="premium-table">
+                <thead><tr><th>Nama Terapis</th><th>Selesai</th><th>Efisiensi</th></tr></thead>
                 <tbody>
-                    ${data.perTerapis.map(t => `
-                        <tr>
-                            <td>${t.nama}</td>
-                            <td>${t.selesai}</td>
-                            <td>
-                                ${t.total}
-                                <div class="bar-mini" style="width: ${(t.selesai/t.total*100)||0}%"></div>
-                            </td>
-                        </tr>
-                    `).join('')}
+                    ${data.perTerapis.map(t => {
+                        const efisiensi = Math.round((t.selesai / (t.total || 1)) * 100);
+                        return `
+                            <tr>
+                                <td><div style="display:flex; align-items:center; gap:10px;"><i class="fas fa-circle-user" style="color:var(--slate-300)"></i> ${t.nama}</div></td>
+                                <td>${t.selesai} / ${t.total}</td>
+                                <td>
+                                    <span style="font-weight:800; color:var(--emerald-600)">${efisiensi}%</span>
+                                    <div class="bar-mini" style="width: ${efisiensi}%"></div>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('')}
                 </tbody>
             </table>
         </div>
 
-        <div class="laporan-section">
-            <h4><i class="fas fa-medal"></i> Layanan Populer</h4>
-            <table class="laporan-table">
-                <thead><tr><th>Layanan</th><th>Jumlah Pesanan</th></tr></thead>
-                <tbody>
-                    ${data.perLayanan.map(l => `
-                        <tr>
-                            <td>${l.nama}</td>
-                            <td>${l.jumlah}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        </div>
-
-        <div class="laporan-section">
-            <h4><i class="fas fa-user-friends"></i> Loyalitas Pasien (Top 10)</h4>
-            <table class="laporan-table">
-                <thead><tr><th>Nama Pasien</th><th>HP</th><th>Visit</th><th>Terakhir</th></tr></thead>
+        <div class="premium-table-wrap">
+            <h4><i class="fas fa-crown" style="color:#eab308"></i> Loyalitas Pasien (Top 10)</h4>
+            <table class="premium-table">
+                <thead><tr><th>Nama Pasien</th><th>Kontak</th><th>Kunjungan</th><th>Terakhir</th></tr></thead>
                 <tbody>
                     ${data.pasienList.slice(0, 10).map(p => `
                         <tr>
                             <td>${p.nama}</td>
                             <td>${p.hp}</td>
-                            <td style="color:var(--emerald-600); font-weight:800;">${p.kunjungan}x</td>
+                            <td><span class="badge badge-selesai">${p.kunjungan}x Visit</span></td>
                             <td style="font-size:0.8rem; color:#666;">${p.terakhir}</td>
                         </tr>
                     `).join('')}
@@ -274,11 +321,11 @@ function renderLaporan(data) {
 }
 
 async function updateStatus(row, newStatus) {
-    if(!confirm(`Yakin tandai ${newStatus}?`)) return;
+    if(!confirm(`Apakah Bapak yakin menandai layanan ini sebagai ${newStatus.toUpperCase()}?`)) return;
 
     const pin = localStorage.getItem('adminPin');
     const loader = document.getElementById('loadingDash');
-    loader.style.display = 'block';
+    loader.style.display = 'grid';
 
     try {
         const res = await fetch(GAS_URL, {
@@ -289,10 +336,10 @@ async function updateStatus(row, newStatus) {
         if (result.status === 'success') {
             loadDashboardData(pin);
         } else {
-            alert("Gagal: " + result.message);
+            alert("Gagal memperbarui status: " + result.message);
         }
     } catch(err) {
-        alert("Gagal menghubungi server.");
+        alert("Gagal menghubungi server pusat.");
     } finally {
         loader.style.display = 'none';
     }

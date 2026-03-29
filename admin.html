@@ -3,177 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard — Rumah Sehat Dani Sabri</title>
+    <title>Sistem Manajemen — Rumah Sehat Dani Sabri</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-
-    <style>
-        .admin-nav {
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255, 255, 255, 0.85); padding: 16px 24px;
-            box-shadow: 0 4px 30px rgba(0,0,0,0.04); position: sticky; top: 0; z-index: 100;
-            backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.5);
-        }
-        .admin-nav h2 { margin: 0; font-size: 1.25rem; color: var(--emerald-800); font-weight: 800; display:flex; align-items:center; gap:8px;}
-        .btn-logout { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 8px 18px; border-radius: 12px; cursor: pointer; font-weight: 700; transition: all 0.2s; display:flex; align-items:center; gap:6px;}
-        .btn-logout:hover { background: #fee2e2; transform: scale(1.05); }
-
-        .dashboard-container { padding: 25px 20px; max-width: 900px; margin: 0 auto; position: relative; z-index: 2;}
-
-        /* Tab Buttons */
-        .tab-btn {
-            flex: 1; padding: 12px 20px; border-radius: 16px; font-size: 0.95rem; font-weight: 700;
-            cursor: pointer; border: 2px solid var(--slate-200); background: white;
-            color: var(--slate-600); transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
-        .tab-btn.active {
-            background: var(--emerald-600); color: white; border-color: var(--emerald-600);
-            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.25);
-        }
-        .tab-btn:hover:not(.active) { border-color: var(--emerald-300); color: var(--emerald-700); }
-
-        /* Stat Cards Laporan */
-        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin-bottom: 25px; }
-        .stat-card {
-            background: white; border-radius: 20px; padding: 20px 16px; text-align: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.04); border: 1px solid var(--slate-200);
-            transition: transform 0.2s;
-        }
-        .stat-card:hover { transform: translateY(-3px); }
-        .stat-card .stat-icon { font-size: 1.5rem; margin-bottom: 8px; }
-        .stat-card .stat-num { font-size: 2rem; font-weight: 800; color: var(--slate-900); line-height: 1; }
-        .stat-card .stat-label { font-size: 0.78rem; color: var(--slate-500); font-weight: 600; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .stat-card.green { background: linear-gradient(135deg, #ecfdf5, #d1fae5); border-color: #a7f3d0; }
-        .stat-card.red   { background: linear-gradient(135deg, #fef2f2, #fee2e2); border-color: #fecaca; }
-        .stat-card.blue  { background: linear-gradient(135deg, #eff6ff, #dbeafe); border-color: #bfdbfe; }
-        .stat-card.purple{ background: linear-gradient(135deg, #faf5ff, #ede9fe); border-color: #ddd6fe; }
-
-        /* Tabel Laporan */
-        .laporan-section { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--slate-200); }
-        .laporan-section h4 { margin: 0 0 15px; color: var(--emerald-800); font-size: 1rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
-        .laporan-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        .laporan-table th { text-align: left; padding: 8px 12px; background: var(--slate-50); color: var(--slate-600); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; border-radius: 8px; }
-        .laporan-table td { padding: 10px 12px; border-bottom: 1px solid var(--slate-100); color: var(--slate-800); font-weight: 600; }
-        .laporan-table tr:last-child td { border-bottom: none; }
-        .bar-mini { height: 6px; background: var(--emerald-400); border-radius: 10px; margin-top: 4px; transition: width 0.6s; }
-
-        /* Login Screen */
-        #loginScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 85vh; position: relative; z-index: 2;}
-        .login-card { background: rgba(255,255,255,0.9); backdrop-filter: blur(15px); border: 1px solid white; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); padding: 40px 30px; text-align: center; max-width: 420px; width: 90%; }
-
-        /* Card list admin */
-        @keyframes slideUpIn { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
-        .admin-card {
-            background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px;
-            box-shadow: 0 8px 25px rgba(6, 78, 59, 0.04); border: 1px solid rgba(6, 78, 59, 0.05);
-            border-left: 6px solid var(--emerald-500); display: flex; flex-direction: column; gap: 12px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); animation: slideUpIn 0.4s ease-out forwards;
-        }
-        .admin-card:hover { transform: translateY(-4px); box-shadow: 0 15px 35px rgba(6, 78, 59, 0.08); }
-        .batal-card { border-left-color: #ef4444; background: #fffcfc; }
-        .selesai-card { border-left-color: #10b981; background: #fcfdfd;}
-
-        .ac-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .ac-title { font-size: 1.15rem; font-weight: 800; color: #1e293b; margin: 0; display:flex; align-items:center; gap:8px;}
-        .ac-subtitle { font-size: 0.85rem; color: #64748b; font-weight: 600; margin-top: 4px; display:inline-block; background: #f1f5f9; padding: 4px 10px; border-radius: 20px;}
-
-        .ac-body { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px dashed #cbd5e1; }
-        .ac-body p { margin:0; display:flex; flex-direction:column; gap:2px; }
-        .ac-body p strong { color: #64748b; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; }
-        .ac-body p span { font-weight:700; color:#0f172a; }
-
-        .ac-actions { display: flex; gap: 12px; margin-top: 8px; }
-        .btn-sm { flex: 1; padding: 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; border: none; text-align: center; transition: all 0.2s; display:flex; justify-content:center; align-items:center; gap:6px;}
-        .btn-selesai { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;}
-        .btn-batal { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;}
-        .btn-sm:hover { transform: scale(1.03); filter: brightness(0.95); }
-
-        .filter-bar {
-            display: flex; gap: 12px; margin-bottom: 25px; background: rgba(255,255,255,0.8);
-            backdrop-filter: blur(10px); padding: 12px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-            overflow-x: auto;
-        }
-        .filter-btn { background: white; border: 1px solid #e2e8f0; padding: 8px 20px; border-radius: 30px; cursor: pointer; font-size: 0.9rem; font-weight: 700; color: #64748b; transition: all 0.3s; white-space: nowrap; }
-        .filter-btn:hover { background: #f8fafc; color: #0f172a; }
-        .filter-btn.active { background: var(--emerald-600); color: white; border-color: var(--emerald-600); box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3); }
-    </style>
 </head>
-<body style="background: #f0f9ff;">
+<body class="admin-body">
     
-    <!-- Animasi Background Latar Belakang -->
+    <!-- Animasi Background Pasif -->
     <div class="bg-blobs">
         <div class="blob-1"></div>
         <div class="blob-2"></div>
-        <div class="blob-3"></div>
     </div>
 
-    <!-- Laman Login -->
-    <div id="loginScreen">
-        <div class="login-card">
-            <div style="text-align: center;">
-                <div style="font-size: 3.5rem; color: var(--emerald-600); margin-bottom: 20px; filter: drop-shadow(0 4px 6px rgba(5,150,105,0.2));">
-                    <i class="fas fa-user-shield"></i>
+    <!-- ── MODUL LOGIN ── -->
+    <div id="loginScreen" class="login-wrapper">
+        <div class="login-luxury-card">
+            <div class="login-header">
+                <div class="login-logo">
+                    <i class="fas fa-shield-halved"></i>
                 </div>
-                <h2 style="font-weight: 800; color: var(--slate-900); font-size: 1.8rem;">Portal Admin</h2>
-                <p style="margin-bottom: 25px; color: var(--slate-600); font-weight: 500;">Silakan masukkan PIN rahasia untuk mengakses kendali sistem.</p>
-                <form id="formLogin" onsubmit="event.preventDefault(); doLogin();">
-                    <input type="password" id="adminPin" class="form-control" placeholder="Masukkan PIN" required style="text-align: center; font-size: 1.5rem; letter-spacing: 8px; padding: 15px; border-radius: 16px; border: 2px solid var(--emerald-300);">
-                    <button type="submit" class="btn-submit" id="btnLogin" style="margin-top: 20px; border-radius: 16px; padding: 15px; font-size: 1.1rem;"><i class="fas fa-door-open"></i> Akses Dasbor</button>
-                    <div id="loginAlert" style="color: #dc2626; margin-top: 15px; display: none; font-weight: 700; background: #fee2e2; padding: 10px; border-radius: 8px;">PIN Salah!</div>
-                </form>
+                <h2>Akses Manajemen</h2>
+                <p>Rumah Sehat Dani Sabri</p>
             </div>
+            <form id="formLogin" onsubmit="event.preventDefault(); doLogin();" class="login-form">
+                <div class="pin-input-group">
+                    <input type="password" id="adminPin" maxlength="8" placeholder="••••" required autofocus>
+                    <small>Masukkan PIN Keamanan</small>
+                </div>
+                <button type="submit" id="btnLogin" class="btn-primary-luxury">
+                    <span>Masuk ke Sistem</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                <div id="loginAlert" class="error-toast" style="display: none;"></div>
+            </form>
         </div>
     </div>
 
-    <!-- Papan Dasbor -->
-    <div id="dashboardScreen" style="display: none;">
-        <nav class="admin-nav">
-            <h2><i class="fas fa-clinic-medical"></i> Dasbor Admin</h2>
-            <button onclick="logout()" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Keluar</button>
+    <!-- ── MODUL DESBOR UTAMA ── -->
+    <div id="dashboardScreen" class="dashboard-layout" style="display: none;">
+        
+        <!-- Sidebar Navigation (Desktop) -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <i class="fas fa-hand-holding-medical"></i>
+                <span>RS Dani Sabri</span>
+            </div>
+            <nav class="sidebar-menu">
+                <button id="tabBooking" class="nav-item active" onclick="switchTab('booking')">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Reservasi</span>
+                </button>
+                <button id="tabLaporan" class="nav-item" onclick="switchTab('laporan')">
+                    <i class="fas fa-analytics"></i>
+                    <span>Laporan</span>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="logout()" class="btn-logout-minimal">
+                    <i class="fas fa-power-off"></i>
+                    <span>Keluar</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h1 id="pageTitle">Manajemen Reservasi</h1>
+                    <p id="pageSubtitle">Pantau dan kelola jadwal pasien hari ini.</p>
+                </div>
+                <div class="topbar-right">
+                    <div class="admin-status">
+                        <span class="status-indicator online"></span>
+                        <span>Administrator</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-body">
+                
+                <!-- Konten: Booking & Reservasi -->
+                <div id="tabContentBooking" class="tab-pane">
+                    
+                    <div class="action-bar-luxury">
+                        <div class="filter-pills">
+                            <button class="pill active" onclick="applyFilter('semua')">Semua</button>
+                            <button class="pill" onclick="applyFilter('terjadwal')">Terjadwal</button>
+                            <button class="pill" onclick="applyFilter('hariini')">Hari Ini</button>
+                        </div>
+                        <div class="search-box-luxury">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchPasien" placeholder="Cari nama atau nomor HP..." oninput="handleSearch(this.value)">
+                        </div>
+                    </div>
+
+                    <div id="loadingDash" class="skeleton-loader" style="display: none;">
+                        <div class="sk-card"></div>
+                        <div class="sk-card"></div>
+                    </div>
+                    
+                    <div id="listPasien" class="data-grid"></div>
+                </div>
+
+                <!-- Konten: Laporan -->
+                <div id="tabContentLaporan" class="tab-pane" style="display:none;">
+                    <div id="loadingLaporan" class="skeleton-loader" style="display: none;">
+                        <div class="sk-grid"></div>
+                    </div>
+                    <div id="isiLaporan"></div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Bottom Navigation (Mobile Only) -->
+        <nav class="bottom-nav">
+            <button class="bn-item active" onclick="switchTab('booking')">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Booking</span>
+            </button>
+            <button class="bn-item" onclick="switchTab('laporan')">
+                <i class="fas fa-chart-pie"></i>
+                <span>Laporan</span>
+            </button>
+            <button class="bn-item" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Keluar</span>
+            </button>
         </nav>
 
-        <div class="dashboard-container">
-
-            <!-- Tab Navigation -->
-            <div style="display:flex; gap:12px; margin-bottom:20px;">
-                <button id="tabBooking" class="tab-btn active" onclick="switchTab('booking')">
-                    <i class="fas fa-calendar-check"></i> Data Booking
-                </button>
-                <button id="tabLaporan" class="tab-btn" onclick="switchTab('laporan')">
-                    <i class="fas fa-chart-bar"></i> Laporan & Analitik
-                </button>
-            </div>
-
-            <!-- konten Booking -->
-            <div id="tabContentBooking">
-                <div class="filter-bar">
-                    <button class="filter-btn active" onclick="applyFilter('semua')">Semua</button>
-                    <button class="filter-btn" onclick="applyFilter('terjadwal')">Terjadwal</button>
-                    <button class="filter-btn" onclick="applyFilter('hariini')">Hari Ini</button>
-                </div>
-                <div id="loadingDash" style="text-align: center; padding: 40px; color: #666;">
-                    <i class="fas fa-spinner fa-spin fa-2x"></i>
-                    <p>Memuat Data Pasien...</p>
-                </div>
-                <div id="listPasien"></div>
-            </div>
-
-            <!-- konten Laporan -->
-            <div id="tabContentLaporan" style="display:none;">
-                <div id="loadingLaporan" style="text-align:center; padding:40px; color:#666;">
-                    <i class="fas fa-spinner fa-spin fa-2x"></i>
-                    <p>Memuat Laporan...</p>
-                </div>
-                <div id="isiLaporan"></div>
-            </div>
-
-        </div>
     </div>
 
+    <!-- Scripts -->
     <script src="config.js"></script>
     <script src="admin.js"></script>
 </body>
