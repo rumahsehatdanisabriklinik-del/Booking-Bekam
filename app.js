@@ -4,7 +4,7 @@
    ================================================ */
 
 // ── KONFIGURASI (Ganti URL ini dengan URL deploy Anda) ──────────────────────
-const GAS_URL = "https://script.google.com/macros/s/AKfycbybe1mkKJLidbAwPg3rKfFcZNLjKUcEdW_iR0ybzXntQymPval06MQIpnrX300SoJxl2Q/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzqWqRdWTsvv4y68WIODqHelU0W4G-QCDO3v163_jYyXDDjzgK1I0Dbw5HelpGdciD7wA/exec";
 
 // ── ELEMENT REFERENCES ──────────────────────────────────────────────────────
 const terapisSelect   = document.getElementById('terapis');
@@ -163,6 +163,10 @@ async function checkAvailability() {
     // Validasi hari libur dulu — batalkan jika kena hari libur
     if (!validateHariLibur(tgl)) return;
 
+    // Cegah spam klik dengan mengunci input selama loading
+    tanggalSelect.disabled = true;
+    terapisSelect.disabled = true;
+
     waktuSelect.innerHTML = '<option value="" disabled selected>⏳ Mengecek ketersediaan...</option>';
     waktuSelect.disabled  = true;
     hideAlert();
@@ -190,6 +194,10 @@ async function checkAvailability() {
     } catch (err) {
         waktuSelect.innerHTML = '<option value="" disabled selected>Gagal memuat slot</option>';
         showAlert("Gagal mengecek jadwal: " + err.message, 'error');
+    } finally {
+        // Buka kembali kuncian input setelah loading selesai/gagal
+        tanggalSelect.disabled = false;
+        terapisSelect.disabled = false;
     }
 }
 
