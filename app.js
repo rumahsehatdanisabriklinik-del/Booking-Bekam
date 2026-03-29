@@ -4,7 +4,7 @@
    ================================================ */
 
 // ── KONFIGURASI (Ganti URL ini dengan URL deploy Anda) ──────────────────────
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzqWqRdWTsvv4y68WIODqHelU0W4G-QCDO3v163_jYyXDDjzgK1I0Dbw5HelpGdciD7wA/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwlfdDr5QV8ISdk68gI5_Bd9tC_1qo4SaXoETY1KauKm7JWsJFJ7plofcQ-aFV-sKhq0A/exec";
 
 // ── ELEMENT REFERENCES ──────────────────────────────────────────────────────
 const terapisSelect   = document.getElementById('terapis');
