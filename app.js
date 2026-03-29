@@ -4,7 +4,7 @@
    ================================================ */
 
 // ── KONFIGURASI ─────────────────────────────────────────────────────────────
-// (URL Deploy Google Apps Script sekarang ditarik otomatis dari 'config.js')
+// (Berpindah ke config.js)
 
 // ── ELEMENT REFERENCES ──────────────────────────────────────────────────────
 const terapisSelect   = document.getElementById('terapis');

@@ -1,4 +1,4 @@
-// (URL Deploy Google Apps Script ditarik otomatis dari 'config.js')
+// (Berpindah ke config.js)
 
 async function trackBooking() {
     const hp = document.getElementById('noHpTrack').value;

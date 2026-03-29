@@ -1,7 +1,4 @@
-// (URL Deploy Google Apps Script ditarik otomatis dari 'config.js')
-
-
-let currentFilter = 'semua';
+// (Berpindah ke config.js)let currentFilter = 'semua';
 
 document.addEventListener('DOMContentLoaded', () => {
     const savedPin = localStorage.getItem('adminPin');
