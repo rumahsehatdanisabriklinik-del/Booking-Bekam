@@ -179,9 +179,7 @@ function buildDateStrip() {
                 gridTanggal.querySelectorAll('.date-card').forEach(c => c.classList.remove('active'));
                 card.classList.add('active');
                 tanggalSelect.value = isoStr;
-                // Scroll sedikit agar kartu aktif kelihatan di tengah
-                card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                // Reset slot waktu
+                // Reset slot waktu dan cek ketersediaan
                 gridWaktu.innerHTML = '<div class="pill-placeholder"><i class="fas fa-spinner fa-spin"></i> Mengecek ketersediaan...</div>';
                 waktuInput.value = '';
                 checkAvailability();
@@ -190,6 +188,13 @@ function buildDateStrip() {
 
         gridTanggal.appendChild(card);
     }
+}
+
+// ── NAVIGASI PANAH DATE STRIP ────────────────────────────────────────────────
+function scrollDateStrip(direction) {
+    // Hitung lebar 3 kartu (85px per kartu + 10px gap)
+    const scrollAmount = (85 + 10) * 3;
+    gridTanggal.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
 }
 
 // ── FILTER TERAPIS BERDASARKAN GENDER ───────────────────────────────────────

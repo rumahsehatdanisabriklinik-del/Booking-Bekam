@@ -115,7 +115,13 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Pilih Tanggal Reservasi</label>
+                    <label style="display:flex; justify-content:space-between; align-items:center;">
+                        <span>Pilih Tanggal Reservasi</span>
+                        <span style="font-size:0.75rem; color:var(--slate-400); font-weight:600; display:flex; gap:6px;">
+                            <button type="button" id="btnDatePrev" onclick="scrollDateStrip(-1)" class="date-nav-btn"><i class="fas fa-chevron-left"></i></button>
+                            <button type="button" id="btnDateNext" onclick="scrollDateStrip(1)"  class="date-nav-btn"><i class="fas fa-chevron-right"></i></button>
+                        </span>
+                    </label>
                     <div id="gridTanggal" class="date-strip">
                         <div class="pill-placeholder"><i class="fas fa-spinner fa-spin"></i> Menyiapkan kalender...</div>
                     </div>
