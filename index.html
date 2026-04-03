@@ -114,7 +114,7 @@
                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-600 to-teal-500 text-white flex items-center justify-center font-bold text-xl shadow-lg">
                         <i class="fas fa-leaf"></i>
                     </div>
-                    <span class="font-extrabold text-xl text-emerald-950 tracking-tight">Dani Sabri</span>
+                    <span class="font-extrabold text-xl text-emerald-950 tracking-tight" id="cms-nama-klinik-nav">Dani Sabri</span>
                 </a>
                 
                 <div class="hidden md:flex items-center gap-8 font-semibold text-slate-600">
@@ -138,12 +138,12 @@
         <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
             <div class="space-y-8 animate-fade-in-up">
                 <div class="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full text-emerald-700 text-xs font-bold uppercase tracking-widest shadow-sm border border-emerald-100">
-                    <i class="fas fa-star text-yellow-400"></i> Klinik Terapis Profesional
+                    <i class="fas fa-star text-yellow-400"></i> <span id="cms-badge">Klinik Terapis Profesional</span>
                 </div>
-                <h1 class="text-5xl lg:text-7xl font-extrabold leading-[1.1] text-emerald-950">
+                <h1 class="text-5xl lg:text-7xl font-extrabold leading-[1.1] text-emerald-950" id="cms-tagline">
                     Lebih Sehat dengan <span class="text-gradient">Terapi Sunnah</span>
                 </h1>
-                <p class="text-lg text-slate-600 font-medium leading-relaxed max-w-xl">
+                <p class="text-lg text-slate-600 font-medium leading-relaxed max-w-xl" id="cms-deskripsi">
                     Rumah Sehat Dani Sabri menyediakan layanan terapi bekam, ruqyah syar'iyyah, dan pengobatan Islami untuk pemulihan kesehatan fisik dan rohani Anda secara maksimal.
                 </p>
                 <div class="flex flex-wrap items-center gap-4 pt-4">
@@ -210,12 +210,14 @@
                     <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center text-emerald-600 text-3xl mb-6 shadow-sm group-hover:scale-110 transition-transform">
                         <i class="fas fa-fire"></i>
                     </div>
-                    <h3 class="text-xl font-extrabold text-slate-800 mb-3">Bekam Sunnah</h3>
-                    <p class="text-slate-600 text-sm leading-relaxed mb-6 font-medium">Metode pengeluaran darah statis (toksin) untuk mengatasi berbagai keluhan seperti pegal linu, hipertensi, dan memulihkan stamina.</p>
-                    <ul class="space-y-2 mb-8">
-                        <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-emerald-500"></i> Bekam Basah (Wet Cupping)</li>
-                        <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-emerald-500"></i> Bekam Kering & Luncur</li>
-                    </ul>
+                    <h3 class="text-xl font-extrabold text-slate-800 mb-3" id="cms-layanan1-nama">Bekam Sunnah</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-6 font-medium" id="cms-layanan1-desk">Metode pengeluaran darah statis (toksin) untuk mengatasi berbagai keluhan seperti pegal linu, hipertensi, dan memulihkan stamina.</p>
+                    <div id="cms-layanan1-detail-container">
+                        <ul class="space-y-2 mb-8" id="cms-layanan1-detail">
+                            <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-emerald-500"></i> Bekam Basah (Wet Cupping)</li>
+                            <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-emerald-500"></i> Bekam Kering & Luncur</li>
+                        </ul>
+                    </div>
                     <a href="booking.html" class="inline-block w-full text-center py-3 rounded-xl bg-slate-50 text-emerald-700 font-bold group-hover:bg-emerald-50 transition-colors">Pesan Jadwal</a>
                 </div>
 
@@ -225,12 +227,14 @@
                     <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-100 to-cyan-50 flex items-center justify-center text-cyan-600 text-3xl mb-6 shadow-sm group-hover:scale-110 transition-transform">
                         <i class="fas fa-book-quran"></i>
                     </div>
-                    <h3 class="text-xl font-extrabold text-slate-800 mb-3">Ruqyah Syar'iyyah</h3>
-                    <p class="text-slate-600 text-sm leading-relaxed mb-6 font-medium">Terapi penyembuhan dengan ayat suci Al-Qur'an untuk gangguan psikis, sihir, ain, dan penyakit non-medis lainnya.</p>
-                    <ul class="space-y-2 mb-8">
-                        <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-cyan-500"></i> Pembersihan Aura Negatif</li>
-                        <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-cyan-500"></i> Konseling & Edukasi Tauhid</li>
-                    </ul>
+                    <h3 class="text-xl font-extrabold text-slate-800 mb-3" id="cms-layanan2-nama">Ruqyah Syar'iyyah</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-6 font-medium" id="cms-layanan2-desk">Terapi penyembuhan dengan ayat suci Al-Qur'an untuk gangguan psikis, sihir, ain, dan penyakit non-medis lainnya.</p>
+                    <div id="cms-layanan2-detail-container">
+                        <ul class="space-y-2 mb-8" id="cms-layanan2-detail">
+                            <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-cyan-500"></i> Pembersihan Aura Negatif</li>
+                            <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-cyan-500"></i> Konseling & Edukasi Tauhid</li>
+                        </ul>
+                    </div>
                     <a href="booking.html" class="inline-block w-full text-center py-3 rounded-xl bg-slate-50 text-cyan-700 font-bold group-hover:bg-cyan-50 transition-colors">Pesan Jadwal</a>
                 </div>
 
@@ -239,12 +243,14 @@
                     <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-100 to-teal-50 flex items-center justify-center text-teal-600 text-3xl mb-6 shadow-sm group-hover:scale-110 transition-transform">
                         <i class="fas fa-spa"></i>
                     </div>
-                    <h3 class="text-xl font-extrabold text-slate-800 mb-3">Terapi Relaksasi</h3>
-                    <p class="text-slate-600 text-sm leading-relaxed mb-6 font-medium">Layanan pijat dan refleksi yang mengembalikan fungsi syaraf dan otot, melancarkan peredaran darah sehingga tubuh lebih bugar.</p>
-                    <ul class="space-y-2 mb-8">
-                        <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-teal-500"></i> Pijat Refleksi Tradisional</li>
-                        <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-teal-500"></i> Terapi Lintah Medis</li>
-                    </ul>
+                    <h3 class="text-xl font-extrabold text-slate-800 mb-3" id="cms-layanan3-nama">Terapi Relaksasi</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-6 font-medium" id="cms-layanan3-desk">Layanan pijat dan refleksi yang mengembalikan fungsi syaraf dan otot, melancarkan peredaran darah sehingga tubuh lebih bugar.</p>
+                    <div id="cms-layanan3-detail-container">
+                        <ul class="space-y-2 mb-8" id="cms-layanan3-detail">
+                            <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-teal-500"></i> Pijat Refleksi Tradisional</li>
+                            <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-teal-500"></i> Terapi Lintah Medis</li>
+                        </ul>
+                    </div>
                     <a href="booking.html" class="inline-block w-full text-center py-3 rounded-xl bg-slate-50 text-teal-700 font-bold group-hover:bg-teal-50 transition-colors">Pesan Jadwal</a>
                 </div>
             </div>
@@ -360,15 +366,15 @@
                     <ul class="space-y-3">
                         <li class="flex items-start gap-3 text-sm text-slate-500 font-medium">
                             <i class="fas fa-map-marker-alt text-emerald-500 mt-1"></i>
-                            <span>Jl. Kesehatan No. 12, Bekasi (Contoh Lokasi)</span>
+                            <span id="cms-alamat">Jl. Kesehatan No. 12, Bekasi</span>
                         </li>
                         <li class="flex items-center gap-3 text-sm text-slate-500 font-medium">
-                            <i class="fas fa-phone-alt text-emerald-500"></i>
-                            <span>0812-3456-7890</span>
+                            <i class="fas fa-envelope text-emerald-500"></i>
+                            <span id="cms-whatsapp">0812-3456-7890</span>
                         </li>
                         <li class="flex items-center gap-3 text-sm text-slate-500 font-medium">
                             <i class="fas fa-clock text-emerald-500"></i>
-                            <span>Setiap Hari, 08:00 - 17:00</span>
+                            <span id="cms-jam-operasional">Setiap Hari, 08:00 - 17:00</span>
                         </li>
                     </ul>
                 </div>
@@ -385,8 +391,10 @@
         </div>
     </footer>
 
-    <!-- Scroll behavior script -->
+    <!-- Configuration and CMS Loader -->
+    <script src="config.js"></script>
     <script>
+        // Scroll behavior script
         window.addEventListener('scroll', () => {
             const nav = document.getElementById('navbar');
             if (window.scrollY > 50) {
@@ -395,6 +403,79 @@
                 nav.classList.remove('bg-white/80', 'backdrop-blur-md', 'shadow-sm', 'border-b', 'border-slate-200/50');
             }
         });
+
+        // CMS Content Loader
+        async function loadLandingContent() {
+            try {
+                const response = await fetch(`${window.GAS_URL}?action=getLandingSettings`);
+                const result = await response.json();
+                
+                if (result.status === "success") {
+                    const d = result.data;
+                    
+                    // Update Common Info
+                    if(d.cms_nama_klinik) {
+                        const el = document.getElementById('cms-nama-klinik-nav');
+                        if(el) el.textContent = d.cms_nama_klinik;
+                        document.title = d.cms_nama_klinik + " — Klinik Bekam & Ruqyah Profesional";
+                    }
+                    if(d.cms_tagline) {
+                        const el = document.getElementById('cms-tagline');
+                        if(el) el.innerHTML = d.cms_tagline.replace("Terapi Sunnah", '<span class="text-gradient">Terapi Sunnah</span>');
+                    }
+                    if(d.cms_deskripsi) {
+                        const el = document.getElementById('cms-deskripsi');
+                        if(el) el.textContent = d.cms_deskripsi;
+                    }
+                    if(d.cms_badge) {
+                        const el = document.getElementById('cms-badge');
+                        if(el) el.textContent = d.cms_badge;
+                    }
+                    if(d.cms_alamat) {
+                        const el = document.getElementById('cms-alamat');
+                        if(el) el.textContent = d.cms_alamat;
+                    }
+                    if(d.cms_jam_operasional) {
+                        const el = document.getElementById('cms-jam-operasional');
+                        if(el) el.textContent = d.cms_jam_operasional;
+                    }
+                    if(d.cms_whatsapp) {
+                        const el = document.getElementById('cms-whatsapp');
+                        if(el) el.textContent = d.cms_whatsapp;
+                    }
+
+                    // Update Services
+                    updateService('cms-layanan1', d.cms_layanan1_nama, d.cms_layanan1_deskripsi, d.cms_layanan1_detail, 'emerald');
+                    updateService('cms-layanan2', d.cms_layanan2_nama, d.cms_layanan2_deskripsi, d.cms_layanan2_detail, 'cyan');
+                    updateService('cms-layanan3', d.cms_layanan3_nama, d.cms_layanan3_deskripsi, d.cms_layanan3_detail, 'teal');
+                }
+            } catch (error) {
+                console.error("Gagal memuat konten CMS:", error);
+            }
+        }
+
+        function updateService(idPrefix, nama, desk, detail, color) {
+            const elNama = document.getElementById(`${idPrefix}-nama`);
+            if(elNama && nama) elNama.textContent = nama;
+            
+            const elDesk = document.getElementById(`${idPrefix}-desk`);
+            if(elDesk && desk) elDesk.textContent = desk;
+            
+            if(detail) {
+                const list = document.getElementById(`${idPrefix}-detail`);
+                if(list) {
+                    const items = detail.split(',').map(item => item.trim());
+                    list.innerHTML = items.map(item => `
+                        <li class="flex items-center gap-2 text-sm text-slate-500 font-medium">
+                            <i class="fas fa-check text-${color}-500"></i> ${item}
+                        </li>
+                    `).join('');
+                }
+            }
+        }
+
+        // Run on load
+        document.addEventListener('DOMContentLoaded', loadLandingContent);
     </script>
 </body>
 </html>
