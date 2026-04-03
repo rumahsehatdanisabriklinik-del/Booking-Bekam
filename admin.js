@@ -70,17 +70,22 @@ function switchTab(tab) {
         }
     });
     
-    document.getElementById('tabContentBooking').style.display = tab === 'booking' ? 'block' : 'none';
-    document.getElementById('tabContentLaporan').style.display = tab === 'laporan' ? 'block' : 'none';
+    document.getElementById('tabContentBooking').style.display    = tab === 'booking'    ? 'block' : 'none';
+    document.getElementById('tabContentLaporan').style.display    = tab === 'laporan'    ? 'block' : 'none';
+    document.getElementById('tabContentPengaturan').style.display = tab === 'pengaturan' ? 'block' : 'none';
 
     if (tab === 'booking') {
         title.textContent = "Manajemen Reservasi";
         sub.textContent   = "Pantau dan kelola jadwal pasien hari ini.";
         loadDashboardData(pin);
-    } else {
+    } else if (tab === 'laporan') {
         title.textContent = "Laporan & Analitik";
         sub.textContent   = "Data statistik performa klinik Bapak.";
         loadLaporanData(pin);
+    } else {
+        title.textContent = "Konten Landing Page";
+        sub.textContent   = "Atur teks dan informasi yang tampil di halaman utama website.";
+        loadCmsSettings();
     }
 }
 
@@ -371,5 +376,82 @@ async function updateStatus(row, newStatus) {
         alert("Gagal menghubungi server pusat.");
     } finally {
         loader.classList.add('hidden');
+    }
+}
+
+// ── CMS: LOAD SETTINGS ──
+async function loadCmsSettings() {
+    const loader = document.getElementById('cmsLoader');
+    const form   = document.getElementById('cmsForm');
+    loader.style.display = 'flex';
+    form.classList.add('hidden');
+
+    try {
+        const res = await fetch(`${GAS_URL}?action=getLandingSettings`);
+        const result = await res.json();
+        if (result.status === 'success') {
+            const d = result.data;
+            // Isi setiap field form dengan data dari server
+            Object.keys(d).forEach(key => {
+                const el = document.getElementById(key);
+                if (el) el.value = d[key];
+            });
+            loader.style.display = 'none';
+            form.classList.remove('hidden');
+        } else {
+            loader.innerHTML = `<i class="fas fa-exclamation-triangle text-red-500 mr-2"></i><span class="text-red-600 font-bold">${result.message}</span>`;
+        }
+    } catch(err) {
+        loader.innerHTML = `<i class="fas fa-exclamation-triangle text-red-500 mr-2"></i><span class="text-red-600 font-bold">Gagal memuat: ${err.message}</span>`;
+    }
+}
+
+// ── CMS: SAVE SETTINGS ──
+async function saveCmsSettings() {
+    const pin    = localStorage.getItem('adminPin');
+    const btn    = document.getElementById('btnSaveCms');
+    const alert  = document.getElementById('cmsAlert');
+
+    // Kumpulkan semua nilai dari form
+    const keys = [
+        'cms_nama_klinik','cms_tagline','cms_deskripsi','cms_badge',
+        'cms_whatsapp','cms_alamat','cms_jam_operasional','cms_maps_link',
+        'cms_instagram','cms_facebook',
+        'cms_layanan1_nama','cms_layanan1_icon','cms_layanan1_deskripsi','cms_layanan1_detail',
+        'cms_layanan2_nama','cms_layanan2_icon','cms_layanan2_deskripsi','cms_layanan2_detail',
+        'cms_layanan3_nama','cms_layanan3_icon','cms_layanan3_deskripsi','cms_layanan3_detail',
+    ];
+    const settings = {};
+    keys.forEach(k => {
+        const el = document.getElementById(k);
+        if (el) settings[k] = el.value;
+    });
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menyimpan...';
+    alert.classList.add('hidden');
+
+    try {
+        const res = await fetch(GAS_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'updateLandingSettings', pass: pin, settings })
+        });
+        const result = await res.json();
+        if (result.status === 'success') {
+            alert.className = 'flex-1 p-3 rounded-xl text-sm font-bold text-center border bg-emerald-50 text-emerald-700 border-emerald-200';
+            alert.innerHTML = '<i class="fas fa-check-circle mr-2"></i>' + result.message;
+        } else {
+            alert.className = 'flex-1 p-3 rounded-xl text-sm font-bold text-center border bg-red-50 text-red-600 border-red-200';
+            alert.innerHTML = '<i class="fas fa-times-circle mr-2"></i> Gagal: ' + result.message;
+        }
+        alert.classList.remove('hidden');
+    } catch(err) {
+        alert.className = 'flex-1 p-3 rounded-xl text-sm font-bold text-center border bg-red-50 text-red-600 border-red-200';
+        alert.innerHTML = '<i class="fas fa-times-circle mr-2"></i> Error: ' + err.message;
+        alert.classList.remove('hidden');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save mr-2"></i> Simpan Perubahan';
+        setTimeout(() => alert.classList.add('hidden'), 5000);
     }
 }

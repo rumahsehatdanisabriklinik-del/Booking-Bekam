@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking Bekam — Rumah Sehat Dani Sabri</title>
+    <title>Rumah Sehat Dani Sabri — Klinik Bekam & Ruqyah Profesional</title>
 
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Rumah Sehat Dani Sabri menyediakan layanan terapi bekam sunnah, ruqyah syar'iyyah, dan pengobatan Islami oleh terapis profesional dan berpengalaman.">
+    
     <!-- Preconnect for Performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,6 +39,28 @@
                             700: '#047857',
                             800: '#065f46',
                             900: '#064e3b',
+                            950: '#022c22',
+                        }
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'float': 'float 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
                         }
                     }
                 }
@@ -44,254 +69,332 @@
     </script>
 
     <style type="text/tailwindcss">
-        @layer components {
-            .pill-btn {
-                @apply w-full flex items-center justify-center gap-2 p-4 bg-white border-2 border-slate-200 text-slate-600 font-bold text-sm rounded-xl cursor-pointer transition-all hover:border-emerald-300 hover:text-emerald-700 hover:-translate-y-0.5 shadow-sm;
+        @layer utilities {
+            .glass-panel {
+                @apply bg-white/70 backdrop-blur-xl border border-white/40 shadow-xl;
             }
-            .pill-btn.active {
-                @apply ring-4 ring-emerald-500/20 bg-emerald-50 text-emerald-800 border-emerald-500 shadow-md;
-            }
-            .pill-btn.disabled {
-                @apply bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed opacity-70 hover:transform-none hover:border-slate-200;
-            }
-            .date-card {
-                @apply flex-shrink-0 w-[80px] bg-white border-2 border-slate-200 rounded-2xl p-3 text-center cursor-pointer transition-all shadow-sm hover:border-emerald-300 hover:-translate-y-1 hover:shadow-md flex flex-col items-center gap-1;
-            }
-            .date-card.active {
-                @apply bg-gradient-to-br from-emerald-500 to-teal-500 border-transparent shadow-lg shadow-emerald-500/40 -translate-y-1 scale-105;
-            }
-            .date-card.active span {
-                @apply text-white;
-            }
-            .date-card.disabled {
-                @apply bg-slate-50 border-slate-200 cursor-not-allowed opacity-60 hover:transform-none hover:border-slate-200 hover:shadow-none;
-            }
-            .dc-day { @apply text-xs font-bold text-slate-500 uppercase transition-colors; }
-            .dc-date { @apply text-2xl font-extrabold text-slate-800 leading-tight transition-colors; }
-            .dc-month { @apply text-[10px] font-bold text-slate-500 uppercase transition-colors; }
-            .pill-placeholder {
-                @apply w-full col-span-full text-center p-4 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-slate-400 text-sm font-medium;
+            .text-gradient {
+                @apply bg-clip-text text-transparent bg-gradient-to-r from-emerald-800 to-teal-600;
             }
         }
+        
+        .bg-blobs {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .blob {
+            position: absolute;
+            filter: blur(80px);
+            opacity: 0.6;
+            border-radius: 50%;
+            animation: blob 10s infinite alternate;
+        }
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: rgba(52, 211, 153, 0.4); animation-delay: 0s; }
+        .blob-2 { top: 40%; right: -20%; width: 600px; height: 600px; background: rgba(20, 184, 166, 0.3); animation-delay: 2s; }
+        .blob-3 { bottom: -20%; left: 20%; width: 400px; height: 400px; background: rgba(16, 185, 129, 0.3); animation-delay: 4s; }
     </style>
-    
-    <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-sky-50 min-h-screen text-slate-800 antialiased overflow-x-hidden relative flex flex-col items-center justify-center p-4 md:p-10">
+<body class="bg-slate-50 text-slate-800 antialiased overflow-x-hidden relative font-sans">
 
     <!-- Background Decoration -->
-    <div class="bg-blobs">
-        <div class="blob-1"></div>
-        <div class="blob-2"></div>
-        <div class="blob-3"></div>
+    <div class="bg-blobs fixed">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
     </div>
 
-    <!-- ── HERO ── -->
-    <div class="text-center mb-10 mt-6 relative z-10 w-full max-w-2xl px-4">
-        <div class="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full text-emerald-700 text-xs font-bold uppercase tracking-widest shadow-md mb-6 border border-white/40">
-            <i class="fas fa-circle-check text-emerald-500"></i> Sistem Reservasi Online
-        </div>
-        <h1 class="text-3xl md:text-5xl font-extrabold text-emerald-950 leading-tight mb-3">Rumah Sehat Dani Sabri</h1>
-        <p class="text-slate-600 font-medium text-lg">Bekam, Ruqyah &amp; Terapi Islami Profesional</p>
-        <div class="mt-6">
-            <a href="status.html" class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white px-6 py-3 rounded-full text-sm font-bold shadow-lg shadow-emerald-500/30 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/40 transition-all duration-300">
-                <i class="fas fa-search"></i> Lacak / Batal Booking
-            </a>
-        </div>
-    </div>
-
-    <!-- ── CARD ── -->
-    <div class="w-full max-w-[540px] relative z-10 glass-panel rounded-[2rem] shadow-2xl overflow-hidden shadow-emerald-900/5">
-        
-        <!-- Progress Bar Indicator -->
-        <div class="h-1.5 w-full bg-slate-100/50">
-            <div class="h-full w-[5%] bg-gradient-to-r from-emerald-400 to-teal-500 transition-all duration-500 ease-out rounded-r-full" id="progressBar"></div>
-        </div>
-        
-        <!-- Topbar -->
-        <div class="bg-gradient-to-br from-emerald-800 to-emerald-600 p-8 flex items-center gap-5 relative">
-            <div class="absolute -bottom-4 left-0 right-0 h-8 bg-white/60 backdrop-blur-md rounded-t-3xl"></div>
-            
-            <div class="w-14 h-14 shrink-0 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl flex items-center justify-center text-white text-2xl shadow-inner shadow-white/10">
-                <i class="fas fa-calendar-plus"></i>
-            </div>
-            <div>
-                <h2 class="text-white text-xl font-extrabold tracking-tight">Form Booking Jadwal</h2>
-                <p class="text-white/80 text-sm font-medium mt-1">Isi data di bawah untuk membuat reservasi</p>
-            </div>
-        </div>
-
-        <div class="p-6 md:p-8 pt-6 relative bg-white/40 backdrop-blur-3xl rounded-3xl -mt-4">
-            
-            <!-- Global Loader Awal -->
-            <div id="global-loader" class="flex items-center gap-3 bg-white/80 backdrop-blur border border-emerald-100 p-4 rounded-2xl mb-8 shadow-sm">
-                <div class="mini-spinner"></div>
-                <span class="text-emerald-800 font-bold text-sm">Menghubungkan ke sistem klinik...</span>
-            </div>
-
-            <form id="bookingForm" onsubmit="event.preventDefault(); submitBooking();" novalidate class="space-y-8">
-
-                <!-- STEP 1: Data Klien -->
-                <div class="space-y-5">
-                    <div class="flex items-center gap-3 mt-2">
-                        <div class="w-7 h-7 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xs font-black shadow-sm ring-2 ring-emerald-50">1</div>
-                        <span class="text-emerald-800 font-extrabold text-xs uppercase tracking-widest">Data Klien</span>
-                        <div class="flex-1 h-px bg-slate-200/60"></div>
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="glass-panel rounded-full px-6 py-3 flex items-center justify-between">
+                <a href="#" class="flex items-center gap-2">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-600 to-teal-500 text-white flex items-center justify-center font-bold text-xl shadow-lg">
+                        <i class="fas fa-leaf"></i>
                     </div>
-
-                    <div class="space-y-2">
-                        <label class="block text-slate-800 text-sm font-bold pl-1">Jenis Kelamin Klien</label>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="relative group">
-                                <input type="radio" id="jkL" name="jenisKelamin" value="Laki-laki" disabled onchange="filterTerapis()" class="peer hidden-radio">
-                                <label for="jkL" class="flex items-center justify-center gap-2 p-3.5 bg-white border-2 border-slate-200 text-slate-600 font-bold text-sm rounded-xl cursor-pointer transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-checked:shadow-md peer-checked:shadow-emerald-500/10 hover:border-emerald-300 peer-disabled:bg-slate-50 peer-disabled:text-slate-400 peer-disabled:border-slate-200 peer-disabled:cursor-not-allowed">
-                                    <i class="fas fa-mars text-blue-500"></i> Laki-laki
-                                </label>
-                            </div>
-                            <div class="relative group">
-                                <input type="radio" id="jkP" name="jenisKelamin" value="Perempuan" disabled onchange="filterTerapis()" class="peer hidden-radio">
-                                <label for="jkP" class="flex items-center justify-center gap-2 p-3.5 bg-white border-2 border-slate-200 text-slate-600 font-bold text-sm rounded-xl cursor-pointer transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-checked:shadow-md peer-checked:shadow-emerald-500/10 hover:border-emerald-300 peer-disabled:bg-slate-50 peer-disabled:text-slate-400 peer-disabled:border-slate-200 peer-disabled:cursor-not-allowed">
-                                    <i class="fas fa-venus text-pink-500"></i> Perempuan
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label for="nama" class="block text-slate-800 text-sm font-bold pl-1">Nama Lengkap</label>
-                        <div class="relative">
-                            <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600 z-10"></i>
-                            <input type="text" id="nama" class="w-full bg-white border-2 border-slate-200 text-slate-800 font-medium text-sm rounded-xl py-3.5 pr-4 pl-12 transition-all focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm" placeholder="Contoh: Ahmad Fauzi" required autocomplete="name">
-                        </div>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label for="nohp" class="block text-slate-800 text-sm font-bold pl-1">No. HP / WhatsApp</label>
-                        <div class="relative">
-                            <i class="fab fa-whatsapp absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600 z-10 text-lg"></i>
-                            <input type="tel" id="nohp" class="w-full bg-white border-2 border-slate-200 text-slate-800 font-medium text-sm rounded-xl py-3.5 pr-4 pl-12 transition-all focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm" placeholder="Contoh: 081234567890" required inputmode="numeric" pattern="[0-9]*" minlength="9" autocomplete="tel">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- STEP 2: Pilih Jadwal -->
-                <div class="space-y-5 pt-2">
-                    <div class="flex items-center gap-3">
-                        <div class="w-7 h-7 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xs font-black shadow-sm ring-2 ring-emerald-50">2</div>
-                        <span class="text-emerald-800 font-extrabold text-xs uppercase tracking-widest">Pilih Jadwal</span>
-                        <div class="flex-1 h-px bg-slate-200/60"></div>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="block text-slate-800 text-sm font-bold pl-1">Terapis</label>
-                        <div id="gridTerapis" class="flex flex-wrap gap-3">
-                            <div class="w-full text-center p-4 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-slate-400 text-sm font-medium">Pilih jenis kelamin terlebih dahulu</div>
-                        </div>
-                        <input type="hidden" id="terapis">
-                    </div>
-
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-center pl-1">
-                            <label class="text-slate-800 text-sm font-bold">Pilih Tanggal Reservasi</label>
-                            <div class="flex gap-1.5">
-                                <button type="button" onclick="scrollDateStrip(-1)" class="w-8 h-8 rounded-full bg-white border border-slate-200 text-emerald-700 flex items-center justify-center hover:bg-emerald-50 hover:border-emerald-300 transition-all shadow-sm"><i class="fas fa-chevron-left text-xs"></i></button>
-                                <button type="button" onclick="scrollDateStrip(1)" class="w-8 h-8 rounded-full bg-white border border-slate-200 text-emerald-700 flex items-center justify-center hover:bg-emerald-50 hover:border-emerald-300 transition-all shadow-sm"><i class="fas fa-chevron-right text-xs"></i></button>
-                            </div>
-                        </div>
-                        
-                        <div id="gridTanggal" class="flex gap-3 overflow-x-auto custom-scrollbar pb-3 pt-1 px-1 -mx-1 snap-x">
-                            <div class="w-full text-center p-4 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-slate-400 text-sm font-medium"><i class="fas fa-spinner fa-spin mr-2"></i> Menyiapkan kalender...</div>
-                        </div>
-                        <input type="hidden" id="tanggal">
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="block text-slate-800 text-sm font-bold pl-1">Slot Waktu Tersedia</label>
-                        <div id="gridWaktu" class="grid grid-cols-2 lg:grid-cols-3 gap-3">
-                            <div class="pill-placeholder">Pilih terapis dan tanggal dulu</div>
-                        </div>
-                        <input type="hidden" id="waktu">
-                    </div>
-                </div>
-
-                <!-- STEP 3: Pilih Layanan -->
-                <div class="space-y-5 pt-2">
-                    <div class="flex items-center gap-3">
-                        <div class="w-7 h-7 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xs font-black shadow-sm ring-2 ring-emerald-50">3</div>
-                        <span class="text-emerald-800 font-extrabold text-xs uppercase tracking-widest">Pilih Layanan</span>
-                        <div class="flex-1 h-px bg-slate-200/60"></div>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="block text-slate-800 text-sm font-bold pl-1">Jenis Sesi / Paket Layanan</label>
-                        <div id="gridSesi" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div class="pill-placeholder">Memuat layanan klinik...</div>
-                        </div>
-                        <input type="hidden" id="sesiBekam">
-                    </div>
-                </div>
-
-                <div class="pt-4">
-                    <button type="submit" id="btnSubmit" disabled class="w-full relative py-4 bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-bold text-base rounded-2xl shadow-xl shadow-emerald-500/30 flex items-center justify-center gap-2 hover:-translate-y-1 hover:shadow-2xl hover:shadow-emerald-500/40 transition-all duration-300 disabled:opacity-60 disabled:hover:translate-y-0 disabled:shadow-none disabled:cursor-not-allowed group overflow-hidden">
-                        <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                        <span class="relative z-10 flex items-center gap-2">
-                            <i class="fas fa-check-circle"></i>
-                            <span class="btn-text">Konfirmasi Booking</span>
-                        </span>
-                        <div class="spinner hidden relative z-10" id="btnSpinner"><i class="fas fa-circle-notch fa-spin"></i></div>
-                    </button>
-                    
-                    <div id="alertBox" class="hidden mt-4 p-4 rounded-xl text-sm font-bold text-center border animate-slide-in"></div>
-                </div>
-
-            </form>
-
-            <!-- ── SUCCESS OVERLAY (Hidden by default) ── -->
-            <div id="successOverlay" class="hidden text-center py-6 animate-slide-in">
-                <div class="w-24 h-24 mx-auto bg-gradient-to-br from-green-100 to-emerald-50 text-emerald-500 text-4xl rounded-full flex items-center justify-center mb-6 shadow-2xl shadow-emerald-500/20 border-4 border-white">
-                    <i class="fas fa-check"></i>
-                </div>
-                <h3 class="text-2xl font-extrabold text-emerald-900 mb-2">Booking Berhasil!</h3>
-                <p class="text-slate-500 font-medium text-sm mb-8">Jadwal Anda telah tercatat di sistem kami.</p>
-                
-                <div class="bg-white border border-slate-100 rounded-3xl p-6 mb-8 shadow-sm text-left shadow-slate-200/50">
-                    <div class="flex justify-between items-center py-3 border-b border-slate-50/80">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Nama Pasien</span>
-                        <strong id="resNama" class="text-slate-800 font-extrabold">-</strong>
-                    </div>
-                    <div class="flex justify-between items-center py-3 border-b border-slate-50/80">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Terapis</span>
-                        <strong id="resTerapis" class="text-slate-800 font-extrabold text-emerald-700">-</strong>
-                    </div>
-                    <div class="flex justify-between items-center py-3">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Waktu</span>
-                        <strong id="resWaktu" class="text-slate-800 font-extrabold bg-emerald-50 px-2 py-1 rounded-md text-emerald-800">-</strong>
-                    </div>
-                </div>
-
-                <a href="#" id="waLink" target="_blank" class="w-full py-4 bg-[#25d366] text-white font-extrabold text-base rounded-2xl flex items-center justify-center gap-3 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#25d366]/40 transition-all duration-300 mb-6 border border-[#25d366]/50">
-                    <i class="fab fa-whatsapp text-xl"></i>
-                    Konfirmasi via WhatsApp
+                    <span class="font-extrabold text-xl text-emerald-950 tracking-tight">Dani Sabri</span>
                 </a>
                 
-                <button type="button" class="mx-auto flex items-center justify-center gap-2 text-slate-400 text-sm font-bold hover:text-emerald-600 transition-colors" onclick="location.reload()">
-                    <i class="fas fa-redo"></i> Booking Lagi
-                </button>
+                <div class="hidden md:flex items-center gap-8 font-semibold text-slate-600">
+                    <a href="#services" class="hover:text-emerald-600 transition-colors">Layanan</a>
+                    <a href="#benefits" class="hover:text-emerald-600 transition-colors">Keunggulan</a>
+                    <a href="#testimonials" class="hover:text-emerald-600 transition-colors">Testimoni</a>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <a href="status.html" class="hidden md:flex text-sm font-bold text-slate-500 hover:text-emerald-600 transition-colors">Cek Status</a>
+                    <a href="booking.html" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-emerald-600/30 transition-all hover:-translate-y-0.5">
+                        Booking <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-6 z-10 min-h-screen flex items-center">
+        <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+            <div class="space-y-8 animate-fade-in-up">
+                <div class="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full text-emerald-700 text-xs font-bold uppercase tracking-widest shadow-sm border border-emerald-100">
+                    <i class="fas fa-star text-yellow-400"></i> Klinik Terapis Profesional
+                </div>
+                <h1 class="text-5xl lg:text-7xl font-extrabold leading-[1.1] text-emerald-950">
+                    Lebih Sehat dengan <span class="text-gradient">Terapi Sunnah</span>
+                </h1>
+                <p class="text-lg text-slate-600 font-medium leading-relaxed max-w-xl">
+                    Rumah Sehat Dani Sabri menyediakan layanan terapi bekam, ruqyah syar'iyyah, dan pengobatan Islami untuk pemulihan kesehatan fisik dan rohani Anda secara maksimal.
+                </p>
+                <div class="flex flex-wrap items-center gap-4 pt-4">
+                    <a href="booking.html" class="bg-gradient-to-r from-emerald-600 to-teal-500 text-white px-8 py-4 rounded-full text-lg font-bold shadow-xl shadow-emerald-500/30 hover:-translate-y-1 hover:shadow-2xl hover:shadow-emerald-500/40 transition-all duration-300 flex items-center gap-3">
+                        <i class="fas fa-calendar-check"></i> Reservasi Jadwal
+                    </a>
+                    <a href="#services" class="px-8 py-4 rounded-full text-lg font-bold text-slate-700 bg-white/50 hover:bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
+                        Pelajari Layanan
+                    </a>
+                </div>
+                
+                <div class="pt-8 flex items-center gap-6 border-t border-slate-200/60">
+                    <div class="flex -space-x-4">
+                        <img class="w-12 h-12 rounded-full border-4 border-white shadow-sm object-cover" src="https://i.pravatar.cc/100?img=1" alt="Patient">
+                        <img class="w-12 h-12 rounded-full border-4 border-white shadow-sm object-cover" src="https://i.pravatar.cc/100?img=2" alt="Patient">
+                        <img class="w-12 h-12 rounded-full border-4 border-white shadow-sm object-cover" src="https://i.pravatar.cc/100?img=3" alt="Patient">
+                        <div class="w-12 h-12 rounded-full border-4 border-white shadow-sm bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">+1K</div>
+                    </div>
+                    <div>
+                        <div class="flex text-yellow-400 text-sm">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        </div>
+                        <p class="text-sm font-bold text-slate-600. mt-1">Dipercaya oleh ribuan pasien</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="relative lg:-mr-10 animate-fade-in-up" style="animation-delay: 0.2s;">
+                <!-- Abstract Hero Image Composition -->
+                <div class="relative w-full aspect-square max-w-lg mx-auto">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-emerald-100 to-teal-50 rounded-full animate-blob"></div>
+                    <div class="absolute inset-4 glass-panel rounded-3xl overflow-hidden animate-float">
+                        <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=1520&auto=format&fit=crop" alt="Cupping Therapy" class="w-full h-full object-cover opacity-90 scale-105 hover:scale-110 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-emerald-950/80 to-transparent"></div>
+                        <div class="absolute bottom-6 left-6 right-6">
+                            <div class="glass-panel p-4 rounded-2xl flex items-center gap-4">
+                                <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-emerald-600 text-xl shadow-md">
+                                    <i class="fas fa-shield-heart"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-emerald-950">Aman & Higienis</h4>
+                                    <p class="text-xs font-medium text-slate-500">Standar sterilisasi medis tinggi</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-24 px-6 relative z-10 bg-white/40 backdrop-blur-sm border-y border-white/60">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <span class="text-emerald-600 font-extrabold tracking-widest uppercase text-sm">Layanan Kami</span>
+                <h2 class="text-4xl font-extrabold text-emerald-950 mt-3 mb-4">Terapi Komprehensif Sesuai Sunnah</h2>
+                <p class="text-slate-600 font-medium">Kami menggunakan metode yang memadukan keilmuan medis modern dan pengobatan tradisional Islami.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Service Card 1 -->
+                <div class="glass-panel p-8 rounded-3xl group hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/10 hover:border-emerald-200">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center text-emerald-600 text-3xl mb-6 shadow-sm group-hover:scale-110 transition-transform">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <h3 class="text-xl font-extrabold text-slate-800 mb-3">Bekam Sunnah</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-6 font-medium">Metode pengeluaran darah statis (toksin) untuk mengatasi berbagai keluhan seperti pegal linu, hipertensi, dan memulihkan stamina.</p>
+                    <ul class="space-y-2 mb-8">
+                        <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-emerald-500"></i> Bekam Basah (Wet Cupping)</li>
+                        <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-emerald-500"></i> Bekam Kering & Luncur</li>
+                    </ul>
+                    <a href="booking.html" class="inline-block w-full text-center py-3 rounded-xl bg-slate-50 text-emerald-700 font-bold group-hover:bg-emerald-50 transition-colors">Pesan Jadwal</a>
+                </div>
+
+                <!-- Service Card 2 -->
+                <div class="glass-panel p-8 rounded-3xl group hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl hover:shadow-cyan-500/10 hover:border-cyan-200 relative">
+                    <div class="absolute top-0 right-8 -translate-y-1/2 bg-gradient-to-r from-amber-400 to-orange-400 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">Populer</div>
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-100 to-cyan-50 flex items-center justify-center text-cyan-600 text-3xl mb-6 shadow-sm group-hover:scale-110 transition-transform">
+                        <i class="fas fa-book-quran"></i>
+                    </div>
+                    <h3 class="text-xl font-extrabold text-slate-800 mb-3">Ruqyah Syar'iyyah</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-6 font-medium">Terapi penyembuhan dengan ayat suci Al-Qur'an untuk gangguan psikis, sihir, ain, dan penyakit non-medis lainnya.</p>
+                    <ul class="space-y-2 mb-8">
+                        <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-cyan-500"></i> Pembersihan Aura Negatif</li>
+                        <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-cyan-500"></i> Konseling & Edukasi Tauhid</li>
+                    </ul>
+                    <a href="booking.html" class="inline-block w-full text-center py-3 rounded-xl bg-slate-50 text-cyan-700 font-bold group-hover:bg-cyan-50 transition-colors">Pesan Jadwal</a>
+                </div>
+
+                <!-- Service Card 3 -->
+                <div class="glass-panel p-8 rounded-3xl group hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl hover:shadow-teal-500/10 hover:border-teal-200">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-100 to-teal-50 flex items-center justify-center text-teal-600 text-3xl mb-6 shadow-sm group-hover:scale-110 transition-transform">
+                        <i class="fas fa-spa"></i>
+                    </div>
+                    <h3 class="text-xl font-extrabold text-slate-800 mb-3">Terapi Relaksasi</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-6 font-medium">Layanan pijat dan refleksi yang mengembalikan fungsi syaraf dan otot, melancarkan peredaran darah sehingga tubuh lebih bugar.</p>
+                    <ul class="space-y-2 mb-8">
+                        <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-teal-500"></i> Pijat Refleksi Tradisional</li>
+                        <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-teal-500"></i> Terapi Lintah Medis</li>
+                    </ul>
+                    <a href="booking.html" class="inline-block w-full text-center py-3 rounded-xl bg-slate-50 text-teal-700 font-bold group-hover:bg-teal-50 transition-colors">Pesan Jadwal</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Us Section -->
+    <section id="benefits" class="py-24 px-6 relative z-10">
+        <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+            
+            <div class="relative order-2 lg:order-1">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-4 pt-10">
+                        <div class="glass-panel p-6 rounded-3xl text-center shadow-lg">
+                            <div class="w-12 h-12 mx-auto bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xl mb-4"><i class="fas fa-user-doctor"></i></div>
+                            <h4 class="font-extrabold text-slate-800 text-lg mb-1">Terapis Ahli</h4>
+                            <p class="text-xs text-slate-500 font-medium">Bersertifikat dan Pria/Wanita terpisah.</p>
+                        </div>
+                        <div class="glass-panel p-6 rounded-3xl text-center shadow-lg bg-emerald-600 border-none">
+                            <div class="w-12 h-12 mx-auto bg-white/20 text-white rounded-full flex items-center justify-center text-xl mb-4"><i class="fas fa-pump-medical"></i></div>
+                            <h4 class="font-extrabold text-white text-lg mb-1">Sterilisasi 100%</h4>
+                            <p class="text-xs text-white/80 font-medium">Menggunakan jarum/lanset sekali pakai.</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="glass-panel p-6 rounded-3xl text-center shadow-lg">
+                            <div class="w-12 h-12 mx-auto bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xl mb-4"><i class="fas fa-clock"></i></div>
+                            <h4 class="font-extrabold text-slate-800 text-lg mb-1">Tepat Waktu</h4>
+                            <p class="text-xs text-slate-500 font-medium">Sistem booking modern & tanpa antre lama.</p>
+                        </div>
+                        <div class="glass-panel p-6 rounded-3xl text-center shadow-lg">
+                            <div class="w-12 h-12 mx-auto bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xl mb-4"><i class="fas fa-heart"></i></div>
+                            <h4 class="font-extrabold text-slate-800 text-lg mb-1">Sesuai Syariat</h4>
+                            <p class="text-xs text-slate-500 font-medium">Pelayanan yang menjaga privasi dan adab.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="order-1 lg:order-2">
+                <span class="text-emerald-600 font-extrabold tracking-widest uppercase text-sm">Keunggulan Kami</span>
+                <h2 class="text-4xl font-extrabold text-emerald-950 mt-3 mb-6">Mengapa Memilih Rumah Sehat Dani Sabri?</h2>
+                <p class="text-slate-600 font-medium text-lg leading-relaxed mb-8">
+                    Kesehatan Anda adalah prioritas kami. Kami berkomitmen memberikan layanan kesehatan komplementer yang mengedepankan standar keamanan medis namun tetap berpedoman kuat pada thibbun nabawi.
+                </p>
+                <div class="space-y-4">
+                    <div class="flex items-center gap-4 bg-white/60 p-4 rounded-xl border border-white">
+                        <div class="w-10 h-10 shrink-0 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center text-white"><i class="fas fa-check"></i></div>
+                        <p class="font-bold text-slate-700">Terapis berpengalaman & tersertifikasi PBI (Perkumpulan Bekam Indonesia).</p>
+                    </div>
+                    <div class="flex items-center gap-4 bg-white/60 p-4 rounded-xl border border-white">
+                        <div class="w-10 h-10 shrink-0 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center text-white"><i class="fas fa-check"></i></div>
+                        <p class="font-bold text-slate-700">Ruang terapi pria & wanita 100% dipisah (privasi terjamin).</p>
+                    </div>
+                    <div class="flex items-center gap-4 bg-white/60 p-4 rounded-xl border border-white">
+                        <div class="w-10 h-10 shrink-0 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center text-white"><i class="fas fa-check"></i></div>
+                        <p class="font-bold text-slate-700">Sistem registrasi online pintar yang meminimalisir waktu tunggu Anda di lokasi.</p>
+                    </div>
+                </div>
             </div>
 
         </div>
-    </div>
+    </section>
 
-    <p class="mt-10 text-center text-xs font-bold text-slate-400 relative z-10 px-4">
-        <i class="fas fa-shield-halved text-emerald-400 mr-1"></i> Data Anda aman &amp; hanya digunakan untuk keperluan pelayanan klinik
-        <br><br>
-        <a href="admin.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/50 border border-slate-200 rounded-lg text-slate-500 hover:text-emerald-700 transition-colors"><i class="fas fa-lock text-[10px]"></i> Portal Admin</a>
-    </p>
+    <!-- CTA Section -->
+    <section class="py-20 px-6 relative z-10">
+        <div class="max-w-5xl mx-auto rounded-[3rem] bg-gradient-to-br from-emerald-900 to-emerald-700 overflow-hidden relative shadow-2xl shadow-emerald-900/30">
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+            <div class="absolute -top-40 -right-40 w-96 h-96 bg-emerald-500/30 rounded-full blur-3xl"></div>
+            
+            <div class="relative p-12 lg:p-20 text-center">
+                <h2 class="text-3xl lg:text-5xl font-extrabold text-white mb-6">Siap Untuk Berkonsultasi?</h2>
+                <p class="text-emerald-100 text-lg mb-10 max-w-2xl mx-auto font-medium">Beri tubuh Anda hak untuk sehat. Segera jadwalkan kedatangan Anda melalui platform reservasi online kami yang sangat mudah digunakan.</p>
+                <a href="booking.html" class="inline-flex items-center gap-3 bg-white text-emerald-800 px-10 py-5 rounded-full text-xl font-bold shadow-xl hover:-translate-y-1 hover:shadow-2xl hover:scale-105 transition-all duration-300">
+                    <i class="fas fa-calendar-check text-emerald-500"></i> Buat Jadwal Sekarang
+                </a>
+            </div>
+        </div>
+    </section>
 
-    <!-- Logika Aplikasi -->
-    <script src="config.js"></script>
-    <script src="app.js"></script>
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 pt-16 pb-8 relative z-10">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-10 mb-12">
+                <div class="col-span-1 md:col-span-2">
+                    <a href="#" class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold shadow-md">
+                            <i class="fas fa-leaf text-sm"></i>
+                        </div>
+                        <span class="font-extrabold text-xl text-emerald-950">Rumah Sehat Dani Sabri</span>
+                    </a>
+                    <p class="text-slate-500 text-sm leading-relaxed mb-6 max-w-sm font-medium">
+                        Melayani dengan hati, mengobati dengan iman. Klinik bekam dan ruqyah terbaik dengan pendekatan syariah dan standar higienitas.
+                    </p>
+                    <div class="flex gap-3">
+                        <a href="#" class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-emerald-500 hover:text-white transition-all"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-emerald-500 hover:text-white transition-all"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-emerald-500 hover:text-white transition-all"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-slate-800 mb-4">Akses Cepat</h4>
+                    <ul class="space-y-3">
+                        <li><a href="booking.html" class="text-slate-500 hover:text-emerald-600 text-sm font-medium transition-colors">Booking Jadwal</a></li>
+                        <li><a href="status.html" class="text-slate-500 hover:text-emerald-600 text-sm font-medium transition-colors">Cek Status Booking</a></li>
+                        <li><a href="#services" class="text-slate-500 hover:text-emerald-600 text-sm font-medium transition-colors">Layanan Terapis</a></li>
+                    </ul>
+                </div>
 
+                <div>
+                    <h4 class="font-bold text-slate-800 mb-4">Kontak & Lokasi</h4>
+                    <ul class="space-y-3">
+                        <li class="flex items-start gap-3 text-sm text-slate-500 font-medium">
+                            <i class="fas fa-map-marker-alt text-emerald-500 mt-1"></i>
+                            <span>Jl. Kesehatan No. 12, Bekasi (Contoh Lokasi)</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-slate-500 font-medium">
+                            <i class="fas fa-phone-alt text-emerald-500"></i>
+                            <span>0812-3456-7890</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-slate-500 font-medium">
+                            <i class="fas fa-clock text-emerald-500"></i>
+                            <span>Setiap Hari, 08:00 - 17:00</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-sm font-bold text-slate-400">
+                    &copy; 2026 Rumah Sehat Dani Sabri. All rights reserved.
+                </p>
+                <div class="flex items-center gap-4 text-sm font-bold">
+                    <a href="admin.html" class="text-slate-400 hover:text-emerald-600 transition-colors"><i class="fas fa-lock mr-1"></i> Portal Admin</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scroll behavior script -->
+    <script>
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.classList.add('bg-white/80', 'backdrop-blur-md', 'shadow-sm', 'border-b', 'border-slate-200/50');
+            } else {
+                nav.classList.remove('bg-white/80', 'backdrop-blur-md', 'shadow-sm', 'border-b', 'border-slate-200/50');
+            }
+        });
+    </script>
 </body>
 </html>

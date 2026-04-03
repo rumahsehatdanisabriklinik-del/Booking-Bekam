@@ -63,6 +63,9 @@
             .pill.active {
                 @apply bg-emerald-50 border-emerald-500 text-emerald-800 ring-2 ring-emerald-500/20;
             }
+            .cms-input {
+                @apply bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all;
+            }
         }
     </style>
 </head>
@@ -116,6 +119,10 @@
                 <button id="tabLaporan" class="nav-item" onclick="switchTab('laporan')">
                     <i class="fas fa-chart-pie"></i>
                     <span>Laporan &amp; Analitik</span>
+                </button>
+                <button id="tabPengaturan" class="nav-item" onclick="switchTab('pengaturan')">
+                    <i class="fas fa-pen-to-square"></i>
+                    <span>Konten Landing Page</span>
                 </button>
             </nav>
             <div class="mt-auto pt-6 border-t border-slate-100">
@@ -178,6 +185,152 @@
                     <div id="isiLaporan" class="space-y-6"></div>
                 </div>
 
+                <!-- Konten: Pengaturan CMS Landing Page -->
+                <div id="tabContentPengaturan" class="hidden animate-slide-in">
+                    <div id="cmsLoader" class="flex items-center gap-3 bg-white border border-emerald-100 p-5 rounded-2xl mb-6 shadow-sm">
+                        <div class="w-5 h-5 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                        <span class="text-emerald-800 font-bold text-sm">Memuat pengaturan konten...</span>
+                    </div>
+                    <form id="cmsForm" class="hidden space-y-8" onsubmit="event.preventDefault(); saveCmsSettings();">
+
+                        <!-- BAGIAN: HERO -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-5">
+                            <h3 class="font-extrabold text-lg text-slate-800 flex items-center gap-2"><i class="fas fa-star text-amber-400"></i> Hero Section</h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="space-y-1">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Nama Klinik</label>
+                                    <input id="cms_nama_klinik" class="w-full cms-input" type="text" placeholder="Rumah Sehat Dani Sabri">
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Badge Teks Atas</label>
+                                    <input id="cms_badge" class="w-full cms-input" type="text" placeholder="Klinik Terapis Profesional">
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Tagline Utama (Heading)</label>
+                                    <input id="cms_tagline" class="w-full cms-input" type="text" placeholder="Lebih Sehat dengan Terapi Sunnah">
+                                </div>
+                                <div class="space-y-1 md:col-span-2">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Deskripsi Singkat</label>
+                                    <textarea id="cms_deskripsi" class="w-full cms-input" rows="3" placeholder="Menyediakan layanan terapi..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- BAGIAN: KONTAK & LOKASI -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-5">
+                            <h3 class="font-extrabold text-lg text-slate-800 flex items-center gap-2"><i class="fas fa-circle-info text-cyan-500"></i> Kontak &amp; Lokasi</h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="space-y-1">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">No. WhatsApp (awali 62)</label>
+                                    <div class="relative"><i class="fab fa-whatsapp absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500"></i><input id="cms_whatsapp" class="w-full cms-input pl-9" type="text" placeholder="6281234567890"></div>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Jam Operasional</label>
+                                    <input id="cms_jam_operasional" class="w-full cms-input" type="text" placeholder="Setiap Hari, 08:00 - 17:00">
+                                </div>
+                                <div class="space-y-1 md:col-span-2">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Alamat Lengkap</label>
+                                    <input id="cms_alamat" class="w-full cms-input" type="text" placeholder="Jl. Kesehatan No. 12...">
+                                </div>
+                                <div class="space-y-1 md:col-span-2">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Link Google Maps (URL penuh)</label>
+                                    <input id="cms_maps_link" class="w-full cms-input" type="text" placeholder="https://maps.google.com/...">
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Link Instagram</label>
+                                    <input id="cms_instagram" class="w-full cms-input" type="text" placeholder="https://instagram.com/...">
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Link Facebook</label>
+                                    <input id="cms_facebook" class="w-full cms-input" type="text" placeholder="https://facebook.com/...">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- BAGIAN: LAYANAN -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-6">
+                            <h3 class="font-extrabold text-lg text-slate-800 flex items-center gap-2"><i class="fas fa-list-check text-teal-500"></i> Layanan Unggulan</h3>
+                            
+                            <!-- Layanan 1 -->
+                            <div class="p-5 bg-emerald-50 rounded-xl border border-emerald-100 space-y-3">
+                                <p class="font-bold text-emerald-700 text-sm">Layanan 1</p>
+                                <div class="grid md:grid-cols-2 gap-3">
+                                    <div class="space-y-1">
+                                        <label class="block text-xs font-bold text-slate-500">Nama Layanan</label>
+                                        <input id="cms_layanan1_nama" class="w-full cms-input" type="text" placeholder="Bekam Sunnah">
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="block text-xs font-bold text-slate-500">Icon FontAwesome (class)</label>
+                                        <input id="cms_layanan1_icon" class="w-full cms-input" type="text" placeholder="fas fa-fire">
+                                    </div>
+                                    <div class="space-y-1 md:col-span-2">
+                                        <label class="block text-xs font-bold text-slate-500">Deskripsi</label>
+                                        <textarea id="cms_layanan1_deskripsi" class="w-full cms-input" rows="2"></textarea>
+                                    </div>
+                                    <div class="space-y-1 md:col-span-2">
+                                        <label class="block text-xs font-bold text-slate-500">Poin Detail (pisahkan dengan koma)</label>
+                                        <input id="cms_layanan1_detail" class="w-full cms-input" type="text" placeholder="Bekam Basah, Bekam Kering">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Layanan 2 -->
+                            <div class="p-5 bg-cyan-50 rounded-xl border border-cyan-100 space-y-3">
+                                <p class="font-bold text-cyan-700 text-sm">Layanan 2</p>
+                                <div class="grid md:grid-cols-2 gap-3">
+                                    <div class="space-y-1">
+                                        <label class="block text-xs font-bold text-slate-500">Nama Layanan</label>
+                                        <input id="cms_layanan2_nama" class="w-full cms-input" type="text" placeholder="Ruqyah Syar'iyyah">
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="block text-xs font-bold text-slate-500">Icon FontAwesome (class)</label>
+                                        <input id="cms_layanan2_icon" class="w-full cms-input" type="text" placeholder="fas fa-book-quran">
+                                    </div>
+                                    <div class="space-y-1 md:col-span-2">
+                                        <label class="block text-xs font-bold text-slate-500">Deskripsi</label>
+                                        <textarea id="cms_layanan2_deskripsi" class="w-full cms-input" rows="2"></textarea>
+                                    </div>
+                                    <div class="space-y-1 md:col-span-2">
+                                        <label class="block text-xs font-bold text-slate-500">Poin Detail (pisahkan dengan koma)</label>
+                                        <input id="cms_layanan2_detail" class="w-full cms-input" type="text" placeholder="Pembersihan Aura, Konseling">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Layanan 3 -->
+                            <div class="p-5 bg-teal-50 rounded-xl border border-teal-100 space-y-3">
+                                <p class="font-bold text-teal-700 text-sm">Layanan 3</p>
+                                <div class="grid md:grid-cols-2 gap-3">
+                                    <div class="space-y-1">
+                                        <label class="block text-xs font-bold text-slate-500">Nama Layanan</label>
+                                        <input id="cms_layanan3_nama" class="w-full cms-input" type="text" placeholder="Terapi Relaksasi">
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="block text-xs font-bold text-slate-500">Icon FontAwesome (class)</label>
+                                        <input id="cms_layanan3_icon" class="w-full cms-input" type="text" placeholder="fas fa-spa">
+                                    </div>
+                                    <div class="space-y-1 md:col-span-2">
+                                        <label class="block text-xs font-bold text-slate-500">Deskripsi</label>
+                                        <textarea id="cms_layanan3_deskripsi" class="w-full cms-input" rows="2"></textarea>
+                                    </div>
+                                    <div class="space-y-1 md:col-span-2">
+                                        <label class="block text-xs font-bold text-slate-500">Poin Detail (pisahkan dengan koma)</label>
+                                        <input id="cms_layanan3_detail" class="w-full cms-input" type="text" placeholder="Pijat Refleksi, Terapi Lintah">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tombol Simpan -->
+                        <div class="flex items-center justify-between gap-4">
+                            <div id="cmsAlert" class="hidden flex-1 p-3 rounded-xl text-sm font-bold text-center border"></div>
+                            <button type="submit" id="btnSaveCms" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg shadow-emerald-500/30 transition-all hover:-translate-y-0.5 ml-auto">
+                                <i class="fas fa-save"></i> Simpan Perubahan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
             </div>
         </main>
 
@@ -190,6 +343,10 @@
             <button class="bn-item" onclick="switchTab('laporan')">
                 <i class="fas fa-chart-pie"></i>
                 <span>Laporan</span>
+            </button>
+            <button class="bn-item" onclick="switchTab('pengaturan')">
+                <i class="fas fa-pen-to-square"></i>
+                <span>Konten</span>
             </button>
             <button class="bn-item" onclick="logout()">
                 <i class="fas fa-sign-out-alt"></i>
