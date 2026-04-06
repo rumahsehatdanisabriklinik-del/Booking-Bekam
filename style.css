@@ -127,19 +127,77 @@ body {
 
 /* ── INPUTS & BUTTONS ── */
 .input-premium {
-    @apply w-full bg-white border-2 border-slate-100 rounded-2xl px-5 py-4 text-slate-800 transition-all focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm;
+    width: 100%;
+    background-color: #ffffff;
+    border: 2px solid #f1f5f9;
+    border-radius: 1rem;
+    padding: 1rem 1.25rem;
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.input-premium:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+.input-premium::placeholder {
+    color: #cbd5e1;
 }
 
 .btn-premium {
-    @apply relative overflow-hidden bg-emerald-600 text-white font-bold px-8 py-4 rounded-2xl shadow-xl shadow-emerald-600/20 transition-all hover:-translate-y-1 hover:shadow-emerald-600/30 active:scale-95;
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #059669 0%, #0d9488 50%, #10b981 100%);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+    padding: 1rem 2rem;
+    border-radius: 1rem;
+    border: none;
+    cursor: pointer;
+    box-shadow:
+        0 4px 6px -1px rgba(5, 150, 105, 0.3),
+        0 10px 20px -5px rgba(5, 150, 105, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+}
+
+.btn-premium:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 8px 16px -4px rgba(5, 150, 105, 0.4),
+        0 16px 32px -8px rgba(5, 150, 105, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    filter: brightness(1.05);
+}
+
+.btn-premium:active {
+    transform: scale(0.97);
 }
 
 .btn-premium::after {
     content: '';
-    @apply absolute inset-0 bg-white/20 translate-y-full transition-transform duration-300;
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 60%);
+    pointer-events: none;
 }
 
-.btn-premium:hover::after {
-    @apply translate-y-0;
+.btn-premium:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.1) !important;
 }
 
