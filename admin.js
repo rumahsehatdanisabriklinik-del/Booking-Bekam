@@ -34,8 +34,21 @@ async function verifyPin(pin) {
         
         if (result.status === 'success') {
             localStorage.setItem('adminPin', pin);
+            localStorage.setItem('adminRole', result.role || 'admin');
+            localStorage.setItem('adminNama', result.nama || 'Admin');
+            
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('dashboardScreen').style.display = '';
+            
+            // Atur Sidebar untuk Terapis
+            if (result.role === 'terapis') {
+                document.querySelectorAll('[onclick="switchTab(\'laporan\')"]').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('[onclick="switchTab(\'pengaturan\')"]').forEach(el => el.style.display = 'none');
+            }
+            // Update nama profil
+            const profilNameEls = document.querySelectorAll('.profil-nama');
+            profilNameEls.forEach(el => el.textContent = result.nama || 'Super Admin');
+
             switchTab('booking');
         } else {
             throw new Error(result.message);
@@ -45,6 +58,8 @@ async function verifyPin(pin) {
         al.textContent = err.message || "Gagal menghubungi server";
         al.classList.remove('hidden');
         localStorage.removeItem('adminPin');
+        localStorage.removeItem('adminRole');
+        localStorage.removeItem('adminNama');
     }
 }
 
@@ -162,7 +177,16 @@ function renderData() {
     const now = new Date();
     const todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
     
+    // Terapis Filtering
+    const roleAdmin = localStorage.getItem('adminRole') || 'admin';
+    const namaAdmin = localStorage.getItem('adminNama') || 'Admin';
+
     let displayData = allData.filter(item => {
+        // Filter Role: Jika Terapis, hanya lihat datanya sendiri
+        if (roleAdmin === 'terapis' && (item.terapis || "") !== namaAdmin) {
+            return false;
+        }
+
         // Filter Mode
         let isMatchMode = true;
         if (currentFilter === 'terjadwal') isMatchMode = (item.status || "Terjadwal").toLowerCase() === 'terjadwal';
@@ -179,7 +203,7 @@ function renderData() {
     });
 
     if (displayData.length === 0) {
-        container.innerHTML = `<div class="col-span-full w-full text-center p-8 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-bold">Tidak ada data yang cocok dengan pencarian Bapak.</div>`;
+        container.innerHTML = `<div class="col-span-full w-full text-center p-8 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-bold">Tidak ada data yang cocok dengan kriteria.</div>`;
         return;
     }
 
@@ -188,12 +212,15 @@ function renderData() {
         let badgeClass = "bg-blue-50 text-blue-600 border-blue-200 ring-1 ring-blue-100";
         let actionBtn = "";
 
+        // EMR Button
+        const emrBtn = `<button class="w-full mt-3 py-2 bg-slate-100 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 text-slate-600 hover:text-emerald-700 font-bold rounded-xl text-xs transition-colors flex items-center justify-center gap-2" onclick="openEMR('${p.row}', '${p.nama}', \`${p.tensi||''}\`, \`${p.keluhan||''}\`, \`${p.tindakan||''}\`)"><i class="fas fa-file-medical"></i> Catatan Rekam Medis</button>`;
+
         if (st === "batal" || st === "cancel" || st === "dibatalkan") {
             badgeClass = "bg-red-50 text-red-600 border-red-200 ring-1 ring-red-100";
             actionBtn = `<div class="bg-red-50/50 rounded-xl p-3 text-red-500 font-extrabold text-xs text-center border border-red-100"><i class="fas fa-times-circle"></i> Reservasi Dibatalkan</div>`;
         } else if (st === "selesai") {
             badgeClass = "bg-emerald-50 text-emerald-600 border-emerald-200 ring-1 ring-emerald-100";
-            actionBtn = `<div class="bg-emerald-50 rounded-xl p-3 text-emerald-600 font-extrabold text-xs text-center border border-emerald-100"><i class="fas fa-check-double text-emerald-500"></i> Layanan Selesai</div>`;
+            actionBtn = `<div class="bg-emerald-50 rounded-xl p-3 text-emerald-600 font-extrabold text-xs text-center border border-emerald-100"><i class="fas fa-check-double text-emerald-500"></i> Layanan Selesai</div>${emrBtn}`;
         } else {
             badgeClass = "bg-blue-50 text-blue-600 border-blue-200 ring-1 ring-blue-100";
             actionBtn = `
@@ -201,19 +228,20 @@ function renderData() {
                     <button class="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl text-xs transition-colors shadow-sm shadow-emerald-500/20" onclick="updateStatus('${p.row}', 'Selesai')"><i class="fas fa-check mr-1"></i> Selesai</button>
                     <button class="flex-1 py-2.5 bg-white border border-red-200 hover:bg-red-50 text-red-500 hover:text-red-600 font-bold rounded-xl text-xs transition-colors" onclick="updateStatus('${p.row}', 'Batal')"><i class="fas fa-times mr-1"></i> Batal</button>
                 </div>
+                ${emrBtn}
             `;
         }
 
         container.innerHTML += `
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-shadow p-5 flex flex-col gap-4">
-                <div class="flex justify-between items-start pb-4 border-b border-dashed border-slate-100">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-shadow p-5 flex flex-col gap-4 relative overflow-hidden">
+                <div class="flex justify-between items-start pb-4 border-b border-dashed border-slate-100 relative z-10">
                     <div>
                         <h3 class="text-base font-extrabold text-slate-800 uppercase tracking-wide">${p.nama}</h3>
                         <div class="flex items-center gap-1.5 text-slate-500 text-xs font-bold mt-1.5"><i class="fab fa-whatsapp text-emerald-500"></i> ${p.hp}</div>
                     </div>
                     <span class="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border ${badgeClass}">${st}</span>
                 </div>
-                <div class="grid grid-cols-2 gap-y-4 gap-x-2 text-xs">
+                <div class="grid grid-cols-2 gap-y-4 gap-x-2 text-xs relative z-10">
                     <div class="col-span-2 sm:col-span-1 border border-slate-100 p-3 rounded-xl bg-slate-50">
                         <span class="block text-slate-400 font-bold uppercase text-[9px] mb-1">Tanggal & Waktu</span>
                         <strong class="text-slate-700 flex items-center gap-1.5"><i class="far fa-clock text-slate-400"></i> ${p.waktu} &bull; ${p.tanggal}</strong>
@@ -453,5 +481,60 @@ async function saveCmsSettings() {
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-save mr-2"></i> Simpan Perubahan';
         setTimeout(() => alert.classList.add('hidden'), 5000);
+    }
+}
+
+// ── EMR (Catatan Medis) ──
+let currentEmrRow = null;
+
+function openEMR(row, nama, tensi, keluhan, tindakan) {
+    currentEmrRow = row;
+    document.getElementById('emrNamaPasien').textContent = nama;
+    document.getElementById('emrTensi').value = tensi !== "undefined" ? tensi : "";
+    document.getElementById('emrKeluhan').value = keluhan !== "undefined" ? keluhan : "";
+    document.getElementById('emrTindakan').value = tindakan !== "undefined" ? tindakan : "";
+    document.getElementById('emrModal').style.display = 'flex';
+}
+
+function closeEMR() {
+    currentEmrRow = null;
+    document.getElementById('emrModal').style.display = 'none';
+}
+
+async function saveEMR() {
+    if (!currentEmrRow) return;
+    const pin = localStorage.getItem('adminPin');
+    const tensi = document.getElementById('emrTensi').value;
+    const keluhan = document.getElementById('emrKeluhan').value;
+    const tindakan = document.getElementById('emrTindakan').value;
+
+    const btn = document.getElementById('btnSaveEMR');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+
+    try {
+        const res = await fetch(GAS_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'adminUpdateRekamMedis',
+                pass: pin,
+                row: currentEmrRow,
+                tensi, keluhan, tindakan
+            })
+        });
+        const result = await res.json();
+        if (result.status === 'success') {
+            closeEMR();
+            loadDashboardData(pin); // Refresh data
+        } else {
+            alert('Gagal simpan EMR: ' + result.message);
+        }
+    } catch(e) {
+        alert('Internal Error: ' + e.message);
+    } finally {
+        if(btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Simpan Rekam Medis';
+        }
     }
 }

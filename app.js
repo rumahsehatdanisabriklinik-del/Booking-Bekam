@@ -43,6 +43,7 @@ const globalLoader    = document.getElementById('global-loader');
 const alertBox        = document.getElementById('alertBox');
 
 let allTerapisData = [];
+let allLayananData = [];
 let hariLiburList  = []; // Daftar angka hari libur dari Spreadsheet
 
 const NAMA_HARI = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
@@ -112,16 +113,21 @@ async function loadInitialData() {
         // Simpan data terapis
         allTerapisData = dataTerapis;
 
-        // Isi dropdown Sesi Bekam dari Spreadsheet
-        const sesiList = dataSetting.sesiBekam || [];
-        gridSesi.innerHTML = '';
-        sesiList.forEach(sesi => {
-            const btn = document.createElement('div');
-            btn.className = 'pill-btn full-width';
-            btn.innerHTML = `<i class="fas fa-briefcase-medical"></i> ${sesi}`;
-            btn.onclick = () => selectPill(btn, gridSesi, sesiBekamInput, sesi, false);
-            gridSesi.appendChild(btn);
-        });
+        // Simpan data Layanan (Jika kosong, gunakan fallback dari Pengaturan)
+        if (hasil.data.layanan && hasil.data.layanan.length > 0) {
+            allLayananData = hasil.data.layanan;
+        } else {
+            // Fallback (Konversi format lama)
+            const sesiList = dataSetting.sesiBekam || [];
+            allLayananData = sesiList.map(s => ({
+                nama: s,
+                hariAktif: [],
+                terapisKhusus: []
+            }));
+        }
+
+        // Render Sesi awal (sebelum ada filter Terapis/Tanggal)
+        renderSesi();
 
         // Simpan daftar hari libur untuk validasi frontend
         hariLiburList = dataSetting.hariLibur || [];
@@ -181,6 +187,7 @@ function buildDateStrip() {
                 gridWaktu.innerHTML = '<div class="pill-placeholder"><i class="fas fa-spinner fa-spin"></i> Mengecek ketersediaan...</div>';
                 waktuInput.value = '';
                 checkAvailability();
+                renderSesi(); // Update layanan bergantung hari
             };
         }
 
@@ -204,6 +211,10 @@ function filterTerapis() {
     gridWaktu.innerHTML   = '<div class="pill-placeholder">Pilih terapis dan tanggal dulu</div>';
     terapisInput.value = '';
     waktuInput.value   = '';
+    
+    // Karena Terapis diganti/direset, perbarui juga tombol Layanan
+    renderSesi();
+    
     hideAlert();
 
     const cocok = allTerapisData.filter(t => t.gender === genderKlien);
@@ -217,7 +228,10 @@ function filterTerapis() {
             const btn = document.createElement('div');
             btn.className = 'pill-btn';
             btn.innerHTML = `<i class="fas fa-user-md"></i> ${t.nama}`;
-            btn.onclick = () => selectPill(btn, gridTerapis, terapisInput, t.nama, true);
+            btn.onclick = () => {
+                selectPill(btn, gridTerapis, terapisInput, t.nama, true);
+                renderSesi(); // Update layanan waktu ganti terapis
+            };
             gridTerapis.appendChild(btn);
         });
         checkAvailability(); // Refresh slot jika tanggal sudah dipilih
@@ -371,4 +385,72 @@ function showSuccessScreen(data) {
     
     // Scroll ke atas kartu
     document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ── LOGIKA LAYANAN DINAMIS ──────────────────────────────────────────────────
+function renderSesi() {
+    const tgl = tanggalSelect.value;
+    const trp = terapisInput.value;
+    
+    // Ambil object date untuk cari index hari (0-6)
+    let hariAngka = -1;
+    if (tgl) {
+        hariAngka = new Date(tgl + 'T00:00:00').getDay();
+    }
+
+    gridSesi.innerHTML = '';
+    let hasValidSelection = false;
+
+    allLayananData.forEach(lay => {
+        // Cek Syarat Hari
+        let validHari = true;
+        if (lay.hariAktif && lay.hariAktif.length > 0 && hariAngka !== -1) {
+            if (!lay.hariAktif.includes(hariAngka)) validHari = false;
+        }
+
+        // Cek Syarat Terapis
+        let validTerapis = true;
+        if (lay.terapisKhusus && lay.terapisKhusus.length > 0 && trp) {
+            // Karena nama terapis bisa punya huruf besar/kecil berbeda
+            validTerapis = lay.terapisKhusus.some(nama => nama.toLowerCase() === trp.toLowerCase());
+        }
+
+        const isAvailable = validHari && validTerapis;
+
+        const btn = document.createElement('div');
+        btn.className = 'pill-btn full-width' + (isAvailable ? '' : ' disabled');
+        
+        let label = `<i class="fas fa-briefcase-medical"></i> ${lay.nama}`;
+        if (!isAvailable) {
+            // Beri tulisan abu-abu dan info syarat
+            let reason = [];
+            if (!validHari) reason.push('Beda Hari');
+            if (!validTerapis) reason.push('Beda Terapis');
+            label = `<i class="fas fa-ban opacity-50"></i> <span class="opacity-50 line-through">${lay.nama}</span> <span class="text-[9px] text-red-400 ml-auto block">(${reason.join(', ')})</span>`;
+            
+            // Jika layanan ini awalnya terpilih tapi kini disable, hapus value
+            if (sesiBekamInput.value === lay.nama) {
+                sesiBekamInput.value = '';
+            }
+        }
+
+        btn.innerHTML = label;
+        
+        if (isAvailable) {
+            btn.onclick = () => selectPill(btn, gridSesi, sesiBekamInput, lay.nama, false);
+            // Kembalikan class active jika nama ini memang yang lagi dipilih
+            if (sesiBekamInput.value === lay.nama) {
+                btn.classList.add('active');
+                hasValidSelection = true;
+            }
+        }
+        
+        gridSesi.appendChild(btn);
+    });
+
+    if (sesiBekamInput.value && !hasValidSelection) {
+        // Just fail-safe reset
+        sesiBekamInput.value = '';
+        updateProgressBar();
+    }
 }

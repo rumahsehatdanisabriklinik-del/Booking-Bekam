@@ -43,7 +43,7 @@
             }
             
             .cms-input {
-                @apply bg-white border-2 border-slate-100 rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm transition-all placeholder:text-slate-300;
+                @apply bg-white border-2 border-slate-100 rounded-2xl px-6 py-5 text-base font-bold text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm transition-all placeholder:text-slate-300 w-full;
             }
             .cms-section {
                 @apply p-10 bg-white/40 backdrop-blur-md rounded-[3rem] border border-white/60 space-y-8 shadow-xl shadow-slate-200/50;
@@ -74,7 +74,7 @@
             
             <form id="formLogin" onsubmit="event.preventDefault(); doLogin();" class="space-y-8">
                 <div>
-                    <input type="password" id="adminPin" maxlength="8" placeholder="••••" required autofocus class="w-full bg-slate-50 border-4 border-white rounded-[2rem] p-6 text-center text-5xl tracking-[0.5em] text-slate-900 transition-all focus:outline-none focus:bg-white focus:ring-8 focus:ring-emerald-500/10 shadow-inner placeholder:text-slate-200">
+                    <input type="password" id="adminPin" maxlength="8" placeholder="••••" required autofocus class="w-full bg-slate-50 border-4 border-white rounded-[2rem] p-8 text-center text-5xl tracking-[0.5em] text-slate-900 transition-all focus:outline-none focus:bg-white focus:ring-8 focus:ring-emerald-500/10 shadow-inner placeholder:text-slate-200">
                     <p class="mt-4 text-slate-400 font-black uppercase text-[10px] tracking-[0.4em]">Masukkan PIN Administrator</p>
                 </div>
                 <button type="submit" id="btnLogin" class="btn-premium w-full !rounded-[2rem] py-5 !text-xl group">
@@ -157,7 +157,7 @@
                         </div>
                         <div class="relative w-full md:w-80 shrink-0">
                             <i class="fas fa-magnifying-glass absolute left-6 top-1/2 -translate-y-1/2 text-slate-300"></i>
-                            <input type="text" id="searchPasien" placeholder="Cari Nama / WhatsApp..." oninput="handleSearch(this.value)" class="w-full bg-white border-2 border-slate-100 rounded-full py-4 pl-14 pr-6 text-sm font-bold text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-8 focus:ring-emerald-500/5 transition-all">
+                            <input type="text" id="searchPasien" placeholder="Cari Nama / WhatsApp..." oninput="handleSearch(this.value)" class="w-full bg-white border-2 border-slate-100 rounded-full py-5 pl-14 pr-8 text-base font-bold text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-8 focus:ring-emerald-500/5 transition-all">
                         </div>
                     </div>
 
@@ -380,8 +380,37 @@
                 <div class="w-10 h-10 rounded-2xl flex items-center justify-center"><i class="fas fa-sign-out-alt text-lg"></i></div>
                 <span>Log Out</span>
             </button>
-        </nav>
+    </div>
 
+    <!-- ── EMR MODAL ── -->
+    <div id="emrModal" style="display: none;" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl shadow-emerald-900/30 overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="px-8 py-6 bg-gradient-to-r from-emerald-600 to-teal-500 text-white flex justify-between items-center">
+                <div>
+                    <h3 class="text-xl font-black tracking-tight">Catatan Rekam Medis</h3>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-100 mt-1" id="emrNamaPasien">Nama Pasien</p>
+                </div>
+                <button onclick="closeEMR()" class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-colors"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-8 flex-1 overflow-y-auto space-y-6 hide-scrollbar">
+                <div class="space-y-3">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]"><i class="fas fa-heartbeat text-red-400 mr-1"></i> Tensi Darah</label>
+                    <input id="emrTensi" class="cms-input w-full" type="text" placeholder="Misal: 120/80 mmHg">
+                </div>
+                <div class="space-y-3">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]"><i class="fas fa-comment-medical text-amber-500 mr-1"></i> Keluhan Medis</label>
+                    <textarea id="emrKeluhan" class="cms-input w-full" rows="3" placeholder="Keluhan utama pasien..."></textarea>
+                </div>
+                <div class="space-y-3">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]"><i class="fas fa-stethoscope text-emerald-500 mr-1"></i> Tindakan / Titik Bekam</label>
+                    <textarea id="emrTindakan" class="cms-input w-full !py-4" rows="4" placeholder="Tindakan yang diberikan..."></textarea>
+                </div>
+            </div>
+            <div class="p-6 bg-slate-50 border-t border-slate-100 flex gap-4">
+                <button onclick="closeEMR()" class="flex-1 py-4 text-slate-500 font-bold text-sm bg-white border border-slate-200 rounded-2xl hover:bg-slate-100 transition-colors">Batal</button>
+                <button id="btnSaveEMR" onclick="saveEMR()" class="flex-1 py-4 text-white font-bold text-sm bg-emerald-600 rounded-2xl hover:bg-emerald-700 shadow-lg shadow-emerald-600/30 transition-colors"><i class="fas fa-save mr-2"></i> Simpan Medis</button>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->
