@@ -19,7 +19,7 @@
     <script>
         tailwind.config = {
             safelist: [
-                'bg-slate-50', 'text-slate-600', 'border-slate-200',
+                'bg-slate-50', 'text-slate-600', 'border-slate-200', 'text-slate-900',
                 'bg-blue-50', 'text-blue-600', 'border-blue-200',
                 'bg-red-50', 'text-red-600', 'border-red-200',
                 'bg-emerald-50', 'text-emerald-600', 'border-emerald-200', 'bg-emerald-100',
@@ -27,23 +27,7 @@
             ],
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                    },
-                    colors: {
-                        emerald: {
-                            50: '#ecfdf5',
-                            100: '#d1fae5',
-                            200: '#a7f3d0',
-                            300: '#6ee7b7',
-                            400: '#34d399',
-                            500: '#10b981',
-                            600: '#059669',
-                            700: '#047857',
-                            800: '#065f46',
-                            900: '#064e3b',
-                        }
-                    }
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] }
                 }
             }
         }
@@ -55,10 +39,10 @@
     <style type="text/tailwindcss">
         @layer components {
             .status-card {
-                @apply bg-white/90 backdrop-blur-md border border-white/80 p-5 rounded-2xl shadow-lg shadow-emerald-900/5 flex flex-col gap-3 transition-all duration-300 animate-slide-up hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-900/10;
+                @apply bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col gap-4 transition-all duration-300 animate-slide-up hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10 hover:border-emerald-200 relative overflow-hidden;
             }
             .status-badge {
-                @apply px-3.5 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-widest;
+                @apply px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-sm;
             }
             .badge-terjadwal { @apply bg-blue-50 text-blue-600 border border-blue-200; }
             .badge-batal { @apply bg-red-50 text-red-600 border border-red-200; }
@@ -66,59 +50,73 @@
             .badge-lainnya { @apply bg-slate-50 text-slate-600 border border-slate-200; }
             
             .btn-cancel {
-                @apply w-full flex justify-center items-center gap-2 bg-white border-2 border-red-200 text-red-600 py-2.5 px-4 rounded-xl font-bold cursor-pointer transition-all hover:bg-red-50 hover:border-red-600 hover:scale-[1.02] mt-2;
+                @apply w-full flex justify-center items-center gap-3 bg-red-50 border border-red-200 text-red-600 py-4 px-6 rounded-2xl font-bold cursor-pointer transition-all hover:bg-red-600 hover:text-white hover:border-red-600 hover:shadow-lg hover:shadow-red-500/20 active:scale-95 mt-4;
             }
         }
     </style>
 </head>
-<body class="bg-sky-50 min-h-screen text-slate-800 antialiased overflow-x-hidden relative flex flex-col items-center p-4 md:p-10">
+<body class="bg-slate-50 min-h-screen text-slate-900 antialiased overflow-x-hidden relative flex flex-col items-center p-4 md:p-12 lg:p-20 font-sans">
+    
+    <!-- Background Decoration -->
     <div class="bg-blobs">
-        <div class="blob-1"></div>
-        <div class="blob-2"></div>
-        <div class="blob-3"></div>
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
     </div>
 
     <!-- Header Nav -->
-    <div class="w-full max-w-2xl text-center py-6 relative z-10">
-        <a href="booking.html" class="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm text-emerald-700 border-2 border-emerald-500 py-2.5 px-6 rounded-full font-bold shadow-md hover:bg-emerald-50 transition-colors">
-            <i class="fas fa-arrow-left"></i> Kembali ke Form Booking
+    <div class="w-full max-w-2xl text-center py-6 relative z-10 animate-fade-up">
+        <a href="index.html" class="inline-flex items-center gap-3 bg-white/80 backdrop-blur-md text-emerald-700 border border-white py-3 px-8 rounded-full font-bold shadow-lg shadow-emerald-900/5 hover:bg-emerald-50 hover:-translate-y-0.5 transition-all mb-8">
+            <i class="fas fa-home text-sm"></i> Beranda Utama
         </a>
     </div>
 
-    <div class="text-center mb-8 relative z-10 w-full max-w-2xl px-4">
-        <div class="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full text-emerald-700 text-xs font-bold uppercase tracking-widest shadow-md mb-6 border border-white/40">
-            <i class="fas fa-search text-emerald-500"></i> Lacak Jadwal
-        </div>
-        <h1 class="text-3xl md:text-5xl font-extrabold text-emerald-950 leading-tight mb-3">Status Reservasi</h1>
-        <p class="text-slate-600 font-medium text-lg">Cek atau batalkan jadwal Anda menggunakan Nomor HP</p>
+    <div class="text-center mb-10 relative z-10 w-full max-w-2xl px-4 animate-fade-up" style="animation-delay: 0.1s;">
+        <span class="text-emerald-600 font-black tracking-widest uppercase text-xs mb-4 block"><i class="fas fa-search mr-2"></i> Lacak Jadwal</span>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-slate-950 leading-tight mb-4 tracking-tighter">Status Reservasi</h1>
+        <p class="text-slate-500 font-medium text-lg">Periksa riwayat kunjungan atau batalkan jadwal Anda di sini.</p>
     </div>
 
-    <div class="w-full max-w-[540px] relative z-10 glass-panel rounded-[2rem] shadow-2xl overflow-hidden shadow-emerald-900/5 mb-10">
-        <div class="p-6 md:p-10">
-            <form id="trackForm" onsubmit="event.preventDefault(); trackBooking();" class="space-y-6">
-                <div class="space-y-2">
-                    <label for="noHpTrack" class="block text-slate-800 text-sm font-bold pl-1">No. HP / WhatsApp yang didaftarkan</label>
+    <div class="w-full max-w-[600px] relative z-10 glass-panel rounded-[3rem] shadow-2xl overflow-hidden animate-fade-up" style="animation-delay: 0.2s;">
+        <div class="p-8 md:p-12">
+            
+            <form id="trackForm" onsubmit="event.preventDefault(); trackBooking();" class="space-y-8">
+                <div class="space-y-3">
+                    <label for="noHpTrack" class="block text-slate-900 text-sm font-black uppercase tracking-widest pl-1">Nomor WhatsApp Terdaftar</label>
                     <div class="relative">
-                        <i class="fab fa-whatsapp absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600 z-10 text-lg"></i>
-                        <input type="tel" id="noHpTrack" class="w-full bg-white border-2 border-slate-200 text-slate-800 font-medium text-sm rounded-xl py-3.5 pr-4 pl-12 transition-all focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm block" placeholder="Contoh: 081234567890" required inputmode="numeric" pattern="[0-9]*">
+                        <span class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">+62</span>
+                        <input type="tel" id="noHpTrack" class="input-premium pl-16 py-5 text-lg" placeholder="812-XXXX-XXXX" required inputmode="numeric" pattern="[0-9]*">
                     </div>
                 </div>
-                <button type="submit" id="btnTrack" class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-extrabold text-base rounded-2xl shadow-xl shadow-emerald-500/30 flex items-center justify-center gap-2 hover:-translate-y-1 hover:shadow-2xl hover:shadow-emerald-500/40 transition-all duration-300 disabled:opacity-60 disabled:hover:translate-y-0 disabled:shadow-none disabled:cursor-not-allowed">
-                    <i class="fas fa-search"></i>
-                    <span id="btnTrackText">Cari Jadwal</span>
+                <button type="submit" id="btnTrack" class="btn-premium w-full !text-lg !py-5 flex items-center justify-center gap-3 disabled:opacity-50 disabled:hover:translate-y-0 disabled:shadow-none transition-all">
+                    <i class="fas fa-search relative z-10"></i>
+                    <span id="btnTrackText" class="relative z-10">Cari Data Jadwal</span>
                 </button>
             </form>
 
-            <div id="resultContainer" class="hidden mt-10 animate-slide-in">
-                <div class="flex items-center justify-center gap-3 mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl">
-                    <i class="fas fa-clipboard-list text-emerald-600 text-2xl"></i>
-                    <h3 class="text-emerald-800 text-lg font-extrabold m-0">Riwayat Jadwal Anda</h3>
+            <div id="resultContainer" class="hidden mt-12 animate-slide-in">
+                <div class="flex items-center justify-between mb-8 pb-4 border-b border-slate-100">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-xl shadow-inner"><i class="fas fa-clipboard-list"></i></div>
+                        <div>
+                            <h3 class="text-slate-900 text-xl font-extrabold m-0 tracking-tight">Riwayat Jadwal</h3>
+                            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">Ditemukan di sistem</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex flex-col gap-5" id="ticketList">
+                
+                <div class="flex flex-col gap-6" id="ticketList">
                     <!-- Dinamis injeksi dari status.js -->
+                </div>
             </div>
-            <div id="alertBoxStatus" class="hidden mt-6 p-4 rounded-xl text-sm font-bold text-center border animate-slide-in"></div>
+            
+            <div id="alertBoxStatus" class="hidden mt-8 p-6 rounded-[2rem] text-sm font-bold text-center border-2 animate-slide-in"></div>
         </div>
+    </div>
+
+    <!-- ── FOOTER DECORATION ── -->
+    <div class="mt-16 text-center space-y-6 relative z-10 px-6 animate-fade-up" style="animation-delay: 0.3s;">
+        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-[0.4em]">&copy; 2026 Rumah Sehat Dani Sabri</p>
     </div>
 
     <script src="config.js"></script>

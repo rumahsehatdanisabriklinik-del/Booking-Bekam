@@ -3,295 +3,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking Bekam — Rumah Sehat Dani Sabri</title>
+    <title>Booking Reservasi — Rumah Sehat Dani Sabri</title>
 
-    <!-- Preconnect for Performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
-    <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                    },
-                    colors: {
-                        emerald: {
-                            50: '#ecfdf5',
-                            100: '#d1fae5',
-                            200: '#a7f3d0',
-                            300: '#6ee7b7',
-                            400: '#34d399',
-                            500: '#10b981',
-                            600: '#059669',
-                            700: '#047857',
-                            800: '#065f46',
-                            900: '#064e3b',
-                        }
-                    }
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
                 }
             }
         }
     </script>
+    <link rel="stylesheet" href="style.css">
 
     <style type="text/tailwindcss">
         @layer components {
             .pill-btn {
-                @apply w-full flex items-center justify-center gap-2 p-4 bg-white border-2 border-slate-200 text-slate-600 font-bold text-sm rounded-xl cursor-pointer transition-all hover:border-emerald-300 hover:text-emerald-700 hover:-translate-y-0.5 shadow-sm;
+                @apply w-full flex items-center justify-center gap-3 p-5 bg-white border-2 border-slate-100 text-slate-600 font-bold text-sm rounded-2xl cursor-pointer transition-all hover:border-emerald-300 hover:text-emerald-700 hover:-translate-y-1 shadow-sm hover:shadow-lg;
             }
             .pill-btn.active {
-                @apply ring-4 ring-emerald-500/20 bg-emerald-50 text-emerald-800 border-emerald-500 shadow-md;
+                @apply ring-4 ring-emerald-500/10 bg-emerald-50 text-emerald-800 border-emerald-500 shadow-xl shadow-emerald-500/10;
             }
             .pill-btn.disabled {
-                @apply bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed opacity-70 hover:transform-none hover:border-slate-200;
+                @apply bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed opacity-50 hover:transform-none hover:border-slate-100 shadow-none;
             }
             .date-card {
-                @apply flex-shrink-0 w-[80px] bg-white border-2 border-slate-200 rounded-2xl p-3 text-center cursor-pointer transition-all shadow-sm hover:border-emerald-300 hover:-translate-y-1 hover:shadow-md flex flex-col items-center gap-1;
+                @apply flex-shrink-0 w-[90px] bg-white border-2 border-slate-100 rounded-3xl p-5 text-center cursor-pointer transition-all shadow-sm hover:border-emerald-300 hover:-translate-y-2 hover:shadow-xl flex flex-col items-center gap-2;
             }
             .date-card.active {
-                @apply bg-gradient-to-br from-emerald-500 to-teal-500 border-transparent shadow-lg shadow-emerald-500/40 -translate-y-1 scale-105;
+                @apply bg-gradient-to-br from-emerald-600 to-teal-500 border-transparent shadow-2xl shadow-emerald-500/40 -translate-y-2 scale-105;
             }
             .date-card.active span {
                 @apply text-white;
             }
             .date-card.disabled {
-                @apply bg-slate-50 border-slate-200 cursor-not-allowed opacity-60 hover:transform-none hover:border-slate-200 hover:shadow-none;
+                @apply bg-slate-50 border-slate-100 cursor-not-allowed opacity-40 hover:transform-none hover:border-slate-100 hover:shadow-none;
             }
-            .dc-day { @apply text-xs font-bold text-slate-500 uppercase transition-colors; }
-            .dc-date { @apply text-2xl font-extrabold text-slate-800 leading-tight transition-colors; }
-            .dc-month { @apply text-[10px] font-bold text-slate-500 uppercase transition-colors; }
+            .dc-day { @apply text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] transition-colors group-hover:text-emerald-600; }
+            .dc-date { @apply text-3xl font-extrabold text-slate-900 leading-none transition-colors; }
+            .dc-month { @apply text-[10px] font-black text-slate-400 uppercase tracking-widest transition-colors; }
             .pill-placeholder {
-                @apply w-full col-span-full text-center p-4 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-slate-400 text-sm font-medium;
+                @apply w-full col-span-full text-center p-8 bg-slate-50/50 border-2 border-dashed border-slate-200 rounded-3xl text-slate-400 text-sm font-bold;
             }
         }
     </style>
-    
-    <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-sky-50 min-h-screen text-slate-800 antialiased overflow-x-hidden relative flex flex-col items-center justify-center p-4 md:p-10">
+<body class="bg-slate-50 min-h-screen text-slate-900 antialiased overflow-x-hidden relative flex flex-col items-center justify-center p-4 md:p-12 lg:p-20">
 
     <!-- Background Decoration -->
     <div class="bg-blobs">
-        <div class="blob-1"></div>
-        <div class="blob-2"></div>
-        <div class="blob-3"></div>
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
     </div>
 
-    <!-- ── HERO ── -->
-    <div class="text-center mb-10 mt-6 relative z-10 w-full max-w-2xl px-4">
-        <div class="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full text-emerald-700 text-xs font-bold uppercase tracking-widest shadow-md mb-6 border border-white/40">
-            <i class="fas fa-circle-check text-emerald-500"></i> Sistem Reservasi Online
-        </div>
-        <h1 class="text-3xl md:text-5xl font-extrabold text-emerald-950 leading-tight mb-3">Rumah Sehat Dani Sabri</h1>
-        <p class="text-slate-600 font-medium text-lg">Bekam, Ruqyah &amp; Terapi Islami Profesional</p>
-        <div class="mt-6">
-            <a href="status.html" class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white px-6 py-3 rounded-full text-sm font-bold shadow-lg shadow-emerald-500/30 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/40 transition-all duration-300">
-                <i class="fas fa-search"></i> Lacak / Batal Booking
-            </a>
+    <!-- ── HEADER ── -->
+    <header class="text-center mb-16 relative z-10 w-full max-w-2xl px-4 animate-fade-up">
+        <a href="index.html" class="inline-flex items-center gap-2 text-slate-400 hover:text-emerald-600 transition-colors mb-8 font-bold text-sm uppercase tracking-widest">
+            <i class="fas fa-chevron-left text-xs"></i> Kembali ke Beranda
+        </a>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-slate-950 leading-tight mb-4 tracking-tighter">Reservasi Jadwal Terapi</h1>
+        <p class="text-slate-500 font-medium text-lg">Pilih waktu terbaik Anda di Rumah Sehat Dani Sabri</p>
+    </header>
+
+    <!-- ── STEPPER (Visual Only) ── -->
+    <div class="w-full max-w-[600px] mb-8 relative z-10 px-4 animate-fade-up" style="animation-delay: 0.1s;">
+        <div class="flex justify-between items-center relative">
+            <div class="absolute top-1/2 left-0 w-full h-1 bg-slate-200 -translate-y-1/2 z-0"></div>
+            <div id="step-bar" class="absolute top-1/2 left-0 w-[10%] h-1 bg-emerald-500 -translate-y-1/2 z-1 transition-all duration-700"></div>
+            
+            <div class="relative z-10 w-10 h-10 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/20 ring-4 ring-white"><i class="fas fa-user text-xs"></i></div>
+            <div class="relative z-10 w-10 h-10 bg-white text-slate-300 rounded-full flex items-center justify-center shadow-sm border border-slate-200 ring-4 ring-white transition-colors" id="step-node-2"><i class="fas fa-calendar text-xs"></i></div>
+            <div class="relative z-10 w-10 h-10 bg-white text-slate-300 rounded-full flex items-center justify-center shadow-sm border border-slate-200 ring-4 ring-white transition-colors" id="step-node-3"><i class="fas fa-check text-xs"></i></div>
         </div>
     </div>
 
-    <!-- ── CARD ── -->
-    <div class="w-full max-w-[540px] relative z-10 glass-panel rounded-[2rem] shadow-2xl overflow-hidden shadow-emerald-900/5">
+    <!-- ── MAIN BOOKING CARD ── -->
+    <div class="w-full max-w-[600px] relative z-10 glass-panel rounded-[3rem] shadow-2xl overflow-hidden animate-fade-up" style="animation-delay: 0.2s;">
         
-        <!-- Progress Bar Indicator -->
-        <div class="h-1.5 w-full bg-slate-100/50">
-            <div class="h-full w-[5%] bg-gradient-to-r from-emerald-400 to-teal-500 transition-all duration-500 ease-out rounded-r-full" id="progressBar"></div>
-        </div>
-        
-        <!-- Topbar -->
-        <div class="bg-gradient-to-br from-emerald-800 to-emerald-600 p-8 flex items-center gap-5 relative">
-            <div class="absolute -bottom-4 left-0 right-0 h-8 bg-white/60 backdrop-blur-md rounded-t-3xl"></div>
+        <div class="p-8 md:p-12">
             
-            <div class="w-14 h-14 shrink-0 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl flex items-center justify-center text-white text-2xl shadow-inner shadow-white/10">
-                <i class="fas fa-calendar-plus"></i>
-            </div>
-            <div>
-                <h2 class="text-white text-xl font-extrabold tracking-tight">Form Booking Jadwal</h2>
-                <p class="text-white/80 text-sm font-medium mt-1">Isi data di bawah untuk membuat reservasi</p>
-            </div>
-        </div>
-
-        <div class="p-6 md:p-8 pt-6 relative bg-white/40 backdrop-blur-3xl rounded-3xl -mt-4">
-            
-            <!-- Global Loader Awal -->
-            <div id="global-loader" class="flex items-center gap-3 bg-white/80 backdrop-blur border border-emerald-100 p-4 rounded-2xl mb-8 shadow-sm">
-                <div class="mini-spinner"></div>
-                <span class="text-emerald-800 font-bold text-sm">Menghubungkan ke sistem klinik...</span>
+            <!-- Global Loader -->
+            <div id="global-loader" class="flex items-center gap-4 bg-emerald-50/50 backdrop-blur border border-emerald-100 p-6 rounded-[2rem] mb-10 shadow-sm">
+                <div class="w-6 h-6 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                <span class="text-emerald-800 font-extrabold text-sm tracking-wide">Menghubungkan ke sistem klinik...</span>
             </div>
 
-            <form id="bookingForm" onsubmit="event.preventDefault(); submitBooking();" novalidate class="space-y-8">
+            <form id="bookingForm" onsubmit="event.preventDefault(); submitBooking();" novalidate class="space-y-12">
 
-                <!-- STEP 1: Data Klien -->
-                <div class="space-y-5">
-                    <div class="flex items-center gap-3 mt-2">
-                        <div class="w-7 h-7 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xs font-black shadow-sm ring-2 ring-emerald-50">1</div>
-                        <span class="text-emerald-800 font-extrabold text-xs uppercase tracking-widest">Data Klien</span>
-                        <div class="flex-1 h-px bg-slate-200/60"></div>
+                <!-- STEP 1: Identitas Pasien -->
+                <div class="space-y-8">
+                    <div class="flex items-center gap-4">
+                        <span class="text-emerald-600 font-black text-xs uppercase tracking-[0.3em]">01. Data Pasien</span>
+                        <div class="flex-1 h-px bg-slate-100"></div>
                     </div>
 
-                    <div class="space-y-2">
-                        <label class="block text-slate-800 text-sm font-bold pl-1">Jenis Kelamin Klien</label>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="relative group">
+                    <div class="space-y-4">
+                        <label class="block text-slate-900 text-sm font-black uppercase tracking-widest pl-1">Jenis Kelamin</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="relative">
                                 <input type="radio" id="jkL" name="jenisKelamin" value="Laki-laki" disabled onchange="filterTerapis()" class="peer hidden-radio">
-                                <label for="jkL" class="flex items-center justify-center gap-2 p-3.5 bg-white border-2 border-slate-200 text-slate-600 font-bold text-sm rounded-xl cursor-pointer transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-checked:shadow-md peer-checked:shadow-emerald-500/10 hover:border-emerald-300 peer-disabled:bg-slate-50 peer-disabled:text-slate-400 peer-disabled:border-slate-200 peer-disabled:cursor-not-allowed">
-                                    <i class="fas fa-mars text-blue-500"></i> Laki-laki
+                                <label for="jkL" class="pill-btn peer-checked:active peer-disabled:disabled">
+                                    <i class="fas fa-mars text-blue-500 text-lg"></i> Laki-laki
                                 </label>
                             </div>
-                            <div class="relative group">
+                            <div class="relative">
                                 <input type="radio" id="jkP" name="jenisKelamin" value="Perempuan" disabled onchange="filterTerapis()" class="peer hidden-radio">
-                                <label for="jkP" class="flex items-center justify-center gap-2 p-3.5 bg-white border-2 border-slate-200 text-slate-600 font-bold text-sm rounded-xl cursor-pointer transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-checked:shadow-md peer-checked:shadow-emerald-500/10 hover:border-emerald-300 peer-disabled:bg-slate-50 peer-disabled:text-slate-400 peer-disabled:border-slate-200 peer-disabled:cursor-not-allowed">
-                                    <i class="fas fa-venus text-pink-500"></i> Perempuan
+                                <label for="jkP" class="pill-btn peer-checked:active peer-disabled:disabled">
+                                    <i class="fas fa-venus text-pink-500 text-lg"></i> Perempuan
                                 </label>
                             </div>
                         </div>
                     </div>
 
-                    <div class="space-y-2">
-                        <label for="nama" class="block text-slate-800 text-sm font-bold pl-1">Nama Lengkap</label>
-                        <div class="relative">
-                            <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600 z-10"></i>
-                            <input type="text" id="nama" class="w-full bg-white border-2 border-slate-200 text-slate-800 font-medium text-sm rounded-xl py-3.5 pr-4 pl-12 transition-all focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm" placeholder="Contoh: Ahmad Fauzi" required autocomplete="name">
+                    <div class="grid gap-6">
+                        <div class="space-y-3">
+                            <label for="nama" class="block text-slate-900 text-sm font-black uppercase tracking-widest pl-1">Nama Lengkap</label>
+                            <input type="text" id="nama" class="input-premium" placeholder="Masukkan nama sesuai KTP" required autocomplete="name">
                         </div>
-                    </div>
 
-                    <div class="space-y-2">
-                        <label for="nohp" class="block text-slate-800 text-sm font-bold pl-1">No. HP / WhatsApp</label>
-                        <div class="relative">
-                            <i class="fab fa-whatsapp absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600 z-10 text-lg"></i>
-                            <input type="tel" id="nohp" class="w-full bg-white border-2 border-slate-200 text-slate-800 font-medium text-sm rounded-xl py-3.5 pr-4 pl-12 transition-all focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm" placeholder="Contoh: 081234567890" required inputmode="numeric" pattern="[0-9]*" minlength="9" autocomplete="tel">
+                        <div class="space-y-3">
+                            <label for="nohp" class="block text-slate-900 text-sm font-black uppercase tracking-widest pl-1">No. WhatsApp</label>
+                            <div class="relative">
+                                <span class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">+62</span>
+                                <input type="tel" id="nohp" class="input-premium pl-16" placeholder="812-XXXX-XXXX" required inputmode="numeric" autocomplete="tel">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- STEP 2: Pilih Jadwal -->
-                <div class="space-y-5 pt-2">
-                    <div class="flex items-center gap-3">
-                        <div class="w-7 h-7 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xs font-black shadow-sm ring-2 ring-emerald-50">2</div>
-                        <span class="text-emerald-800 font-extrabold text-xs uppercase tracking-widest">Pilih Jadwal</span>
-                        <div class="flex-1 h-px bg-slate-200/60"></div>
+                <!-- STEP 2: Pemilihan Jadwal -->
+                <div class="space-y-8 pt-4">
+                    <div class="flex items-center gap-4">
+                        <span class="text-emerald-600 font-black text-xs uppercase tracking-[0.3em]">02. Pilih Jadwal</span>
+                        <div class="flex-1 h-px bg-slate-100"></div>
                     </div>
 
-                    <div class="space-y-2">
-                        <label class="block text-slate-800 text-sm font-bold pl-1">Terapis</label>
-                        <div id="gridTerapis" class="flex flex-wrap gap-3">
-                            <div class="w-full text-center p-4 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-slate-400 text-sm font-medium">Pilih jenis kelamin terlebih dahulu</div>
+                    <div class="space-y-4">
+                        <label class="block text-slate-900 text-sm font-black uppercase tracking-widest pl-1">Pilih Terapis</label>
+                        <div id="gridTerapis" class="flex flex-wrap gap-4">
+                            <div class="pill-placeholder">Pilih jenis kelamin terlebih dahulu</div>
                         </div>
                         <input type="hidden" id="terapis">
                     </div>
 
-                    <div class="space-y-2">
+                    <div class="space-y-4">
                         <div class="flex justify-between items-center pl-1">
-                            <label class="text-slate-800 text-sm font-bold">Pilih Tanggal Reservasi</label>
-                            <div class="flex gap-1.5">
-                                <button type="button" onclick="scrollDateStrip(-1)" class="w-8 h-8 rounded-full bg-white border border-slate-200 text-emerald-700 flex items-center justify-center hover:bg-emerald-50 hover:border-emerald-300 transition-all shadow-sm"><i class="fas fa-chevron-left text-xs"></i></button>
-                                <button type="button" onclick="scrollDateStrip(1)" class="w-8 h-8 rounded-full bg-white border border-slate-200 text-emerald-700 flex items-center justify-center hover:bg-emerald-50 hover:border-emerald-300 transition-all shadow-sm"><i class="fas fa-chevron-right text-xs"></i></button>
+                            <label class="text-slate-900 text-sm font-black uppercase tracking-widest">Pilih Tanggal</label>
+                            <div class="flex gap-2">
+                                <button type="button" onclick="scrollDateStrip(-1)" class="w-10 h-10 rounded-2xl bg-white border border-slate-100 text-slate-400 flex items-center justify-center hover:bg-emerald-50 hover:text-emerald-600 transition-all shadow-sm"><i class="fas fa-arrow-left text-xs"></i></button>
+                                <button type="button" onclick="scrollDateStrip(1)" class="w-10 h-10 rounded-2xl bg-white border border-slate-100 text-slate-400 flex items-center justify-center hover:bg-emerald-50 hover:text-emerald-600 transition-all shadow-sm"><i class="fas fa-arrow-right text-xs"></i></button>
                             </div>
                         </div>
                         
-                        <div id="gridTanggal" class="flex gap-3 overflow-x-auto custom-scrollbar pb-3 pt-1 px-1 -mx-1 snap-x">
-                            <div class="w-full text-center p-4 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-slate-400 text-sm font-medium"><i class="fas fa-spinner fa-spin mr-2"></i> Menyiapkan kalender...</div>
+                        <div id="gridTanggal" class="flex gap-4 overflow-x-auto hide-scrollbar pb-4 pt-2 -mx-2 px-2 snap-x">
+                            <div class="pill-placeholder"><i class="fas fa-spinner fa-spin mr-3"></i> Memuat kalender...</div>
                         </div>
                         <input type="hidden" id="tanggal">
                     </div>
 
-                    <div class="space-y-2">
-                        <label class="block text-slate-800 text-sm font-bold pl-1">Slot Waktu Tersedia</label>
-                        <div id="gridWaktu" class="grid grid-cols-2 lg:grid-cols-3 gap-3">
-                            <div class="pill-placeholder">Pilih terapis dan tanggal dulu</div>
+                    <div class="space-y-4">
+                        <label class="block text-slate-900 text-sm font-black uppercase tracking-widest pl-1">Slot Waktu Kursi</label>
+                        <div id="gridWaktu" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="pill-placeholder">Pilih terapis & tanggal dulu</div>
                         </div>
                         <input type="hidden" id="waktu">
                     </div>
                 </div>
 
-                <!-- STEP 3: Pilih Layanan -->
-                <div class="space-y-5 pt-2">
-                    <div class="flex items-center gap-3">
-                        <div class="w-7 h-7 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xs font-black shadow-sm ring-2 ring-emerald-50">3</div>
-                        <span class="text-emerald-800 font-extrabold text-xs uppercase tracking-widest">Pilih Layanan</span>
-                        <div class="flex-1 h-px bg-slate-200/60"></div>
+                <!-- STEP 3: Konfirmasi Layanan -->
+                <div class="space-y-8 pt-4">
+                    <div class="flex items-center gap-4">
+                        <span class="text-emerald-600 font-black text-xs uppercase tracking-[0.3em]">03. Finalisasi</span>
+                        <div class="flex-1 h-px bg-slate-100"></div>
                     </div>
 
-                    <div class="space-y-2">
-                        <label class="block text-slate-800 text-sm font-bold pl-1">Jenis Sesi / Paket Layanan</label>
-                        <div id="gridSesi" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div class="pill-placeholder">Memuat layanan klinik...</div>
+                    <div class="space-y-4">
+                        <label class="block text-slate-900 text-sm font-black uppercase tracking-widest pl-1">Pilih Paket Layanan</label>
+                        <div id="gridSesi" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="pill-placeholder">Memuat layanan...</div>
                         </div>
                         <input type="hidden" id="sesiBekam">
                     </div>
                 </div>
 
-                <div class="pt-4">
-                    <button type="submit" id="btnSubmit" disabled class="w-full relative py-4 bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-bold text-base rounded-2xl shadow-xl shadow-emerald-500/30 flex items-center justify-center gap-2 hover:-translate-y-1 hover:shadow-2xl hover:shadow-emerald-500/40 transition-all duration-300 disabled:opacity-60 disabled:hover:translate-y-0 disabled:shadow-none disabled:cursor-not-allowed group overflow-hidden">
-                        <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                        <span class="relative z-10 flex items-center gap-2">
-                            <i class="fas fa-check-circle"></i>
-                            <span class="btn-text">Konfirmasi Booking</span>
-                        </span>
-                        <div class="spinner hidden relative z-10" id="btnSpinner"><i class="fas fa-circle-notch fa-spin"></i></div>
+                <!-- SUBMIT BUTTON -->
+                <div class="pt-8">
+                    <button type="submit" id="btnSubmit" disabled class="btn-premium w-full !text-lg flex items-center justify-center gap-4 disabled:opacity-50 disabled:hover:transform-none disabled:shadow-none">
+                        <span class="btn-text">Konfirmasi & Simpan Jadwal</span>
+                        <div class="hidden" id="btnSpinner"><i class="fas fa-circle-notch fa-spin"></i></div>
                     </button>
                     
-                    <div id="alertBox" class="hidden mt-4 p-4 rounded-xl text-sm font-bold text-center border animate-slide-in"></div>
+                    <div id="alertBox" class="hidden mt-6 p-6 rounded-[2rem] text-sm font-bold text-center border-2 animate-slide-in"></div>
                 </div>
 
             </form>
 
-            <!-- ── SUCCESS OVERLAY (Hidden by default) ── -->
-            <div id="successOverlay" class="hidden text-center py-6 animate-slide-in">
-                <div class="w-24 h-24 mx-auto bg-gradient-to-br from-green-100 to-emerald-50 text-emerald-500 text-4xl rounded-full flex items-center justify-center mb-6 shadow-2xl shadow-emerald-500/20 border-4 border-white">
-                    <i class="fas fa-check"></i>
+            <!-- ── SUCCESS OVERLAY (Premium Overhaul) ── -->
+            <div id="successOverlay" class="hidden text-center py-10 animate-fade-up">
+                <div class="w-32 h-32 mx-auto bg-gradient-to-br from-emerald-100 to-teal-50 text-emerald-500 text-5xl rounded-[2.5rem] flex items-center justify-center mb-10 shadow-3xl shadow-emerald-500/20 border-4 border-white animate-float">
+                    <i class="fas fa-circle-check"></i>
                 </div>
-                <h3 class="text-2xl font-extrabold text-emerald-900 mb-2">Booking Berhasil!</h3>
-                <p class="text-slate-500 font-medium text-sm mb-8">Jadwal Anda telah tercatat di sistem kami.</p>
+                <h3 class="text-4xl font-extrabold text-slate-950 mb-4 tracking-tighter">Reservasi Berhasil!</h3>
+                <p class="text-slate-500 font-medium text-lg mb-12">Simpan bukti booking ini untuk ditunjukkan ke resepsionis.</p>
                 
-                <div class="bg-white border border-slate-100 rounded-3xl p-6 mb-8 shadow-sm text-left shadow-slate-200/50">
-                    <div class="flex justify-between items-center py-3 border-b border-slate-50/80">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Nama Pasien</span>
-                        <strong id="resNama" class="text-slate-800 font-extrabold">-</strong>
+                <div class="glass-panel rounded-[3rem] p-10 mb-12 text-left space-y-6 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -translate-y-16 translate-x-16"></div>
+                    
+                    <div class="flex justify-between items-center py-2">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Nama Pasien</span>
+                        <strong id="resNama" class="text-slate-900 font-extrabold text-xl">-</strong>
                     </div>
-                    <div class="flex justify-between items-center py-3 border-b border-slate-50/80">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Terapis</span>
-                        <strong id="resTerapis" class="text-slate-800 font-extrabold text-emerald-700">-</strong>
+                    <div class="h-px bg-slate-50"></div>
+                    <div class="flex justify-between items-center py-2">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Terapis Khusus</span>
+                        <strong id="resTerapis" class="text-emerald-700 font-extrabold text-lg">-</strong>
                     </div>
-                    <div class="flex justify-between items-center py-3">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Waktu</span>
-                        <strong id="resWaktu" class="text-slate-800 font-extrabold bg-emerald-50 px-2 py-1 rounded-md text-emerald-800">-</strong>
+                    <div class="h-px bg-slate-50"></div>
+                    <div class="flex justify-between items-center py-2">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Jadwal & Waktu</span>
+                        <strong id="resWaktu" class="text-slate-900 font-extrabold bg-slate-100 px-4 py-2 rounded-2xl text-base">-</strong>
                     </div>
                 </div>
 
-                <a href="#" id="waLink" target="_blank" class="w-full py-4 bg-[#25d366] text-white font-extrabold text-base rounded-2xl flex items-center justify-center gap-3 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#25d366]/40 transition-all duration-300 mb-6 border border-[#25d366]/50">
-                    <i class="fab fa-whatsapp text-xl"></i>
-                    Konfirmasi via WhatsApp
-                </a>
-                
-                <button type="button" class="mx-auto flex items-center justify-center gap-2 text-slate-400 text-sm font-bold hover:text-emerald-600 transition-colors" onclick="location.reload()">
-                    <i class="fas fa-redo"></i> Booking Lagi
-                </button>
+                <div class="grid gap-4">
+                    <a href="#" id="waLink" target="_blank" class="w-full py-5 bg-[#25d366] text-white font-black text-lg rounded-[2rem] flex items-center justify-center gap-4 hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#25d366]/40 transition-all duration-300 border-b-4 border-[#128c7e]">
+                        <i class="fab fa-whatsapp text-2xl"></i> Konfirmasi Via WhatsApp
+                    </a>
+                    
+                    <button type="button" class="w-full py-5 bg-white border-2 border-slate-100 text-slate-400 font-bold rounded-[2rem] hover:text-emerald-600 hover:border-emerald-200 transition-all" onclick="location.reload()">
+                        <i class="fas fa-redo mr-2"></i> Jadwalkan Pasien Lain
+                    </button>
+                </div>
             </div>
 
         </div>
     </div>
 
-    <p class="mt-10 text-center text-xs font-bold text-slate-400 relative z-10 px-4">
-        <i class="fas fa-shield-halved text-emerald-400 mr-1"></i> Data Anda aman &amp; hanya digunakan untuk keperluan pelayanan klinik
-        <br><br>
-        <a href="admin.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/50 border border-slate-200 rounded-lg text-slate-500 hover:text-emerald-700 transition-colors"><i class="fas fa-lock text-[10px]"></i> Portal Admin</a>
-    </p>
+    <!-- ── FOOTER DECORATION ── -->
+    <div class="mt-16 text-center space-y-6 relative z-10 px-6 animate-fade-up" style="animation-delay: 0.4s;">
+        <div class="inline-flex items-center gap-3 bg-white/50 backdrop-blur px-6 py-3 rounded-full border border-white text-xs font-black text-slate-400 uppercase tracking-widest shadow-sm">
+            <i class="fas fa-shield-halved text-emerald-500"></i> Data Anda Terenkripsi & Aman
+        </div>
+        <p class="text-slate-300 text-[10px] font-bold uppercase tracking-[0.4em]">&copy; 2026 Rumah Sehat Dani Sabri</p>
+    </div>
 
-    <!-- Logika Aplikasi -->
+    <!-- Scripts -->
     <script src="config.js"></script>
     <script src="app.js"></script>
+
+    <script>
+        // Progress Bar & Step Visual Logic
+        function updateStepUI(stepIndex) {
+            const nodes = ['step-node-2', 'step-node-3'];
+            const bar = document.getElementById('step-bar');
+            
+            if (stepIndex === 1) bar.style.width = '10%';
+            if (stepIndex === 2) {
+                bar.style.width = '50%';
+                document.getElementById('step-node-2').classList.replace('bg-white', 'bg-emerald-500');
+                document.getElementById('step-node-2').classList.replace('text-slate-300', 'text-white');
+            }
+            if (stepIndex === 3) {
+                bar.style.width = '100%';
+                document.getElementById('step-node-3').classList.replace('bg-white', 'bg-emerald-500');
+                document.getElementById('step-node-3').classList.replace('text-slate-300', 'text-white');
+            }
+        }
+    </script>
 
 </body>
 </html>

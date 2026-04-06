@@ -6,127 +6,57 @@
     <title>Rumah Sehat Dani Sabri — Klinik Bekam & Ruqyah Profesional</title>
 
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Rumah Sehat Dani Sabri menyediakan layanan terapi bekam sunnah, ruqyah syar'iyyah, dan pengobatan Islami oleh terapis profesional dan berpengalaman.">
+    <meta name="description" content="Layanan terapi bekam sunnah, ruqyah syar'iyyah, dan pengobatan Islami oleh terapis profesional dan berpengalaman.">
     
-    <!-- Preconnect for Performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
-    <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                    },
-                    colors: {
-                        emerald: {
-                            50: '#ecfdf5',
-                            100: '#d1fae5',
-                            200: '#a7f3d0',
-                            300: '#6ee7b7',
-                            400: '#34d399',
-                            500: '#10b981',
-                            600: '#059669',
-                            700: '#047857',
-                            800: '#065f46',
-                            900: '#064e3b',
-                            950: '#022c22',
-                        }
-                    },
-                    animation: {
-                        'blob': 'blob 7s infinite',
-                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
-                        'float': 'float 3s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        blob: {
-                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
-                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
-                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
-                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
-                        },
-                        fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        },
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' },
-                        }
-                    }
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
                 }
             }
         }
     </script>
-
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .glass-panel {
-                @apply bg-white/70 backdrop-blur-xl border border-white/40 shadow-xl;
-            }
-            .text-gradient {
-                @apply bg-clip-text text-transparent bg-gradient-to-r from-emerald-800 to-teal-600;
-            }
-        }
-        
-        .bg-blobs {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            overflow: hidden;
-            z-index: 0;
-            pointer-events: none;
-        }
-        .blob {
-            position: absolute;
-            filter: blur(80px);
-            opacity: 0.6;
-            border-radius: 50%;
-            animation: blob 10s infinite alternate;
-        }
-        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: rgba(52, 211, 153, 0.4); animation-delay: 0s; }
-        .blob-2 { top: 40%; right: -20%; width: 600px; height: 600px; background: rgba(20, 184, 166, 0.3); animation-delay: 2s; }
-        .blob-3 { bottom: -20%; left: 20%; width: 400px; height: 400px; background: rgba(16, 185, 129, 0.3); animation-delay: 4s; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased overflow-x-hidden relative font-sans">
+<body class="bg-slate-50 text-slate-900 antialiased overflow-x-hidden relative font-sans">
 
     <!-- Background Decoration -->
-    <div class="bg-blobs fixed">
+    <div class="bg-blobs">
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
         <div class="blob blob-3"></div>
     </div>
 
     <!-- Navigation -->
-    <nav class="fixed w-full z-50 transition-all duration-300" id="navbar">
-        <div class="max-w-7xl mx-auto px-6 py-4">
-            <div class="glass-panel rounded-full px-6 py-3 flex items-center justify-between">
-                <a href="#" class="flex items-center gap-2">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-600 to-teal-500 text-white flex items-center justify-center font-bold text-xl shadow-lg">
-                        <i class="fas fa-leaf"></i>
+    <nav class="fixed w-full z-50 transition-all duration-500" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 py-6">
+            <div class="glass-panel rounded-[2rem] px-8 py-4 flex items-center justify-between shadow-2xl shadow-emerald-900/5">
+                <a href="#" class="flex items-center gap-3 group">
+                    <div class="w-11 h-11 rounded-2xl bg-premium-gradient text-white flex items-center justify-center font-bold text-xl shadow-lg group-hover:rotate-6 transition-transform">
+                        <i class="fas fa-leaf text-lg"></i>
                     </div>
-                    <span class="font-extrabold text-xl text-emerald-950 tracking-tight" id="cms-nama-klinik-nav">Dani Sabri</span>
+                    <div class="flex flex-col">
+                        <span class="font-extrabold text-lg text-slate-900 tracking-tight leading-none" id="cms-nama-klinik-nav">Dani Sabri</span>
+                        <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mt-1">Rumah Sehat</span>
+                    </div>
                 </a>
                 
-                <div class="hidden md:flex items-center gap-8 font-semibold text-slate-600">
+                <div class="hidden lg:flex items-center gap-10 font-bold text-sm text-slate-500 uppercase tracking-widest">
                     <a href="#services" class="hover:text-emerald-600 transition-colors">Layanan</a>
                     <a href="#benefits" class="hover:text-emerald-600 transition-colors">Keunggulan</a>
-                    <a href="#testimonials" class="hover:text-emerald-600 transition-colors">Testimoni</a>
+                    <a href="status.html" class="hover:text-emerald-600 transition-colors">Lacak Pesanan</a>
                 </div>
 
-                <div class="flex items-center gap-3">
-                    <a href="status.html" class="hidden md:flex text-sm font-bold text-slate-500 hover:text-emerald-600 transition-colors">Cek Status</a>
-                    <a href="booking.html" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-emerald-600/30 transition-all hover:-translate-y-0.5">
-                        Booking <i class="fas fa-arrow-right ml-1"></i>
+                <div class="flex items-center gap-4">
+                    <a href="booking.html" class="btn-premium py-3 px-7 text-sm !rounded-full shadow-emerald-500/20">
+                        Buat Janji <i class="fas fa-arrow-right ml-2 text-xs"></i>
                     </a>
                 </div>
             </div>
@@ -134,58 +64,64 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-6 z-10 min-h-screen flex items-center">
-        <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
-            <div class="space-y-8 animate-fade-in-up">
-                <div class="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full text-emerald-700 text-xs font-bold uppercase tracking-widest shadow-sm border border-emerald-100">
-                    <i class="fas fa-star text-yellow-400"></i> <span id="cms-badge">Klinik Terapis Profesional</span>
+    <section class="relative pt-44 pb-20 lg:pt-56 lg:pb-32 px-6 z-10 min-h-screen flex items-center">
+        <div class="max-w-7xl mx-auto grid lg:grid-cols-12 gap-16 items-center">
+            <div class="lg:col-span-7 space-y-10 animate-fade-up">
+                <div class="inline-flex items-center gap-3 bg-white/80 backdrop-blur-md px-5 py-2.5 rounded-full shadow-lg border border-white/50">
+                    <span class="flex h-2 w-2 relative">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span id="cms-badge" class="text-emerald-800 text-[10px] font-black uppercase tracking-[0.2em]">Klinik Terapis Profesional</span>
                 </div>
-                <h1 class="text-5xl lg:text-7xl font-extrabold leading-[1.1] text-emerald-950" id="cms-tagline">
-                    Lebih Sehat dengan <span class="text-gradient">Terapi Sunnah</span>
+                
+                <h1 class="text-6xl lg:text-[5.5rem] font-extrabold leading-[0.95] text-slate-950 tracking-tighter" id="cms-tagline">
+                    Lebih Sehat dengan <br><span class="text-gradient">Terapi Sunnah</span>
                 </h1>
-                <p class="text-lg text-slate-600 font-medium leading-relaxed max-w-xl" id="cms-deskripsi">
-                    Rumah Sehat Dani Sabri menyediakan layanan terapi bekam, ruqyah syar'iyyah, dan pengobatan Islami untuk pemulihan kesehatan fisik dan rohani Anda secara maksimal.
+                
+                <p class="text-xl text-slate-500 font-medium leading-relaxed max-w-xl" id="cms-deskripsi">
+                    Rumah Sehat Dani Sabri menyediakan layanan terapi bekam, ruqyah syar'iyyah, dan pengobatan Islami untuk pemulihan kesehatan fisik dan rohani Anda.
                 </p>
-                <div class="flex flex-wrap items-center gap-4 pt-4">
-                    <a href="booking.html" class="bg-gradient-to-r from-emerald-600 to-teal-500 text-white px-8 py-4 rounded-full text-lg font-bold shadow-xl shadow-emerald-500/30 hover:-translate-y-1 hover:shadow-2xl hover:shadow-emerald-500/40 transition-all duration-300 flex items-center gap-3">
-                        <i class="fas fa-calendar-check"></i> Reservasi Jadwal
+                
+                <div class="flex flex-wrap items-center gap-6 pt-4">
+                    <a href="booking.html" class="btn-premium text-lg px-10 py-5">
+                        <i class="fas fa-calendar-check mr-2"></i> Reservasi Jadwal
                     </a>
-                    <a href="#services" class="px-8 py-4 rounded-full text-lg font-bold text-slate-700 bg-white/50 hover:bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
-                        Pelajari Layanan
+                    <a href="#services" class="px-10 py-5 rounded-2xl text-lg font-bold text-slate-700 bg-white/50 border border-slate-200 hover:bg-white hover:shadow-xl transition-all">
+                        Lihat Layanan
                     </a>
                 </div>
                 
-                <div class="pt-8 flex items-center gap-6 border-t border-slate-200/60">
-                    <div class="flex -space-x-4">
-                        <img class="w-12 h-12 rounded-full border-4 border-white shadow-sm object-cover" src="https://i.pravatar.cc/100?img=1" alt="Patient">
-                        <img class="w-12 h-12 rounded-full border-4 border-white shadow-sm object-cover" src="https://i.pravatar.cc/100?img=2" alt="Patient">
-                        <img class="w-12 h-12 rounded-full border-4 border-white shadow-sm object-cover" src="https://i.pravatar.cc/100?img=3" alt="Patient">
-                        <div class="w-12 h-12 rounded-full border-4 border-white shadow-sm bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">+1K</div>
+                <div class="pt-10 flex items-center gap-8 border-t border-slate-200/60">
+                    <div class="flex -space-x-3">
+                        <img class="w-12 h-12 rounded-full ring-4 ring-white shadow-xl" src="https://i.pravatar.cc/100?img=1">
+                        <img class="w-12 h-12 rounded-full ring-4 ring-white shadow-xl" src="https://i.pravatar.cc/100?img=12">
+                        <img class="w-12 h-12 rounded-full ring-4 ring-white shadow-xl" src="https://i.pravatar.cc/100?img=33">
+                        <div class="w-12 h-12 rounded-full ring-4 ring-white bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">1K+</div>
                     </div>
                     <div>
-                        <div class="flex text-yellow-400 text-sm">
+                        <div class="flex text-amber-400 text-sm gap-1">
                             <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                         </div>
-                        <p class="text-sm font-bold text-slate-600. mt-1">Dipercaya oleh ribuan pasien</p>
+                        <p class="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Rating dari 1,200 Pasien</p>
                     </div>
                 </div>
             </div>
             
-            <div class="relative lg:-mr-10 animate-fade-in-up" style="animation-delay: 0.2s;">
-                <!-- Abstract Hero Image Composition -->
-                <div class="relative w-full aspect-square max-w-lg mx-auto">
-                    <div class="absolute inset-0 bg-gradient-to-tr from-emerald-100 to-teal-50 rounded-full animate-blob"></div>
-                    <div class="absolute inset-4 glass-panel rounded-3xl overflow-hidden animate-float">
-                        <img id="cms-hero-image" src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=1520&auto=format&fit=crop" alt="Cupping Therapy" class="w-full h-full object-cover opacity-90 scale-105 hover:scale-110 transition-transform duration-700">
-                        <div class="absolute inset-0 bg-gradient-to-t from-emerald-950/80 to-transparent"></div>
-                        <div class="absolute bottom-6 left-6 right-6">
-                            <div class="glass-panel p-4 rounded-2xl flex items-center gap-4">
-                                <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-emerald-600 text-xl shadow-md">
+            <div class="lg:col-span-5 relative animate-fade-up" style="animation-delay: 0.2s;">
+                <div class="relative w-full aspect-[4/5] max-w-md mx-auto">
+                    <div class="absolute inset-0 bg-premium-gradient rounded-[3rem] rotate-6 opacity-10"></div>
+                    <div class="absolute inset-0 glass-panel rounded-[3rem] overflow-hidden animate-float">
+                        <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=1520&auto=format&fit=crop" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
+                        <div class="absolute bottom-8 left-8 right-8">
+                            <div class="glass-panel p-5 rounded-3xl flex items-center gap-4 glow-emerald">
+                                <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-emerald-600 text-xl shadow-lg">
                                     <i class="fas fa-shield-heart"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-emerald-950">Aman & Higienis</h4>
-                                    <p class="text-xs font-medium text-slate-500">Standar sterilisasi medis tinggi</p>
+                                    <h4 class="font-bold text-slate-950 text-sm">Aman & Higienis</h4>
+                                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Standar Medis Tinggi</p>
                                 </div>
                             </div>
                         </div>
@@ -196,196 +132,186 @@
     </section>
 
     <!-- Services Section -->
-    <section id="services" class="py-24 px-6 relative z-10 bg-white/40 backdrop-blur-sm border-y border-white/60">
+    <section id="services" class="py-32 px-6 relative z-10 bg-white shadow-[0_-20px_50px_rgba(0,0,0,0.02)]">
         <div class="max-w-7xl mx-auto">
-            <div class="text-center max-w-2xl mx-auto mb-16">
-                <span class="text-emerald-600 font-extrabold tracking-widest uppercase text-sm">Layanan Kami</span>
-                <h2 class="text-4xl font-extrabold text-emerald-950 mt-3 mb-4">Terapi Komprehensif Sesuai Sunnah</h2>
-                <p class="text-slate-600 font-medium">Kami menggunakan metode yang memadukan keilmuan medis modern dan pengobatan tradisional Islami.</p>
+            <div class="text-center max-w-3xl mx-auto mb-20 space-y-4">
+                <span class="text-emerald-600 font-black tracking-[0.3em] uppercase text-xs">Layanan Unggulan</span>
+                <h2 class="text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight">Terapi Komprehensif Berkah</h2>
+                <p class="text-lg text-slate-500 font-medium">Metode thibbun nabawi yang memadukan keilmuan modern dan adab islami.</p>
             </div>
 
-            <div class="grid md:grid-cols-3 gap-8">
-                <!-- Service Card 1 -->
-                <div class="glass-panel p-8 rounded-3xl group hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/10 hover:border-emerald-200">
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center text-emerald-600 text-3xl mb-6 shadow-sm group-hover:scale-110 transition-transform">
-                        <i class="fas fa-fire"></i>
+            <div class="grid md:grid-cols-3 gap-10">
+                <!-- Service 1 -->
+                <div class="glass-card p-10 rounded-[2.5rem]">
+                    <div class="w-16 h-16 rounded-3xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-3xl mb-8">
+                        <i class="fas fa-hand-holding-heart"></i>
                     </div>
-                    <h3 class="text-xl font-extrabold text-slate-800 mb-3" id="cms-layanan1-nama">Bekam Sunnah</h3>
-                    <p class="text-slate-600 text-sm leading-relaxed mb-6 font-medium" id="cms-layanan1-desk">Metode pengeluaran darah statis (toksin) untuk mengatasi berbagai keluhan seperti pegal linu, hipertensi, dan memulihkan stamina.</p>
-                    <div id="cms-layanan1-detail-container">
-                        <ul class="space-y-2 mb-8" id="cms-layanan1-detail">
-                            <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-emerald-500"></i> Bekam Basah (Wet Cupping)</li>
-                            <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-emerald-500"></i> Bekam Kering & Luncur</li>
-                        </ul>
-                    </div>
-                    <a href="booking.html" class="inline-block w-full text-center py-3 rounded-xl bg-slate-50 text-emerald-700 font-bold group-hover:bg-emerald-50 transition-colors">Pesan Jadwal</a>
+                    <h3 class="text-2xl font-extrabold text-slate-900 mb-4" id="cms-layanan1-nama">Bekam Sunnah</h3>
+                    <p class="text-slate-500 font-medium leading-relaxed mb-8" id="cms-layanan1-desk">Pengeluaran darah kotor untuk membuang toksin dan meningkatkan antibodi tubuh.</p>
+                    <ul class="space-y-3 mb-10" id="cms-layanan1-detail">
+                        <li class="flex items-center gap-3 text-sm font-bold text-slate-600"><i class="fas fa-check-circle text-emerald-500"></i> Bekam Basah (Wet)</li>
+                        <li class="flex items-center gap-3 text-sm font-bold text-slate-600"><i class="fas fa-check-circle text-emerald-500"></i> Bekam Kering & Meluncur</li>
+                    </ul>
+                    <a href="booking.html" class="block w-full text-center py-4 rounded-2xl bg-slate-50 text-emerald-700 font-extrabold hover:bg-emerald-600 hover:text-white transition-all">Pesan Jadwal</a>
                 </div>
 
-                <!-- Service Card 2 -->
-                <div class="glass-panel p-8 rounded-3xl group hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl hover:shadow-cyan-500/10 hover:border-cyan-200 relative">
-                    <div class="absolute top-0 right-8 -translate-y-1/2 bg-gradient-to-r from-amber-400 to-orange-400 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">Populer</div>
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-100 to-cyan-50 flex items-center justify-center text-cyan-600 text-3xl mb-6 shadow-sm group-hover:scale-110 transition-transform">
+                <!-- Service 2 -->
+                <div class="glass-card p-10 rounded-[2.5rem] relative">
+                    <div class="absolute -top-4 right-10 bg-premium-gradient text-white text-[10px] font-black px-5 py-2 rounded-full shadow-xl uppercase tracking-widest">Terlaris</div>
+                    <div class="w-16 h-16 rounded-3xl bg-teal-50 text-teal-600 flex items-center justify-center text-3xl mb-8">
                         <i class="fas fa-book-quran"></i>
                     </div>
-                    <h3 class="text-xl font-extrabold text-slate-800 mb-3" id="cms-layanan2-nama">Ruqyah Syar'iyyah</h3>
-                    <p class="text-slate-600 text-sm leading-relaxed mb-6 font-medium" id="cms-layanan2-desk">Terapi penyembuhan dengan ayat suci Al-Qur'an untuk gangguan psikis, sihir, ain, dan penyakit non-medis lainnya.</p>
-                    <div id="cms-layanan2-detail-container">
-                        <ul class="space-y-2 mb-8" id="cms-layanan2-detail">
-                            <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-cyan-500"></i> Pembersihan Aura Negatif</li>
-                            <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-cyan-500"></i> Konseling & Edukasi Tauhid</li>
-                        </ul>
-                    </div>
-                    <a href="booking.html" class="inline-block w-full text-center py-3 rounded-xl bg-slate-50 text-cyan-700 font-bold group-hover:bg-cyan-50 transition-colors">Pesan Jadwal</a>
+                    <h3 class="text-2xl font-extrabold text-slate-900 mb-4" id="cms-layanan2-nama">Ruqyah Syar'iyyah</h3>
+                    <p class="text-slate-500 font-medium leading-relaxed mb-8" id="cms-layanan2-desk">Terapi penyembuhan dengan Al-Qur'an untuk gangguan fisik maupun psikis.</p>
+                    <ul class="space-y-3 mb-10" id="cms-layanan2-detail">
+                        <li class="flex items-center gap-3 text-sm font-bold text-slate-600"><i class="fas fa-check-circle text-teal-500"></i> Ruqyah Mandiri</li>
+                        <li class="flex items-center gap-3 text-sm font-bold text-slate-600"><i class="fas fa-check-circle text-teal-500"></i> Konseling Tauhid</li>
+                    </ul>
+                    <a href="booking.html" class="block w-full text-center py-4 rounded-2xl bg-slate-50 text-teal-700 font-extrabold hover:bg-teal-600 hover:text-white transition-all">Pesan Jadwal</a>
                 </div>
 
-                <!-- Service Card 3 -->
-                <div class="glass-panel p-8 rounded-3xl group hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl hover:shadow-teal-500/10 hover:border-teal-200">
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-100 to-teal-50 flex items-center justify-center text-teal-600 text-3xl mb-6 shadow-sm group-hover:scale-110 transition-transform">
+                <!-- Service 3 -->
+                <div class="glass-card p-10 rounded-[2.5rem]">
+                    <div class="w-16 h-16 rounded-3xl bg-cyan-50 text-cyan-600 flex items-center justify-center text-3xl mb-8">
                         <i class="fas fa-spa"></i>
                     </div>
-                    <h3 class="text-xl font-extrabold text-slate-800 mb-3" id="cms-layanan3-nama">Terapi Relaksasi</h3>
-                    <p class="text-slate-600 text-sm leading-relaxed mb-6 font-medium" id="cms-layanan3-desk">Layanan pijat dan refleksi yang mengembalikan fungsi syaraf dan otot, melancarkan peredaran darah sehingga tubuh lebih bugar.</p>
-                    <div id="cms-layanan3-detail-container">
-                        <ul class="space-y-2 mb-8" id="cms-layanan3-detail">
-                            <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-teal-500"></i> Pijat Refleksi Tradisional</li>
-                            <li class="flex items-center gap-2 text-sm text-slate-500 font-medium"><i class="fas fa-check text-teal-500"></i> Terapi Lintah Medis</li>
-                        </ul>
-                    </div>
-                    <a href="booking.html" class="inline-block w-full text-center py-3 rounded-xl bg-slate-50 text-teal-700 font-bold group-hover:bg-teal-50 transition-colors">Pesan Jadwal</a>
+                    <h3 class="text-2xl font-extrabold text-slate-900 mb-4" id="cms-layanan3-nama">Terapi Relaksasi</h3>
+                    <p class="text-slate-500 font-medium leading-relaxed mb-8" id="cms-layanan3-desk">Kombinasi pijat refleksi dan terapi magnet untuk sirkulasi darah yang lancar.</p>
+                    <ul class="space-y-3 mb-10" id="cms-layanan3-detail">
+                        <li class="flex items-center gap-3 text-sm font-bold text-slate-600"><i class="fas fa-check-circle text-cyan-500"></i> Pijat Refleksi</li>
+                        <li class="flex items-center gap-3 text-sm font-bold text-slate-600"><i class="fas fa-check-circle text-cyan-500"></i> Terapi Lintah Medis</li>
+                    </ul>
+                    <a href="booking.html" class="block w-full text-center py-4 rounded-2xl bg-slate-50 text-cyan-700 font-extrabold hover:bg-cyan-600 hover:text-white transition-all">Pesan Jadwal</a>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Why Us Section -->
-    <section id="benefits" class="py-24 px-6 relative z-10">
-        <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
-            
-            <div class="relative order-2 lg:order-1">
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-4 pt-10">
-                        <div class="glass-panel p-6 rounded-3xl text-center shadow-lg">
-                            <div class="w-12 h-12 mx-auto bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xl mb-4"><i class="fas fa-user-doctor"></i></div>
-                            <h4 class="font-extrabold text-slate-800 text-lg mb-1">Terapis Ahli</h4>
-                            <p class="text-xs text-slate-500 font-medium">Bersertifikat dan Pria/Wanita terpisah.</p>
-                        </div>
-                        <div class="glass-panel p-6 rounded-3xl text-center shadow-lg bg-emerald-600 border-none">
-                            <div class="w-12 h-12 mx-auto bg-white/20 text-white rounded-full flex items-center justify-center text-xl mb-4"><i class="fas fa-pump-medical"></i></div>
-                            <h4 class="font-extrabold text-white text-lg mb-1">Sterilisasi 100%</h4>
-                            <p class="text-xs text-white/80 font-medium">Menggunakan jarum/lanset sekali pakai.</p>
-                        </div>
+    <!-- Benefits Section -->
+    <section id="benefits" class="py-32 px-6">
+        <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-24 items-center">
+            <div class="grid grid-cols-2 gap-6 relative">
+                <div class="space-y-6 pt-12">
+                    <div class="glass-card p-8 rounded-[2rem] text-center">
+                        <div class="w-14 h-14 mx-auto bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-xl mb-5 shadow-inner"><i class="fas fa-user-md"></i></div>
+                        <h4 class="font-extrabold text-slate-900 text-lg mb-2">Terapis Ahli</h4>
+                        <p class="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed">Sertifikasi Nasional & PBI</p>
                     </div>
-                    <div class="space-y-4">
-                        <div class="glass-panel p-6 rounded-3xl text-center shadow-lg">
-                            <div class="w-12 h-12 mx-auto bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xl mb-4"><i class="fas fa-clock"></i></div>
-                            <h4 class="font-extrabold text-slate-800 text-lg mb-1">Tepat Waktu</h4>
-                            <p class="text-xs text-slate-500 font-medium">Sistem booking modern & tanpa antre lama.</p>
-                        </div>
-                        <div class="glass-panel p-6 rounded-3xl text-center shadow-lg">
-                            <div class="w-12 h-12 mx-auto bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xl mb-4"><i class="fas fa-heart"></i></div>
-                            <h4 class="font-extrabold text-slate-800 text-lg mb-1">Sesuai Syariat</h4>
-                            <p class="text-xs text-slate-500 font-medium">Pelayanan yang menjaga privasi dan adab.</p>
-                        </div>
+                    <div class="bg-premium-gradient p-8 rounded-[2rem] text-center text-white shadow-2xl shadow-emerald-900/20">
+                        <div class="w-14 h-14 mx-auto bg-white/20 rounded-2xl flex items-center justify-center text-xl mb-5"><i class="fas fa-microscope"></i></div>
+                        <h4 class="font-extrabold text-lg mb-2">Higienis</h4>
+                        <p class="text-xs text-white/70 font-bold uppercase tracking-widest leading-relaxed">Sterilisasi Standar Medis</p>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div class="glass-card p-8 rounded-[2rem] text-center">
+                        <div class="w-14 h-14 mx-auto bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-xl mb-5 shadow-inner"><i class="fas fa-clock"></i></div>
+                        <h4 class="font-extrabold text-slate-900 text-lg mb-2">Efisien</h4>
+                        <p class="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed">Tanpa Antre & Tepat Waktu</p>
+                    </div>
+                    <div class="glass-card p-8 rounded-[2rem] text-center">
+                        <div class="w-14 h-14 mx-auto bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-xl mb-5 shadow-inner"><i class="fas fa-mosque"></i></div>
+                        <h4 class="font-extrabold text-slate-900 text-lg mb-2">Sesuai Adab</h4>
+                        <p class="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed">Privasi Pria/Wanita Terjaga</p>
                     </div>
                 </div>
             </div>
 
-            <div class="order-1 lg:order-2">
-                <span class="text-emerald-600 font-extrabold tracking-widest uppercase text-sm">Keunggulan Kami</span>
-                <h2 class="text-4xl font-extrabold text-emerald-950 mt-3 mb-6">Mengapa Memilih Rumah Sehat Dani Sabri?</h2>
-                <p class="text-slate-600 font-medium text-lg leading-relaxed mb-8">
-                    Kesehatan Anda adalah prioritas kami. Kami berkomitmen memberikan layanan kesehatan komplementer yang mengedepankan standar keamanan medis namun tetap berpedoman kuat pada thibbun nabawi.
+            <div class="space-y-8">
+                <span class="text-emerald-600 font-black tracking-[0.3em] uppercase text-xs">Mengapa Kami?</span>
+                <h2 class="text-5xl font-extrabold text-slate-950 tracking-tighter leading-tight">Standar Baru Terapi <br>Thibbun Nabawi</h2>
+                <p class="text-lg text-slate-500 font-medium leading-relaxed">
+                    Kami percaya pengobatan sunnah harus dijalankan dengan profesionalisme tinggi. Dari pendaftaran hingga sesi berakhir, semua dirancang untuk kenyamanan dan keshalihan Anda.
                 </p>
-                <div class="space-y-4">
-                    <div class="flex items-center gap-4 bg-white/60 p-4 rounded-xl border border-white">
-                        <div class="w-10 h-10 shrink-0 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center text-white"><i class="fas fa-check"></i></div>
-                        <p class="font-bold text-slate-700">Terapis berpengalaman & tersertifikasi PBI (Perkumpulan Bekam Indonesia).</p>
+                <div class="space-y-4 pt-4">
+                    <div class="flex items-center gap-5 glass-panel p-5 rounded-3xl border-transparent hover:border-emerald-100 transition-all">
+                        <div class="w-12 h-12 shrink-0 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center font-bold shadow-sm"><i class="fas fa-check"></i></div>
+                        <p class="font-bold text-slate-700 text-sm">Terapis Pria & Wanita 100% dipisah (Privasi Utama).</p>
                     </div>
-                    <div class="flex items-center gap-4 bg-white/60 p-4 rounded-xl border border-white">
-                        <div class="w-10 h-10 shrink-0 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center text-white"><i class="fas fa-check"></i></div>
-                        <p class="font-bold text-slate-700">Ruang terapi pria & wanita 100% dipisah (privasi terjamin).</p>
-                    </div>
-                    <div class="flex items-center gap-4 bg-white/60 p-4 rounded-xl border border-white">
-                        <div class="w-10 h-10 shrink-0 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center text-white"><i class="fas fa-check"></i></div>
-                        <p class="font-bold text-slate-700">Sistem registrasi online pintar yang meminimalisir waktu tunggu Anda di lokasi.</p>
+                    <div class="flex items-center gap-5 glass-panel p-5 rounded-3xl border-transparent hover:border-emerald-100 transition-all">
+                        <div class="w-12 h-12 shrink-0 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center font-bold shadow-sm"><i class="fas fa-check"></i></div>
+                        <p class="font-bold text-slate-700 text-sm">Menggunakan jarum & perlengkapan steril (Single Use Only).</p>
                     </div>
                 </div>
             </div>
-
         </div>
     </section>
 
     <!-- CTA Section -->
-    <section class="py-20 px-6 relative z-10">
-        <div class="max-w-5xl mx-auto rounded-[3rem] bg-gradient-to-br from-emerald-900 to-emerald-700 overflow-hidden relative shadow-2xl shadow-emerald-900/30">
+    <section class="py-24 px-6 relative z-10">
+        <div class="max-w-6xl mx-auto rounded-[4rem] bg-premium-gradient overflow-hidden relative shadow-[0_40px_100px_rgba(6,95,70,0.3)] min-h-[500px] flex items-center justify-center">
             <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-            <div class="absolute -top-40 -right-40 w-96 h-96 bg-emerald-500/30 rounded-full blur-3xl"></div>
+            <div class="absolute -top-40 -left-40 w-96 h-96 bg-white/10 rounded-full blur-[100px]"></div>
+            <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-emerald-400/20 rounded-full blur-[100px]"></div>
             
-            <div class="relative p-12 lg:p-20 text-center">
-                <h2 class="text-3xl lg:text-5xl font-extrabold text-white mb-6">Siap Untuk Berkonsultasi?</h2>
-                <p class="text-emerald-100 text-lg mb-10 max-w-2xl mx-auto font-medium">Beri tubuh Anda hak untuk sehat. Segera jadwalkan kedatangan Anda melalui platform reservasi online kami yang sangat mudah digunakan.</p>
-                <a href="booking.html" class="inline-flex items-center gap-3 bg-white text-emerald-800 px-10 py-5 rounded-full text-xl font-bold shadow-xl hover:-translate-y-1 hover:shadow-2xl hover:scale-105 transition-all duration-300">
-                    <i class="fas fa-calendar-check text-emerald-500"></i> Buat Jadwal Sekarang
-                </a>
+            <div class="relative p-12 lg:p-24 text-center space-y-10 animate-fade-up">
+                <h2 class="text-4xl lg:text-7xl font-extrabold text-white mb-6 leading-tight tracking-tighter">Beri Tubuh Anda Hak <br>Untuk Sehat Kembali</h2>
+                <p class="text-emerald-50/70 text-xl max-w-2xl mx-auto font-medium">Jadwalkan kunjungan Anda dalam kurang dari 2 menit melalui sistem cerdas kami.</p>
+                <div class="pt-6">
+                    <a href="booking.html" class="inline-flex items-center gap-4 bg-white text-emerald-950 px-12 py-6 rounded-[2rem] text-xl font-black shadow-2xl hover:scale-105 transition-all duration-500">
+                        Buat Jadwal Sekarang <i class="fas fa-arrow-right text-emerald-600"></i>
+                    </a>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 pt-16 pb-8 relative z-10">
+    <footer class="bg-white border-t border-slate-200 pt-24 pb-12 relative z-10 overflow-hidden">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="grid md:grid-cols-4 gap-10 mb-12">
-                <div class="col-span-1 md:col-span-2">
-                    <a href="#" class="flex items-center gap-2 mb-4">
-                        <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold shadow-md">
-                            <i class="fas fa-leaf text-sm"></i>
+            <div class="grid md:grid-cols-12 gap-16 mb-20">
+                <div class="md:col-span-5 space-y-8">
+                    <a href="#" class="flex items-center gap-3 group">
+                        <div class="w-12 h-12 rounded-2xl bg-premium-gradient text-white flex items-center justify-center font-bold text-2xl shadow-lg">
+                            <i class="fas fa-leaf text-xl"></i>
                         </div>
-                        <span class="font-extrabold text-xl text-emerald-950">Rumah Sehat Dani Sabri</span>
+                        <span class="font-extrabold text-2xl text-slate-900 tracking-tight" id="cms-nama-klinik-footer">Rumah Sehat Dani Sabri</span>
                     </a>
-                    <p class="text-slate-500 text-sm leading-relaxed mb-6 max-w-sm font-medium">
-                        Melayani dengan hati, mengobati dengan iman. Klinik bekam dan ruqyah terbaik dengan pendekatan syariah dan standar higienitas.
+                    <p class="text-slate-400 text-lg leading-relaxed font-medium">
+                        Melayani dengan hati, mengobati dengan iman. Klinik bekam dan ruqyah terbaik dengan pendekatan syariah.
                     </p>
-                    <div class="flex gap-3">
-                        <a href="#" id="cms-instagram" class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-emerald-500 hover:text-white transition-all"><i class="fab fa-instagram"></i></a>
-                        <a href="#" id="cms-facebook" class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-emerald-500 hover:text-white transition-all"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" id="cms-whatsapp-social" class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-emerald-500 hover:text-white transition-all"><i class="fab fa-whatsapp"></i></a>
+                    <div class="flex gap-4">
+                        <a href="#" id="cms-instagram" class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-emerald-600 hover:text-white transition-all shadow-sm"><i class="fab fa-instagram"></i></a>
+                        <a href="#" id="cms-facebook" class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-emerald-600 hover:text-white transition-all shadow-sm"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" id="cms-whatsapp-social" class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-emerald-600 hover:text-white transition-all shadow-sm"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
                 
-                <div>
-                    <h4 class="font-bold text-slate-800 mb-4">Akses Cepat</h4>
-                    <ul class="space-y-3">
-                        <li><a href="booking.html" class="text-slate-500 hover:text-emerald-600 text-sm font-medium transition-colors">Booking Jadwal</a></li>
-                        <li><a href="status.html" class="text-slate-500 hover:text-emerald-600 text-sm font-medium transition-colors">Cek Status Booking</a></li>
-                        <li><a href="#services" class="text-slate-500 hover:text-emerald-600 text-sm font-medium transition-colors">Layanan Terapis</a></li>
+                <div class="md:col-span-3 space-y-8">
+                    <h4 class="font-black text-slate-900 uppercase tracking-widest text-xs">Portal Akses</h4>
+                    <ul class="space-y-4">
+                        <li><a href="booking.html" class="text-slate-400 hover:text-emerald-600 font-bold transition-colors">Booking Reservasi</a></li>
+                        <li><a href="status.html" class="text-slate-400 hover:text-emerald-600 font-bold transition-colors">Lacak Status</a></li>
+                        <li><a href="admin.html" class="text-slate-400 hover:text-emerald-600 font-bold transition-colors">Login Admin</a></li>
                     </ul>
                 </div>
 
-                <div>
-                    <h4 class="font-bold text-slate-800 mb-4">Kontak & Lokasi</h4>
-                    <ul class="space-y-3">
-                        <li class="flex items-start gap-3 text-sm text-slate-500 font-medium">
+                <div class="md:col-span-4 space-y-8">
+                    <h4 class="font-black text-slate-900 uppercase tracking-widest text-xs">Lokasi & Jam</h4>
+                    <ul class="space-y-6">
+                        <li class="flex items-start gap-4">
                             <i class="fas fa-map-marker-alt text-emerald-500 mt-1"></i>
-                            <span id="cms-alamat">Jl. Kesehatan No. 12, Bekasi</span>
+                            <span id="cms-alamat" class="text-slate-400 font-bold text-sm">Jl. Kesehatan No. 12, Bekasi</span>
                         </li>
-                        <li class="flex items-center gap-3 text-sm text-slate-500 font-medium">
-                            <i class="fas fa-envelope text-emerald-500"></i>
-                            <span id="cms-whatsapp">0812-3456-7890</span>
+                        <li class="flex items-center gap-4">
+                            <i class="fas fa-phone-alt text-emerald-500"></i>
+                            <span id="cms-whatsapp" class="text-slate-400 font-bold text-sm">0812-3456-7890</span>
                         </li>
-                        <li class="flex items-center gap-3 text-sm text-slate-500 font-medium">
+                        <li class="flex items-center gap-4">
                             <i class="fas fa-clock text-emerald-500"></i>
-                            <span id="cms-jam-operasional">Setiap Hari, 08:00 - 17:00</span>
+                            <span id="cms-jam-operasional" class="text-slate-400 font-bold text-sm">Setiap Hari, 08:00 - 17:00</span>
                         </li>
                     </ul>
                 </div>
             </div>
 
-            <div class="border-t border-slate-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                <p class="text-sm font-bold text-slate-400">
-                    &copy; 2026 Rumah Sehat Dani Sabri. All rights reserved.
+            <div class="border-t border-slate-100 pt-12 flex flex-col md:flex-row justify-between items-center gap-8">
+                <p class="text-slate-300 text-sm font-bold tracking-widest uppercase">
+                    &copy; 2026 Rumah Sehat Dani Sabri. Platinum Excellence.
                 </p>
-                <div class="flex items-center gap-4 text-sm font-bold">
-                    <a href="admin.html" class="text-slate-400 hover:text-emerald-600 transition-colors"><i class="fas fa-lock mr-1"></i> Portal Admin</a>
+                <div class="flex items-center gap-6">
+                    <div class="h-10 w-px bg-slate-100"></div>
+                    <span class="text-xs font-black text-slate-300 uppercase tracking-[0.3em]">Bekam Syar'i Indonesia</span>
                 </div>
             </div>
         </div>
@@ -394,13 +320,17 @@
     <!-- Configuration and CMS Loader -->
     <script src="config.js"></script>
     <script>
-        // Scroll behavior script
+        // Scroll behavior
         window.addEventListener('scroll', () => {
             const nav = document.getElementById('navbar');
-            if (window.scrollY > 50) {
-                nav.classList.add('bg-white/80', 'backdrop-blur-md', 'shadow-sm', 'border-b', 'border-slate-200/50');
+            if (window.scrollY > 20) {
+                nav.querySelector('.glass-panel').classList.add('px-10', 'py-3', 'shadow-emerald-900/10');
+                nav.querySelector('.glass-panel').classList.remove('px-8', 'py-4', 'shadow-emerald-900/5');
+                nav.classList.add('pt-2');
             } else {
-                nav.classList.remove('bg-white/80', 'backdrop-blur-md', 'shadow-sm', 'border-b', 'border-slate-200/50');
+                nav.querySelector('.glass-panel').classList.remove('px-10', 'py-3', 'shadow-emerald-900/10');
+                nav.querySelector('.glass-panel').classList.add('px-8', 'py-4', 'shadow-emerald-900/5');
+                nav.classList.remove('pt-2');
             }
         });
 
@@ -413,15 +343,16 @@
                 if (result.status === "success") {
                     const d = result.data;
                     
-                    // Update Common Info
                     if(d.cms_nama_klinik) {
-                        const el = document.getElementById('cms-nama-klinik-nav');
-                        if(el) el.textContent = d.cms_nama_klinik;
+                        const nav = document.getElementById('cms-nama-klinik-nav');
+                        const foot = document.getElementById('cms-nama-klinik-footer');
+                        if(nav) nav.textContent = d.cms_nama_klinik;
+                        if(foot) foot.textContent = d.cms_nama_klinik;
                         document.title = d.cms_nama_klinik + " — Klinik Bekam & Ruqyah Profesional";
                     }
                     if(d.cms_tagline) {
                         const el = document.getElementById('cms-tagline');
-                        if(el) el.innerHTML = d.cms_tagline.replace("Terapi Sunnah", '<span class="text-gradient">Terapi Sunnah</span>');
+                        if(el) el.innerHTML = d.cms_tagline.replace("Terapi Sunnah", '<br><span class="text-gradient">Terapi Sunnah</span>');
                     }
                     if(d.cms_deskripsi) {
                         const el = document.getElementById('cms-deskripsi');
@@ -431,38 +362,27 @@
                         const el = document.getElementById('cms-badge');
                         if(el) el.textContent = d.cms_badge;
                     }
-                    if(d.cms_hero_image) {
-                        const el = document.getElementById('cms-hero-image');
-                        if(el) el.src = d.cms_hero_image;
-                    }
-                    if(d.cms_whatsapp) {
-                        document.getElementById('cms-whatsapp').textContent = d.cms_whatsapp;
-                        document.getElementById('cms-whatsapp-social').href = "https://wa.me/" + d.cms_whatsapp.replace(/[^0-9]/g, "");
+                    if(d.cms_alamat) {
+                        const el = document.getElementById('cms-alamat');
+                        if(el) el.textContent = d.cms_alamat;
                     }
                     if(d.cms_jam_operasional) {
                         const el = document.getElementById('cms-jam-operasional');
                         if(el) el.textContent = d.cms_jam_operasional;
                     }
+                    if(d.cms_whatsapp) {
+                        document.getElementById('cms-whatsapp').textContent = d.cms_whatsapp;
+                        document.getElementById('cms-whatsapp-social').href = "https://wa.me/" + d.cms_whatsapp.replace(/[^0-9]/g, "");
+                    }
                     if(d.cms_instagram) document.getElementById('cms-instagram').href = d.cms_instagram;
                     if(d.cms_facebook) document.getElementById('cms-facebook').href = d.cms_facebook;
-                    if(d.cms_alamat) {
-                        const el = document.getElementById('cms-alamat');
-                        if(el) {
-                            el.textContent = d.cms_alamat;
-                            if(d.cms_maps_link) {
-                                el.parentElement.outerHTML = `<a href="${d.cms_maps_link}" target="_blank" class="flex items-start gap-3 text-sm text-slate-500 hover:text-emerald-600 font-medium">${el.parentElement.innerHTML}</a>`;
-                            }
-                        }
-                    }
 
                     // Update Services
                     updateService('cms-layanan1', d.cms_layanan1_nama, d.cms_layanan1_deskripsi, d.cms_layanan1_detail, 'emerald');
-                    updateService('cms-layanan2', d.cms_layanan2_nama, d.cms_layanan2_deskripsi, d.cms_layanan2_detail, 'cyan');
-                    updateService('cms-layanan3', d.cms_layanan3_nama, d.cms_layanan3_deskripsi, d.cms_layanan3_detail, 'teal');
+                    updateService('cms-layanan2', d.cms_layanan2_nama, d.cms_layanan2_deskripsi, d.cms_layanan2_detail, 'teal');
+                    updateService('cms-layanan3', d.cms_layanan3_nama, d.cms_layanan3_deskripsi, d.cms_layanan3_detail, 'cyan');
                 }
-            } catch (error) {
-                console.error("Gagal memuat konten CMS:", error);
-            }
+            } catch (error) { console.error("CMS Load Error:", error); }
         }
 
         function updateService(idPrefix, nama, desk, detail, color) {
@@ -477,15 +397,14 @@
                 if(list) {
                     const items = detail.split(',').map(item => item.trim());
                     list.innerHTML = items.map(item => `
-                        <li class="flex items-center gap-2 text-sm text-slate-500 font-medium">
-                            <i class="fas fa-check text-${color}-500"></i> ${item}
+                        <li class="flex items-center gap-3 text-sm font-bold text-slate-600">
+                            <i class="fas fa-check-circle text-${color}-500"></i> ${item}
                         </li>
                     `).join('');
                 }
             }
         }
 
-        // Run on load
         document.addEventListener('DOMContentLoaded', loadLandingContent);
     </script>
 </body>
