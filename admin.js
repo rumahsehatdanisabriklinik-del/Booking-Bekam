@@ -414,7 +414,7 @@ async function saveCmsSettings() {
 
     // Kumpulkan semua nilai dari form
     const keys = [
-        'cms_nama_klinik','cms_tagline','cms_deskripsi','cms_badge',
+        'cms_nama_klinik','cms_tagline','cms_deskripsi','cms_badge','cms_hero_image',
         'cms_whatsapp','cms_alamat','cms_jam_operasional','cms_maps_link',
         'cms_instagram','cms_facebook',
         'cms_layanan1_nama','cms_layanan1_icon','cms_layanan1_deskripsi','cms_layanan1_detail',

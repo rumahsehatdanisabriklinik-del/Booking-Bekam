@@ -176,7 +176,7 @@
                 <div class="relative w-full aspect-square max-w-lg mx-auto">
                     <div class="absolute inset-0 bg-gradient-to-tr from-emerald-100 to-teal-50 rounded-full animate-blob"></div>
                     <div class="absolute inset-4 glass-panel rounded-3xl overflow-hidden animate-float">
-                        <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=1520&auto=format&fit=crop" alt="Cupping Therapy" class="w-full h-full object-cover opacity-90 scale-105 hover:scale-110 transition-transform duration-700">
+                        <img id="cms-hero-image" src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=1520&auto=format&fit=crop" alt="Cupping Therapy" class="w-full h-full object-cover opacity-90 scale-105 hover:scale-110 transition-transform duration-700">
                         <div class="absolute inset-0 bg-gradient-to-t from-emerald-950/80 to-transparent"></div>
                         <div class="absolute bottom-6 left-6 right-6">
                             <div class="glass-panel p-4 rounded-2xl flex items-center gap-4">
@@ -431,9 +431,17 @@
                         const el = document.getElementById('cms-badge');
                         if(el) el.textContent = d.cms_badge;
                     }
+                    if(d.cms_hero_image) {
+                        const el = document.getElementById('cms-hero-image');
+                        if(el) el.src = d.cms_hero_image;
+                    }
                     if(d.cms_whatsapp) {
                         document.getElementById('cms-whatsapp').textContent = d.cms_whatsapp;
                         document.getElementById('cms-whatsapp-social').href = "https://wa.me/" + d.cms_whatsapp.replace(/[^0-9]/g, "");
+                    }
+                    if(d.cms_jam_operasional) {
+                        const el = document.getElementById('cms-jam-operasional');
+                        if(el) el.textContent = d.cms_jam_operasional;
                     }
                     if(d.cms_instagram) document.getElementById('cms-instagram').href = d.cms_instagram;
                     if(d.cms_facebook) document.getElementById('cms-facebook').href = d.cms_facebook;
