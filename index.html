@@ -550,7 +550,17 @@
                     }
                     if(d.cms_hero_image) {
                         const el = document.getElementById('cms-hero-image');
-                        if(el) el.src = d.cms_hero_image;
+                        if(el) {
+                            let imgUrl = d.cms_hero_image;
+                            // Auto-fix jika masih link Drive format lama
+                            if(imgUrl.includes('drive.google.com/uc')) {
+                                try {
+                                    const fileId = imgUrl.split('id=')[1].split('&')[0];
+                                    imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
+                                } catch(e) {}
+                            }
+                            el.src = imgUrl;
+                        }
                     }
                     if(d.cms_alamat) {
                         const el = document.getElementById('cms-alamat');
