@@ -88,6 +88,7 @@ function switchTab(tab) {
     document.getElementById('tabContentBooking').style.display    = tab === 'booking'    ? 'block' : 'none';
     document.getElementById('tabContentLaporan').style.display    = tab === 'laporan'    ? 'block' : 'none';
     document.getElementById('tabContentPengaturan').style.display = tab === 'pengaturan' ? 'block' : 'none';
+    document.getElementById('tab-database')        ? document.getElementById('tab-database').style.display = tab === 'tab-database' ? 'block' : 'none' : null;
 
     if (tab === 'booking') {
         title.textContent = "Manajemen Reservasi";

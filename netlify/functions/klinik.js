@@ -1,4 +1,18 @@
 exports.handler = async function(event, context) {
+    // A. Handle CORS Preflight (OPTIONS)
+    if (event.httpMethod === "OPTIONS") {
+        return {
+            statusCode: 204,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "Content-Type, Authorization",
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Max-Age": "86400"
+            },
+            body: ""
+        };
+    }
+
     // 1. Ambil Kredensial Asli dari Environment Variables Netlify (Tersembunyi)
     const GAS_URL = process.env.GAS_URL;
     const APP_TOKEN = process.env.APP_TOKEN;
