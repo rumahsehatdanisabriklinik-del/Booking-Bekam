@@ -628,7 +628,15 @@
                 const connector = window.GAS_URL.includes('?') ? '&' : '?';
                 const res = await fetch(`${window.GAS_URL}${connector}action=getLayananList`);
                 const result = await res.json();
-                if (result.status !== 'success' || !result.data || result.data.length === 0) return;
+                
+                const grid = document.getElementById('services-grid');
+                if (!grid) return;
+
+                if (result.status !== 'success' || !result.data || result.data.length === 0) {
+                    console.warn("Layanan Dinamis Kosong/Error:", result);
+                    grid.innerHTML = '<div class="col-span-full py-10 text-center"><p class="text-slate-400 font-bold">Layanan belum tersedia.<br><span class="font-normal text-xs">Mohon isi Daftar Layanan di Admin Panel atau jalankan Migrasi.</span></p></div>';
+                    return;
+                }
 
                 const colorMap = {
                     emerald: { bg: 'from-emerald-100 to-emerald-50', text: 'text-emerald-600', badge: 'from-emerald-500 to-emerald-600', check: 'text-emerald-500', btn: 'bg-emerald-50 text-emerald-700 hover:bg-emerald-600', shadow: 'hover:shadow-emerald-900/5' },
@@ -638,9 +646,6 @@
                     violet:  { bg: 'from-violet-100 to-violet-50',   text: 'text-violet-600',  badge: 'from-violet-500 to-violet-600',check: 'text-violet-500',  btn: 'bg-violet-50 text-violet-700 hover:bg-violet-600', shadow: 'hover:shadow-violet-900/5' },
                     amber:   { bg: 'from-amber-100 to-amber-50',     text: 'text-amber-600',   badge: 'from-amber-500 to-amber-600',  check: 'text-amber-500',   btn: 'bg-amber-50 text-amber-700 hover:bg-amber-600',shadow: 'hover:shadow-amber-900/5' },
                 };
-
-                const grid = document.getElementById('services-grid');
-                if (!grid) return;
 
                 grid.innerHTML = result.data.map((l, i) => {
                     const c = colorMap[l.warna] || colorMap.emerald;
@@ -663,12 +668,19 @@
                     }
 
                     return `<div class="relative group reveal" style="animation-delay: ${delay}s;">
-                        <div class="glass p-8 sm:p-10 rounded-[2rem] shadow-sm hover:shadow-2xl ${c.shadow} hover:-translate-y-2 transition-all duration-300 h-full flex flex-col border-white/60 overflow-hidden">
+                        <div class="glass p-8 sm:p-10 rounded-[3rem] shadow-sm hover:shadow-2xl ${c.shadow} hover:-translate-y-2 transition-all duration-300 h-full flex flex-col border-white/60 overflow-hidden">
                             ${l.terlaris ? `<div class="absolute top-0 right-0 bg-gradient-to-bl ${c.badge} text-white text-[10px] font-black px-4 sm:px-6 py-2 rounded-bl-2xl shadow-md uppercase tracking-widest">Terlaris</div>` : ''}
                             ${mediaEl}
-                            <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3 sm:mb-4">${l.nama}</h3>
-                            <p class="text-sm sm:text-base text-slate-500 font-medium leading-relaxed mb-6 sm:mb-8 flex-grow">${l.deskripsi}</p>
-                            ${details.length > 0 ? `<ul class="space-y-3 mb-8 sm:mb-10">${details.map(d => `<li class="flex items-center gap-3 text-xs sm:text-sm font-bold text-slate-600"><i class="fas fa-check-circle ${c.check} text-lg"></i> ${d}</li>`).join('')}</ul>` : ''}
+                            <!-- JUDUL (Fixed Height for Alignment) -->
+                            <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3 sm:mb-4 line-clamp-2 min-h-[3.5rem] sm:min-h-[4rem]">${l.nama}</h3>
+                            
+                            <!-- DESKRIPSI (Line Clamp & Min Height) -->
+                            <p class="text-sm sm:text-base text-slate-500 font-medium leading-relaxed mb-6 sm:mb-8 line-clamp-4 min-h-[5rem] sm:min-h-[6rem]">${l.deskripsi}</p>
+                            
+                            <!-- POIN DETAIL (Max 4 items for neatness) -->
+                            ${details.length > 0 ? `<ul class="space-y-3 mb-8 sm:mb-10 flex-grow">${details.slice(0, 4).map(d => `<li class="flex items-start gap-3 text-xs sm:text-sm font-bold text-slate-600"><i class="fas fa-check-circle ${c.check} text-lg mt-0.5"></i> <span class="line-clamp-2">${d}</span></li>`).join('')}</ul>` : '<div class="flex-grow"></div>'}
+                            
+                            <!-- TOMBOL -->
                             <a href="booking.html" class="group/btn flex items-center justify-center gap-2 w-full py-3.5 sm:py-4 rounded-xl sm:rounded-2xl ${c.btn} hover:text-white font-extrabold transition-colors duration-300">
                                 Pesan Jadwal <i class="fas fa-arrow-right text-xs group-hover/btn:translate-x-1 transition-transform"></i>
                             </a>

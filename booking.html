@@ -467,33 +467,67 @@
             list.innerHTML = "";
             container.classList.remove('hidden');
 
-            // Ambil layanan yang bisa dilakukan terapis ini (filter dari allLayanan)
+            // Debugging (cek apakah data ada)
+            if (allLayanan.length === 0) {
+                list.innerHTML = `
+                    <div class="col-span-full p-4 bg-amber-50 text-amber-700 rounded-xl text-xs font-bold border border-amber-100 text-center">
+                        <i class="fas fa-database mb-2 block text-lg"></i>
+                        Database Layanan Kosong secara teknis.<br>
+                        <span class="font-normal text-[10px]">Cek log console atau jalankan ulang Migrasi Data.</span>
+                    </div>`;
+                return;
+            }
+
+            // Normalisasi nama terapis (hapus spasi depan/belakang dan ubah kecil)
+            const cleanTarget = selectedTerapisName.toLowerCase().trim();
+
+            console.log("--- DEBUG RENDER LAYANAN ---");
+            console.log("Mencari Terapis:", cleanTarget);
+
+            // Ambil layanan yang bisa dilakukan terapis ini
             const availableServices = allLayanan.filter(lay => {
-                if (!lay.terapisKhusus || lay.terapisKhusus.length === 0) return true; // Bisa untuk semua
-                return lay.terapisKhusus.includes(selectedTerapisName);
+                // 1. Jika terapisKhusus kosong/tidak ada, tersedia untuk semua
+                if (!lay.terapisKhusus || lay.terapisKhusus.length === 0) return true;
+                
+                // 2. Jika ada pembatasan, cek kecocokan nama secara agresif
+                const isMatch = lay.terapisKhusus.some(t => {
+                    const cleanT = t.toLowerCase().trim();
+                    return cleanT === cleanTarget;
+                });
+                
+                console.log(`Layanan [${lay.nama}] -> Terapis Khusus: [${lay.terapisKhusus.join("|")}] -> Cocok? ${isMatch}`);
+                return isMatch;
             });
 
             if (availableServices.length === 0) {
-                list.innerHTML = '<div class="col-span-full text-slate-400">Tidak ada layanan khusus untuk terapis ini.</div>';
+                // Tampilkan Info Debug supaya USER bisa lapor ke AI
+                const debugInfo = allLayanan.map(l => `${l.nama}(${l.terapisKhusus.join(",")})`).join(" | ");
+                list.innerHTML = `
+                    <div class="col-span-full p-6 bg-slate-50 text-slate-500 rounded-[1.5rem] text-[11px] font-bold text-center border-2 border-dashed border-slate-200">
+                        Maaf, Terapis <b>${selectedTerapisName}</b> tidak terdaftar untuk layanan manapun di Sheet.<br>
+                        <button type="button" onclick="this.nextElementSibling.classList.toggle('hidden')" class="mt-2 text-emerald-600 underline">Klik untuk Lihat Detail Debug</button>
+                        <div class="hidden mt-4 p-3 bg-white border rounded-lg font-mono text-[9px] text-left break-all">
+                            <b>Data dari Sheet:</b><br>${debugInfo}<br><br>
+                            <b>Target:</b> [${cleanTarget}]
+                        </div>
+                    </div>`;
                 return;
             }
 
             availableServices.forEach(lay => {
                 const card = document.createElement('label');
-                card.className = "w-full";
-                const icon = (lay.nama.toLowerCase().includes('ruqyah')) ? 'fa-book-open' : 
-                             (lay.nama.toLowerCase().includes('pijat')) ? 'fa-spa' : 'fa-hand-holding-heart';
-                
-                // Gunakan base64 atau escape untuk keamanan nama yang punya tanda petik
+                card.className = "w-full cursor-pointer";
+                const iconClass = lay.icon || 'fa-hand-holding-heart';
                 const safeName = btoa(unescape(encodeURIComponent(lay.nama)));
                 
                 card.innerHTML = `
                     <input type="radio" name="layanan" value="${safeName}" class="radio-hidden" onchange="onLayananSelectedSafe('${safeName}')">
-                    <div class="pill-label">
-                        <div class="icon-wrapper w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-lg mb-1">
-                            <i class="fas ${icon}"></i>
+                    <div class="pill-label group relative overflow-hidden h-full">
+                        <div class="icon-wrapper w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-xl mb-2 group-hover:scale-110 transition-transform">
+                            <i class="fas ${iconClass}"></i>
                         </div>
-                        <span class="text-title text-xs font-bold text-slate-700">${lay.nama}</span>
+                        <span class="text-title text-[11px] font-black uppercase tracking-wider text-slate-800 leading-tight">${lay.nama}</span>
+                        ${lay.terlaris ? '<div class="absolute -top-1 -right-4 bg-amber-400 text-[8px] font-black py-0.5 px-4 rotate-45 text-white shadow-sm">TOP</div>' : ''}
                     </div>
                 `;
                 list.appendChild(card);

@@ -401,6 +401,11 @@ function renderSesi() {
     gridSesi.innerHTML = '';
     let hasValidSelection = false;
 
+    if (!allLayananData || allLayananData.length === 0) {
+        gridSesi.innerHTML = '<div class="col-span-full p-4 bg-amber-50 text-amber-700 rounded-lg text-[11px] font-bold border border-amber-100 text-center">Database Layanan Kosong. Mohon jalankan "Migrasi Data" di Admin Panel.</div>';
+        return;
+    }
+
     allLayananData.forEach(lay => {
         // Cek Syarat Hari
         let validHari = true;
@@ -412,33 +417,28 @@ function renderSesi() {
         let validTerapis = true;
         if (lay.terapisKhusus && lay.terapisKhusus.length > 0 && trp) {
             // Karena nama terapis bisa punya huruf besar/kecil berbeda
-            validTerapis = lay.terapisKhusus.some(nama => nama.toLowerCase() === trp.toLowerCase());
+            validTerapis = lay.terapisKhusus.some(nama => nama.toLowerCase().trim() === trp.toLowerCase().trim());
         }
 
-        const isAvailable = validHari && validTerapis;
+        const isAvailable = (validHari && validTerapis);
 
         const btn = document.createElement('div');
         btn.className = 'pill-btn full-width' + (isAvailable ? '' : ' disabled');
         
+        // ... (rest of logic) ...
         let label = `<i class="fas fa-briefcase-medical"></i> ${lay.nama}`;
         if (!isAvailable) {
-            // Beri tulisan abu-abu dan info syarat
             let reason = [];
-            if (!validHari) reason.push('Beda Hari');
-            if (!validTerapis) reason.push('Beda Terapis');
+            if (!validHari) reason.push('Jadwal Libur');
+            if (!validTerapis) reason.push('Terapis Beda');
             label = `<i class="fas fa-ban opacity-50"></i> <span class="opacity-50 line-through">${lay.nama}</span> <span class="text-[9px] text-red-400 ml-auto block">(${reason.join(', ')})</span>`;
-            
-            // Jika layanan ini awalnya terpilih tapi kini disable, hapus value
-            if (sesiBekamInput.value === lay.nama) {
-                sesiBekamInput.value = '';
-            }
+            if (sesiBekamInput.value === lay.nama) sesiBekamInput.value = '';
         }
 
         btn.innerHTML = label;
         
         if (isAvailable) {
             btn.onclick = () => selectPill(btn, gridSesi, sesiBekamInput, lay.nama, false);
-            // Kembalikan class active jika nama ini memang yang lagi dipilih
             if (sesiBekamInput.value === lay.nama) {
                 btn.classList.add('active');
                 hasValidSelection = true;
