@@ -58,12 +58,15 @@
         .blob { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.4; }
         .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #a7f3d0; animation: blob 15s infinite alternate; }
         .blob-2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: #99f6e4; animation: blob 15s infinite alternate; animation-delay: -5s; }
-        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.5); }
-        .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.6); }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5); }
+        /* Solid Sidebar for Mobile */
+        @media (max-width: 1023px) {
+            #sidebar { background: #ffffff !important; backdrop-filter: none !important; border-right: 1px solid #e2e8f0; }
+            #sidebarOverlay { backdrop-filter: none !important; background: rgba(15, 23, 42, 0.6) !important; }
+        }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
-</head>
 <body class="text-slate-900 antialiased h-screen overflow-hidden flex relative">
 
     <div class="bg-blobs">
@@ -93,18 +96,35 @@
     </div>
 
     <!-- ── DASHBOARD ── -->
-    <div id="dashboardScreen" class="hidden w-full h-full flex animate-fade-in z-10">
-        <aside class="w-72 sm:w-80 glass-panel border-r border-white/50 flex flex-col h-full shrink-0 shadow-[10px_0_30px_-15px_rgba(0,0,0,0.05)] relative z-20">
-            <div class="p-8 pb-6 flex items-center gap-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg shadow-emerald-500/20">
-                    <i class="fas fa-leaf"></i>
+    <div id="dashboardScreen" class="hidden w-full h-full flex animate-fade-in z-10 transition-all duration-300">
+        
+        <!-- Overlay Tanpa Blur (Hanya Gelap Halus) -->
+        <div id="sidebarOverlay" onclick="toggleSidebar(false)" class="hidden fixed inset-0 bg-slate-900/50 z-30 transition-opacity lg:hidden"></div>
+
+        <!-- Sidebar - Mobile: Solid Floating Drawer, Desktop: Sidebar -->
+        <aside id="sidebar" class="fixed lg:relative inset-y-4 lg:inset-y-0 left-4 lg:left-0 z-50 w-64 sm:w-72 bg-white lg:glass-panel border lg:border-r border-slate-200 lg:border-white/50 flex flex-col h-[calc(100%-2rem)] lg:h-full shrink-0 shadow-2xl lg:shadow-none rounded-[2.5rem] lg:rounded-none transform -translate-x-[120%] lg:translate-x-0 transition-transform duration-500 ease-in-out">
+            <div class="p-8 pb-4 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg shadow-emerald-500/20">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-extrabold text-slate-900 text-lg leading-none">Admin Panel</h2>
+                        <span class="text-[9px] font-black text-emerald-600 uppercase tracking-widest" id="adminNameTxt">Admin</span>
+                    </div>
                 </div>
-                <div>
-                    <h2 class="font-extrabold text-slate-900 text-lg leading-none">Admin Panel</h2>
-                    <span class="text-[9px] font-black text-emerald-600 uppercase tracking-widest" id="adminNameTxt">Admin</span>
-                </div>
+                <!-- Tombol Tutup Sidebar (Mobile Only) -->
+                <button onclick="toggleSidebar(false)" class="lg:hidden w-10 h-10 flex items-center justify-center bg-slate-100 text-slate-400 rounded-full hover:bg-red-50 hover:text-red-500 transition-colors">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
             </div>
-            <div class="px-6 py-4 flex-1 flex flex-col gap-2 overflow-y-auto">
+            
+            <div class="px-8 mb-2">
+                <div class="h-px bg-slate-100 mb-6"></div>
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4">Navigasi Utama</p>
+            </div>
+
+            <div class="px-6 py-2 flex-1 flex flex-col gap-2 overflow-y-auto">
                 <button class="nav-item active" onclick="switchTab('tab-reservasi', this)">
                     <div class="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-calendar-alt text-base"></i></div>
                     Data Reservasi
@@ -129,7 +149,18 @@
             </div>
         </aside>
 
-        <main class="flex-1 h-full overflow-y-auto p-6 sm:p-10 relative">
+        <main class="flex-1 h-full overflow-y-auto p-4 sm:p-10 relative">
+            <!-- Mobile Header (Ultra Compact) -->
+            <div class="lg:hidden flex items-center justify-between mb-4 p-3 bg-white shadow-md rounded-2xl border border-slate-100 z-30 relative">
+                <button onclick="toggleSidebar(true)" class="flex items-center gap-2 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-lg active:scale-95 transition-all">
+                    <i class="fas fa-bars text-sm"></i>
+                    <span class="text-[10px] font-black uppercase tracking-widest">Menu</span>
+                </button>
+                <div class="text-right">
+                    <span class="block text-[8px] font-black text-emerald-600 uppercase tracking-widest">Admin Portal</span>
+                    <span class="block text-[10px] font-black text-slate-800 uppercase tracking-tighter">Rumah Sehat DS</span>
+                </div>
+            </div>
             <div id="loader" class="hidden absolute inset-0 bg-white/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center rounded-[2rem]">
                 <div class="relative w-16 h-16">
                     <div class="absolute inset-0 rounded-full border-4 border-slate-100"></div>
@@ -141,17 +172,16 @@
             <!-- TAB 1: RESERVASI -->
             <section id="tab-reservasi" class="tab-content block animate-slide-up">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4">
-                    <div>
-                        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Manajemen Reservasi</h1>
-                        <p class="text-sm font-bold text-slate-400 mt-1">Lacak dan kelola data pasien klinik.</p>
+                    <div class="w-full">
+                        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Manajemen Reservasi</h1>
                     </div>
-                    <div class="flex gap-2">
-                        <div class="relative">
+                    <div class="flex w-full sm:w-auto gap-2 items-center">
+                        <div class="relative flex-1">
                             <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
-                            <input type="text" id="searchInput" oninput="handleSearch(this.value)" class="bg-white border-2 border-slate-100 rounded-xl px-10 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:border-emerald-500 w-64" placeholder="Cari Pasien...">
+                            <input type="text" id="searchInput" oninput="handleSearch(this.value)" class="bg-white border-2 border-slate-100 rounded-xl pl-10 pr-4 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:border-emerald-500 w-full lg:w-64" placeholder="Cari Pasien...">
                         </div>
-                        <button onclick="loadAllData()" class="bg-white text-emerald-600 border-2 border-emerald-100 px-6 py-3 rounded-xl font-bold text-sm hover:bg-emerald-50 shadow-sm transition-colors flex items-center gap-2">
-                            <i class="fas fa-sync-alt"></i> Segarkan
+                        <button onclick="loadAllData()" class="bg-white text-emerald-600 border-2 border-emerald-100 w-11 h-11 shrink-0 rounded-xl font-bold flex items-center justify-center hover:bg-emerald-50 shadow-sm transition-colors">
+                            <i class="fas fa-sync-alt"></i>
                         </button>
                     </div>
                 </div>
@@ -210,6 +240,24 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div><label class="block text-[10px] text-slate-400 uppercase tracking-[0.2em] mb-2 font-black">Username IG</label><input type="text" id="cms_instagram" class="cms-input" placeholder="@username"></div>
                                 <div><label class="block text-[10px] text-slate-400 uppercase tracking-[0.2em] mb-2 font-black">Link FB</label><input type="text" id="cms_facebook" class="cms-input" placeholder="fb.com/page"></div>
+                            </div>
+                            <div class="space-y-3">
+                                <label class="block text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black">Lencana / Badge Atas</label>
+                                <input type="text" id="cms_badge" class="cms-input" placeholder="Contoh: Klinik Terapis Profesional">
+                            </div>
+                            <div class="space-y-3 lg:col-span-2">
+                                <label class="block text-[10px] text-emerald-600 uppercase tracking-[0.2em] font-black">Link Gambar Utama (Hero Background)</label>
+                                <div class="flex gap-2">
+                                    <div class="relative flex-1">
+                                        <i class="fas fa-image absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                                        <input type="text" id="cms_hero_image" class="cms-input pl-11" placeholder="https://drive.google.com/...">
+                                    </div>
+                                    <button id="btnUploadImage" onclick="document.getElementById('fileHero').click()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 border border-slate-300/50 shadow-sm">
+                                        <i class="fas fa-cloud-upload-alt"></i> <span class="hidden sm:inline">Upload Foto</span>
+                                    </button>
+                                    <input type="file" id="fileHero" class="hidden" accept="image/*" onchange="uploadHeroImage(this)">
+                                </div>
+                                <p class="text-[9px] text-slate-400 font-bold">Direkomendasikan langsung upload dari HP/Laptop agar sinkron dengan Google Drive.</p>
                             </div>
                         </div>
                     </div>
@@ -392,8 +440,23 @@
             location.reload();
         }
 
+        function toggleSidebar(show) {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (show) {
+                sidebar.classList.remove('-translate-x-[120%]');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-[120%]');
+                overlay.classList.add('hidden');
+            }
+        }
+
         function switchTab(tabId, el) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            // Tutup sidebar di mobile setelah pilih tab
+            if (window.innerWidth < 1024) toggleSidebar(false);
+
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
             document.getElementById(tabId).classList.remove('hidden');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             el.classList.add('active');
@@ -517,7 +580,7 @@
                 if(result.status === 'success') {
                     const d = result.data;
                     const keys = [
-                        'cms_nama_klinik','cms_tagline','cms_deskripsi','cms_badge','cms_whatsapp',
+                        'cms_nama_klinik','cms_tagline','cms_deskripsi','cms_badge','cms_hero_image','cms_whatsapp',
                         'cms_alamat','cms_jam_operasional','cms_maps_link','cms_instagram','cms_facebook',
                         'cms_layanan1_nama','cms_layanan1_icon','cms_layanan1_deskripsi','cms_layanan1_detail',
                         'cms_layanan2_nama','cms_layanan2_icon','cms_layanan2_deskripsi','cms_layanan2_detail',
@@ -531,15 +594,60 @@
             } catch(e) {}
         }
 
+        async function uploadHeroImage(input) {
+            const file = input.files[0];
+            if(!file) return;
+
+            const btn = document.getElementById('btnUploadImage');
+            const originalContent = btn.innerHTML;
+            const pin = localStorage.getItem('adminPin');
+
+            btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Loading...';
+            btn.disabled = true;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const base64Data = e.target.result;
+                try {
+                    const connector = window.GAS_URL.includes('?') ? '&' : '?';
+                    const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
+                        method: 'POST',
+                        body: JSON.stringify({ 
+                            action: 'uploadImage', 
+                            pass: pin, 
+                            base64: base64Data, 
+                            fileName: file.name, 
+                            mimeType: file.type 
+                        })
+                    });
+                    const result = await res.json();
+                    if(result.status === 'success') {
+                        document.getElementById('cms_hero_image').value = result.url;
+                        alert("Berhasil diupload ke Google Drive!");
+                    } else {
+                        alert("Upload gagal: " + result.message);
+                    }
+                } catch(err) {
+                    alert("Error upload: " + err.message);
+                } finally {
+                    btn.innerHTML = originalContent;
+                    btn.disabled = false;
+                    input.value = ''; // Reset input
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
         async function saveCMS() {
             const pin = localStorage.getItem('adminPin');
             const btn = document.getElementById('btnSaveCMS');
+            const originalContent = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> menyimpan...';
             btn.disabled = true;
-
+            
             const payload = {};
             const keys = [
-                'cms_nama_klinik','cms_tagline','cms_deskripsi','cms_badge','cms_whatsapp',
+                'cms_nama_klinik','cms_tagline','cms_deskripsi','cms_badge','cms_hero_image','cms_whatsapp',
                 'cms_alamat','cms_jam_operasional','cms_maps_link','cms_instagram','cms_facebook',
                 'cms_layanan1_nama','cms_layanan1_icon','cms_layanan1_deskripsi','cms_layanan1_detail',
                 'cms_layanan2_nama','cms_layanan2_icon','cms_layanan2_deskripsi','cms_layanan2_detail',
@@ -551,14 +659,19 @@
             });
 
             try {
-                const res = await fetch(window.GAS_URL, {
+                const connector = window.GAS_URL.includes('?') ? '&' : '?';
+                const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'updateLandingSettings', pass: pin, settings: payload })
                 });
                 const result = await res.json();
-                if(result.status === 'success') alert("Website berhasil terupdate!");
-            } catch(e) { alert("Gagal update CMS."); }
-            finally { btn.innerHTML = '<i class="fas fa-save"></i> Simpan Web'; btn.disabled = false; }
+                if(result.status === 'success') {
+                    alert("Website berhasil terupdate!");
+                } else {
+                    alert("Error: " + result.message);
+                }
+            } catch(e) { alert("Gagal update CMS. Cek koneksi Anda."); }
+            finally { btn.innerHTML = originalContent; btn.disabled = false; }
         }
 
         // --- MODAL STATUS ---
@@ -574,10 +687,14 @@
             const row = document.getElementById('editRowIndex').value;
             const stat = document.getElementById('editStatus').value;
             const btn = document.getElementById('btnSaveStatus');
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Memproses...';
             btn.disabled = true;
 
             try {
-                const res = await fetch(window.GAS_URL, {
+                const connector = window.GAS_URL.includes('?') ? '&' : '?';
+                const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'adminUpdateStatus', pass: pin, row: row, status: stat })
                 });
@@ -585,9 +702,14 @@
                 if(result.status === 'success') {
                     closeModalStatus();
                     loadAllData();
+                } else {
+                    alert("Gagal update status: " + result.message);
                 }
-            } catch(e) {}
-            finally { btn.disabled = false; }
+            } catch(e) { alert("Error koneksi: Gagal memperbarui status."); }
+            finally { 
+                btn.innerHTML = originalText;
+                btn.disabled = false; 
+            }
         }
 
         // --- MODAL EMR ---
@@ -606,10 +728,14 @@
             const k = document.getElementById('emrKeluhan').value;
             const t = document.getElementById('emrTindakan').value;
             const btn = document.getElementById('btnSaveEMR');
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Menyimpan...';
             btn.disabled = true;
 
             try {
-                const res = await fetch(window.GAS_URL, {
+                const connector = window.GAS_URL.includes('?') ? '&' : '?';
+                const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'adminUpdateRekamMedis', pass: pin, row: row, tensi: '', keluhan: k, tindakan: t })
                 });
@@ -617,9 +743,14 @@
                 if(result.status === 'success') {
                     closeEMR();
                     loadAllData();
+                } else {
+                    alert("Gagal simpan EMR: " + result.message);
                 }
-            } catch(e) {}
-            finally { btn.disabled = false; }
+            } catch(e) { alert("Error koneksi: Gagal menyimpan rekam medis."); }
+            finally { 
+                btn.innerHTML = originalText;
+                btn.disabled = false; 
+            }
         }
     </script>
 </body>
