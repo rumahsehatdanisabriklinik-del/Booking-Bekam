@@ -3,30 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galeri | Rumah Sehat Dani Sabri</title>
+    <title>Galeri Foto | Rumah Sehat Dani Sabri</title>
     
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Config & Style -->
     <script src="config.js"></script>
-    <link rel="stylesheet" href="style.css">
     
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Outfit', 'sans-serif'], },
-                    colors: { emerald: { 50: '#ecfdf5', 100: '#d1fae5', 500: '#10b981', 600: '#059669', 700: '#047857', 900: '#064e3b' } }
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], },
+                    colors: { emerald: { 50: '#ecfdf5', 100: '#d1fae5', 500: '#10b981', 600: '#059669', 700: '#047857', 900: '#064e3b' } },
+                    animation: {
+                        'fade-up': 'fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'blob': 'blob 10s infinite alternate',
+                    },
+                    keyframes: {
+                        fadeUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
                 }
             }
         }
     </script>
     <style>
-        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .glass-dark { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.4); }
+        
+        .bg-blobs { position: fixed; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; z-index: -1; pointer-events: none; background-color: #f8fafc; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4; }
+        .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #a7f3d0; animation: blob 15s infinite alternate; }
+        .blob-2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: #99f6e4; animation: blob 15s infinite alternate; animation-delay: -5s; }
+
         .masonry-grid { column-count: 1; column-gap: 1.5rem; }
         @media (min-width: 640px) { .masonry-grid { column-count: 2; } }
         @media (min-width: 1024px) { .masonry-grid { column-count: 3; } }
@@ -35,63 +58,76 @@
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-slate-50 font-sans text-slate-800 antialiased selection:bg-emerald-200 selection:text-emerald-900 pt-20">
+<body class="bg-slate-50 text-slate-900 antialiased selection:bg-emerald-200 selection:text-emerald-900 overflow-x-hidden pt-28">
 
     <!-- Navbar -->
-    <nav class="fixed w-full z-50 transition-all duration-300 top-0 glass shadow-sm py-3">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="flex justify-between items-center h-16">
-                <a href="index.html" class="flex items-center gap-3 md:gap-4 group">
-                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center text-lg sm:text-xl shadow-lg shadow-emerald-500/30 group-hover:scale-105 transition-transform">
+    <!-- Background Decoration -->
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <!-- Navigation (Synced with index.html) -->
+    <nav class="fixed w-full z-50 transition-all duration-300 top-0 pt-6" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div id="navInner" class="glass-dark shadow-xl shadow-slate-200/50 rounded-[2rem] flex items-center justify-between px-6 sm:px-8 py-4">
+                <a href="index.html" class="flex items-center gap-3 group">
+                    <div id="cms-logo-nav-container" class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-bold text-lg sm:text-xl shadow-lg group-hover:rotate-6 transition-transform">
                         <i class="fas fa-leaf"></i>
                     </div>
-                    <div>
-                        <h1 class="text-lg sm:text-xl font-black text-slate-800 tracking-tight leading-tight">Dani Sabri</h1>
-                        <p class="text-[10px] sm:text-xs font-bold text-emerald-600 uppercase tracking-widest">Rumah Sehat</p>
+                    <div class="flex flex-col">
+                        <span class="font-extrabold text-base sm:text-lg text-slate-900 tracking-tight leading-none" id="cms-nama-klinik-nav">Dani Sabri</span>
+                        <span class="text-[9px] sm:text-[10px] font-bold text-emerald-600 uppercase tracking-widest mt-1">Klinik Terapi Bekam</span>
                     </div>
                 </a>
-                <div class="hidden md:flex items-center space-x-1 lg:space-x-2 bg-slate-100/50 p-1.5 rounded-full border border-slate-200/50">
-                    <a href="index.html" class="px-5 py-2 rounded-full text-sm font-bold text-slate-500 hover:text-emerald-600 transition-colors">Beranda</a>
-                    <a href="artikel.html" class="px-5 py-2 rounded-full text-sm font-bold text-slate-500 hover:text-emerald-600 transition-colors">Artikel</a>
-                    <a href="galeri.html" class="px-5 py-2 rounded-full text-sm font-bold bg-white text-emerald-600 shadow-sm transition-colors">Galeri</a>
-                    <a href="status.html" class="px-5 py-2 rounded-full text-sm font-bold text-slate-500 hover:text-emerald-600 transition-colors">Cek Status</a>
+                
+                <div class="hidden lg:flex items-center gap-8 xl:gap-10 font-bold text-sm text-slate-500 uppercase tracking-widest">
+                    <a href="index.html#services" class="hover:text-emerald-600 transition-colors">Layanan</a>
+                    <a href="artikel.html" class="hover:text-emerald-600 transition-colors">Artikel</a>
+                    <a href="galeri.html" class="text-emerald-600">Galeri</a>
+                    <a href="status.html" class="hover:text-emerald-600 transition-colors">Cek Status</a>
                 </div>
-                <a href="booking.html" class="hidden md:flex items-center gap-2 px-6 sm:px-7 py-2.5 sm:py-3 rounded-full bg-slate-900 text-white text-sm font-bold hover:bg-emerald-600 shadow-lg shadow-slate-900/20 hover:shadow-emerald-600/30 transition-all hover:-translate-y-0.5">
-                    Reservasi <i class="fas fa-arrow-right text-xs"></i>
-                </a>
-                <button id="mobileMenuBtn" class="md:hidden w-10 h-10 flex items-center justify-center text-slate-600 rounded-xl hover:bg-emerald-50 hover:text-emerald-600 transition-colors">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
+
+                <div class="flex items-center gap-4">
+                    <a href="booking.html" class="hidden sm:flex items-center gap-2 bg-gradient-to-br from-emerald-500 to-teal-600 text-white px-6 sm:px-7 py-2.5 sm:py-3 rounded-full font-bold text-sm shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/40 transition-all hover:-translate-y-0.5">
+                        Reservasi <i class="fas fa-calendar-check text-xs"></i>
+                    </a>
+                    <button id="mobileMenuBtn" class="lg:hidden w-10 h-10 flex items-center justify-center text-slate-600 rounded-xl hover:bg-emerald-50 hover:text-emerald-600 transition-colors">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
-    <div id="mobileMenu" class="fixed inset-0 z-40 bg-white transform translate-x-full transition-transform duration-300 md:hidden pt-24 px-6 pb-6 shadow-2xl flex flex-col justify-between">
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="fixed inset-0 z-[60] bg-white transform translate-x-full transition-transform duration-300 lg:hidden pt-24 px-6 pb-6 shadow-2xl flex flex-col justify-between">
         <div class="space-y-2">
-            <a href="index.html" class="block p-4 text-center rounded-2xl bg-slate-50 text-slate-600 font-bold hover:bg-emerald-50 hover:text-emerald-600 transition-colors">Beranda</a>
-            <a href="artikel.html" class="block p-4 text-center rounded-2xl bg-slate-50 text-slate-600 font-bold hover:bg-emerald-50 hover:text-emerald-600 transition-colors">Artikel & Edukasi</a>
-            <a href="galeri.html" class="block p-4 text-center rounded-2xl bg-emerald-50 text-emerald-600 font-bold transition-colors">Galeri Foto</a>
-            <a href="status.html" class="block p-4 text-center rounded-2xl bg-slate-50 text-slate-600 font-bold hover:bg-emerald-50 hover:text-emerald-600 transition-colors">Cek Status Reservasi</a>
+            <a href="index.html" class="block p-4 text-center rounded-2xl bg-slate-50 text-slate-600 font-bold hover:bg-emerald-50 hover:text-emerald-600">Beranda</a>
+            <a href="artikel.html" class="block p-4 text-center rounded-2xl bg-slate-50 text-slate-600 font-bold">Artikel & Edukasi</a>
+            <a href="galeri.html" class="block p-4 text-center rounded-2xl bg-emerald-50 text-emerald-600 font-bold">Galeri Foto</a>
+            <a href="status.html" class="block p-4 text-center rounded-2xl bg-slate-50 text-slate-600 font-bold hover:bg-emerald-50 hover:text-emerald-600">Cek Status</a>
         </div>
-        <a href="booking.html" class="block w-full py-4 text-center rounded-2xl bg-slate-900 text-white font-bold text-lg hover:bg-emerald-600 transition-colors">Reservasi Sekarang</a>
-        <button id="closeMobileMenuBtn" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center bg-slate-100 text-slate-600 rounded-full hover:bg-slate-200 transition-colors"><i class="fas fa-times text-lg"></i></button>
+        <a href="booking.html" class="block w-full py-4 text-center rounded-2xl bg-slate-900 text-white font-bold text-lg">Reservasi Sekarang</a>
+        <button id="closeMobileMenuBtn" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center bg-slate-100 text-slate-600 rounded-full"><i class="fas fa-times text-lg"></i></button>
     </div>
 
     <!-- Header -->
-    <header class="pt-16 pb-12 sm:pt-20 sm:pb-16 px-6 text-center">
-        <span class="inline-block bg-teal-50 text-teal-600 font-black tracking-[0.2em] uppercase text-[10px] sm:text-xs px-4 py-2 rounded-full mb-4">DOKUMENTASI</span>
-        <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">Galeri Kami</h1>
-        <p class="text-slate-500 font-medium max-w-2xl mx-auto text-sm sm:text-base">Melihat lebih dekat fasilitas, proses terapi, dan tim kami yang berdedikasi melayani Anda.</p>
+    <header class="pt-12 pb-12 sm:pt-16 sm:pb-16 px-6 text-center">
+        <span class="inline-block bg-teal-50 text-teal-600 font-black tracking-[0.2em] uppercase text-[10px] sm:text-xs px-4 py-2 rounded-full mb-4 animate-fade-up">DOKUMENTASI VISUAL</span>
+        <h1 class="text-3xl sm:text-4xl md:text-6xl font-extrabold text-slate-900 tracking-tight mb-4 animate-fade-up" style="animation-delay: 0.1s;">Galeri Dokumentasi</h1>
+        <p class="text-slate-500 font-medium max-w-2xl mx-auto text-base sm:text-lg animate-fade-up" style="animation-delay: 0.2s;">Melihat lebih dekat fasilitas, proses terapi, dan tim kami yang berdedikasi melayani Anda.</p>
     </header>
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-6 pb-24">
         <!-- Filter Kategori -->
-        <div class="flex justify-center mb-12">
-            <div class="flex gap-2 overflow-x-auto w-full sm:w-auto pb-4 sm:pb-0 scrollbar-hide px-4 sm:px-0" id="categoryFilter">
-                <button class="px-6 py-3 rounded-full bg-slate-900 text-white text-sm font-bold whitespace-nowrap shadow-md transition-all hover:-translate-y-0.5" data-cat="Semua">Semua</button>
-                <button class="px-6 py-3 rounded-full glass text-slate-600 text-sm font-bold whitespace-nowrap hover:bg-white hover:text-slate-900 transition-all hover:-translate-y-0.5" data-cat="Fasilitas">Fasilitas</button>
-                <button class="px-6 py-3 rounded-full glass text-slate-600 text-sm font-bold whitespace-nowrap hover:bg-white hover:text-slate-900 transition-all hover:-translate-y-0.5" data-cat="Proses">Proses Terapi</button>
-                <button class="px-6 py-3 rounded-full glass text-slate-600 text-sm font-bold whitespace-nowrap hover:bg-white hover:text-slate-900 transition-all hover:-translate-y-0.5" data-cat="Tim">Tim Kami</button>
+        <div class="flex justify-center mb-16 animate-fade-up" style="animation-delay: 0.3s;">
+            <div class="flex gap-2 p-1.5 glass rounded-full overflow-x-auto w-full sm:w-auto scrollbar-hide px-2 items-center" id="categoryFilter">
+                <button class="px-7 py-3 rounded-full bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest whitespace-nowrap shadow-lg" data-cat="Semua">Semua</button>
+                <button class="px-7 py-3 rounded-full text-slate-500 text-[10px] font-black uppercase tracking-widest whitespace-nowrap hover:bg-white hover:text-emerald-600 transition-all" data-cat="Fasilitas">Fasilitas</button>
+                <button class="px-7 py-3 rounded-full text-slate-500 text-[10px] font-black uppercase tracking-widest whitespace-nowrap hover:bg-white hover:text-emerald-600 transition-all" data-cat="Proses">Proses Terapi</button>
+                <button class="px-7 py-3 rounded-full text-slate-500 text-[10px] font-black uppercase tracking-widest whitespace-nowrap hover:bg-white hover:text-emerald-600 transition-all" data-cat="Tim">Tim Kami</button>
             </div>
         </div>
 
@@ -114,20 +150,71 @@
     </main>
 
     <!-- Lightbox Modal -->
-    <div id="lightbox" class="fixed inset-0 z-[60] bg-black/95 backdrop-blur-sm hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
-        <button onclick="closeLightbox()" class="absolute top-6 right-6 w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center backdrop-blur-md transition-all z-20 hover:scale-110">
+    <div id="lightbox" class="fixed inset-0 z-[60] bg-slate-950/95 backdrop-blur-md hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <button onclick="closeLightbox()" class="absolute top-8 right-8 w-12 h-12 bg-white/10 hover:bg-emerald-500 text-white rounded-full flex items-center justify-center backdrop-blur-md transition-all z-20 hover:scale-110 shadow-2xl">
             <i class="fas fa-times text-xl"></i>
         </button>
-        <div class="relative w-full max-w-5xl h-full sm:h-[85vh] p-4 sm:p-8 flex flex-col items-center justify-center pt-20 sm:pt-8" id="lightboxContent">
-            <div class="relative max-h-[70vh] sm:max-h-full rounded-2xl overflow-hidden shadow-2xl">
-                <img id="lightboxImg" src="" alt="" class="max-w-full max-h-[70vh] sm:max-h-full object-contain transform scale-95 transition-transform duration-300">
+        <div class="relative w-full max-w-6xl h-full sm:h-[90vh] p-4 sm:p-12 flex flex-col items-center justify-center pt-24 sm:pt-12" id="lightboxContent">
+            <div class="relative max-h-[70vh] sm:max-h-full rounded-[2rem] overflow-hidden shadow-2xl border border-white/5 bg-black">
+                <img id="lightboxImg" src="" alt="" class="max-w-full max-h-[70vh] sm:max-h-full object-contain transform scale-95 transition-transform duration-500">
             </div>
-            <div class="text-center mt-6 text-white max-w-2xl transform translate-y-4 opacity-0 transition-all duration-300 delay-100" id="lightboxText">
-                <h3 id="lightboxTitle" class="text-xl sm:text-2xl font-bold mb-2"></h3>
-                <p id="lightboxDesc" class="text-sm sm:text-base text-gray-400"></p>
+            <div class="text-center mt-10 text-white max-w-2xl transform translate-y-8 opacity-0 transition-all duration-500 delay-100" id="lightboxText">
+                <h3 id="lightboxTitle" class="text-2xl sm:text-3xl font-black mb-4 tracking-tight"></h3>
+                <p id="lightboxDesc" class="text-sm sm:text-lg text-white/60 font-medium"></p>
             </div>
         </div>
     </div>
+
+    <!-- Footer (Synced with index.html) -->
+    <footer class="bg-white border-t border-slate-100 pt-20 sm:pt-24 pb-8 sm:pb-12 relative z-10 mt-20">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16 mb-16">
+                <!-- Brand Info -->
+                <div class="md:col-span-5 space-y-6 sm:space-y-8">
+                    <a href="index.html" class="flex items-center gap-3 group inline-flex">
+                        <div id="cms-logo-footer-container" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-bold text-xl sm:text-2xl shadow-lg group-hover:rotate-6 transition-transform">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <span class="font-extrabold text-xl sm:text-2xl text-slate-900 tracking-tight" id="cms-nama-klinik-footer">Rumah Sehat Dani Sabri</span>
+                    </a>
+                    <p id="cms-footer-deskripsi" class="text-slate-500 text-base sm:text-lg leading-relaxed font-medium max-w-md">
+                        Melayani dengan hati, mengobati dengan iman. Klinik bekam dan ruqyah terbaik dengan pendekatan syariah dan standar medis modern.
+                    </p>
+                    <div class="flex gap-4">
+                        <a href="#" id="cms-instagram" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-emerald-600 hover:text-white transition-all shadow-sm"><i class="fab fa-instagram text-lg"></i></a>
+                        <a href="#" id="cms-facebook" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-emerald-600 hover:text-white transition-all shadow-sm"><i class="fab fa-facebook-f text-lg"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Links -->
+                <div class="md:col-span-3 space-y-6">
+                    <h4 class="font-black text-slate-900 uppercase tracking-widest text-xs">Portal</h4>
+                    <ul class="space-y-4 font-bold text-sm text-slate-500">
+                        <li><a href="booking.html" class="hover:text-emerald-600">Booking Online</a></li>
+                        <li><a href="status.html" class="hover:text-emerald-600">Cek Status</a></li>
+                        <li><a href="artikel.html" class="hover:text-emerald-600">Artikel & Edukasi</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div class="md:col-span-4 space-y-6">
+                    <h4 class="font-black text-slate-900 uppercase tracking-widest text-xs">Lokasi</h4>
+                    <p id="cms-alamat" class="text-slate-500 font-bold text-sm leading-relaxed whitespace-pre-line">
+                        Jl. Kesehatan No. 12, Bekasi Barat, Jawa Barat
+                    </p>
+                    <p id="cms-jam-operasional" class="text-emerald-600 font-black text-[10px] uppercase tracking-widest mt-2">
+                        Buka: 08:00 - 17:00
+                    </p>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-200 pt-8 flex justify-center md:justify-between items-center">
+                <p class="text-slate-400 text-xs font-bold tracking-widest uppercase">
+                    &copy; 2024 Rumah Sehat Dani Sabri.
+                </p>
+            </div>
+        </div>
+    </footer>
 
     <!-- Script Publik -->
     <script>
@@ -138,6 +225,40 @@
         document.getElementById('closeMobileMenuBtn').addEventListener('click', () => {
             document.getElementById('mobileMenu').classList.add('translate-x-full');
         });
+
+        // CMS Sync Logic (Synced with index.html)
+        async function syncHeaderFooter() {
+            if (typeof window.GAS_URL === 'undefined') return;
+            try {
+                const connector = window.GAS_URL.includes('?') ? '&' : '?';
+                const response = await fetch(`${window.GAS_URL}${connector}action=getLandingSettings`);
+                const result = await response.json();
+                if (result.status === "success") {
+                    const d = result.data;
+                    if(d.cms_nama_klinik) {
+                        document.getElementById('cms-nama-klinik-nav').textContent = d.cms_nama_klinik;
+                        document.getElementById('cms-nama-klinik-footer').textContent = d.cms_nama_klinik;
+                        document.title = d.cms_nama_klinik + " | Galeri Foto";
+                    }
+                    if(d.cms_alamat) document.getElementById('cms-alamat').textContent = d.cms_alamat;
+                    if(d.cms_jam_operasional) document.getElementById('cms-jam-operasional').textContent = "Buka: " + d.cms_jam_operasional;
+                    if(d.cms_footer_deskripsi) document.getElementById('cms-footer-deskripsi').textContent = d.cms_footer_deskripsi;
+                    if(d.cms_instagram) document.getElementById('cms-instagram').href = d.cms_instagram;
+                    if(d.cms_facebook) document.getElementById('cms-facebook').href = d.cms_facebook;
+                    
+                    if(d.cms_logo_image && d.cms_logo_image.trim() !== "") {
+                        let logoUrl = d.cms_logo_image;
+                        if(logoUrl.includes('drive.google.com/uc')) {
+                            try { const fileId = logoUrl.split('id=')[1].split('&')[0]; logoUrl = `https://lh3.googleusercontent.com/d/${fileId}`; } catch(e) {}
+                        }
+                        const navLogo = document.getElementById('cms-logo-nav-container');
+                        if(navLogo) navLogo.innerHTML = `<img src="${logoUrl}" class="w-full h-full object-contain rounded-xl shadow-sm">`;
+                        const footLogo = document.getElementById('cms-logo-footer-container');
+                        if(footLogo) footLogo.innerHTML = `<img src="${logoUrl}" class="w-full h-full object-contain rounded-xl shadow-sm">`;
+                    }
+                }
+            } catch (e) { console.error("CMS Sync failed", e); }
+        }
 
         let allPhotos = [];
         let currentFilter = 'Semua';
@@ -188,12 +309,12 @@
                 const boxHeight = heights[i % heights.length];
 
                 return `
-                <div class="masonry-item group cursor-pointer" onclick="openLightbox(${i})">
-                    <div class="relative w-full ${boxHeight} rounded-3xl overflow-hidden bg-slate-200">
-                        <img src="${fotoUrl}" alt="${p.judul}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out">
-                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
-                            <span class="text-emerald-400 text-[10px] font-black uppercase tracking-widest mb-1 translate-y-4 group-hover:translate-y-0 transition-transform duration-300 ease-out">${p.kategori}</span>
-                            <h3 class="text-white font-bold text-lg translate-y-4 group-hover:translate-y-0 transition-transform duration-300 ease-out delay-75">${p.judul}</h3>
+                <div class="masonry-item group cursor-pointer animate-fade-up" style="animation-delay: ${i*0.05}s" onclick="openLightbox(${allPhotos.indexOf(p)})">
+                    <div class="relative w-full ${boxHeight} rounded-[2.5rem] overflow-hidden bg-slate-200 shadow-sm group-hover:shadow-xl transition-all duration-500">
+                        <img src="${fotoUrl}" alt="${p.judul}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-out">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-8">
+                            <span class="text-emerald-400 text-[10px] font-black uppercase tracking-[0.2em] mb-2 translate-y-6 group-hover:translate-y-0 transition-transform duration-500 ease-out">${p.kategori}</span>
+                            <h3 class="text-white font-extrabold text-xl translate-y-6 group-hover:translate-y-0 transition-transform duration-500 ease-out delay-75 tracking-tight leading-tight">${p.judul}</h3>
                         </div>
                     </div>
                 </div>`;
@@ -250,11 +371,9 @@
                 // Update active state visuals
                 Array.from(document.getElementById('categoryFilter').children).forEach(btn => {
                     const isActive = btn.getAttribute('data-cat') === cat;
-                    if (isActive) {
-                        btn.className = "px-6 py-3 rounded-full bg-slate-900 text-white text-sm font-bold whitespace-nowrap shadow-md transition-all hover:-translate-y-0.5";
-                    } else {
-                        btn.className = "px-6 py-3 rounded-full glass text-slate-600 text-sm font-bold whitespace-nowrap hover:bg-white hover:text-slate-900 transition-all hover:-translate-y-0.5";
-                    }
+                    btn.className = isActive 
+                        ? "px-7 py-3 rounded-full bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest whitespace-nowrap shadow-lg"
+                        : "px-7 py-3 rounded-full text-slate-500 text-[10px] font-black uppercase tracking-widest whitespace-nowrap hover:bg-white hover:text-emerald-600 transition-all";
                 });
                 
                 // Re-render
@@ -277,7 +396,10 @@
         });
 
         // Init
-        document.addEventListener('DOMContentLoaded', loadGaleri);
+        document.addEventListener('DOMContentLoaded', () => {
+            syncHeaderFooter();
+            loadGaleri();
+        });
     </script>
 </body>
 </html>
