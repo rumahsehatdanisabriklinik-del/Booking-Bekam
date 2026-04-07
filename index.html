@@ -197,7 +197,7 @@
                     
                     <!-- Main image container -->
                     <div class="absolute inset-0 glass rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden shadow-2xl animate-float">
-                        <img src="https://images.unsplash.com/photo-1659080540643-7dcbbc530bd2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtdXNsaW0lMjB3b21hbiUyMGhpamFiJTIwdGhlcmFweSUyMHdlbGxuZXNzfGVufDF8fHx8MTc3NTQ1OTA5NXww&ixlib=rb-4.1.0&q=80&w=1080" class="w-full h-full object-cover" alt="Therapy Session">
+                        <img id="cms-hero-image" src="https://images.unsplash.com/photo-1659080540643-7dcbbc530bd2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtdXNsaW0lMjB3b21hbiUyMGhpamFiJTIwdGhlcmFweSUyMHdlbGxuZXNzfGVufDF8fHx8MTc3NTQ1OTA5NXww&ixlib=rb-4.1.0&q=80&w=1080" class="w-full h-full object-cover" alt="Therapy Session">
                         
                         <!-- Gradient Overlay -->
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/10 to-transparent"></div>
@@ -547,6 +547,10 @@
                     if(d.cms_badge) {
                         const el = document.getElementById('cms-badge');
                         if(el) el.textContent = d.cms_badge;
+                    }
+                    if(d.cms_hero_image) {
+                        const el = document.getElementById('cms-hero-image');
+                        if(el) el.src = d.cms_hero_image;
                     }
                     if(d.cms_alamat) {
                         const el = document.getElementById('cms-alamat');
