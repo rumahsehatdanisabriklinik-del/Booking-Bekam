@@ -101,6 +101,7 @@ function switchTab(tab) {
         title.textContent = "Konten Landing Page";
         sub.textContent   = "Atur teks dan informasi yang tampil di halaman utama website.";
         loadCmsSettings();
+        loadLayananData(); // Muat daftar layanan dinamis
     }
 }
 
@@ -544,5 +545,113 @@ async function saveEMR() {
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-save"></i> Simpan Rekam Medis';
         }
+    }
+}
+
+// ============================================================
+//  LAYANAN MANAGER — Daftar Layanan Dinamis
+// ============================================================
+
+let layananData = []; // State lokal
+
+async function loadLayananData() {
+    try {
+        const res = await fetch(`${GAS_URL}?action=getLayananList`);
+        const result = await res.json();
+        if (result.status === 'success') {
+            layananData = result.data || [];
+            renderLayananList();
+        }
+    } catch(e) {
+        document.getElementById('layananList').innerHTML = `<p class="text-red-500 font-bold text-sm text-center py-4"><i class="fas fa-exclamation-triangle mr-2"></i>Gagal memuat layanan: ${e.message}</p>`;
+    }
+}
+
+function renderLayananList() {
+    const container = document.getElementById('layananList');
+    if (!container) return;
+
+    if (layananData.length === 0) {
+        container.innerHTML = `<p class="text-slate-400 font-bold text-sm text-center py-8"><i class="fas fa-inbox mr-2"></i>Belum ada layanan. Klik "+ Tambah Layanan".</p>`;
+        return;
+    }
+
+    container.innerHTML = layananData.map((l, idx) => `
+        <div class="bg-white/60 border border-white rounded-[1.5rem] p-5 sm:p-6 grid md:grid-cols-2 gap-4 relative shadow-sm" id="layanan-row-${idx}">
+            <div class="absolute top-4 right-4 flex items-center gap-2">
+                <label class="flex items-center gap-1.5 cursor-pointer">
+                    <input type="checkbox" id="lay_terlaris_${idx}" ${l.terlaris ? 'checked' : ''} class="accent-teal-500 w-4 h-4">
+                    <span class="text-[10px] font-black text-teal-600 uppercase tracking-widest">Terlaris</span>
+                </label>
+                <button onclick="deleteLayananRow(${idx})" class="w-7 h-7 rounded-full bg-red-50 text-red-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all text-xs ml-1">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <div class="space-y-3 pr-24">
+                <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Layanan ${idx + 1}</div>
+                <input type="text" id="lay_nama_${idx}" value="${l.nama || ''}" class="cms-input" placeholder="Nama Layanan (cth: Bekam Basah)">
+                <input type="text" id="lay_icon_${idx}" value="${l.icon || ''}" class="cms-input !text-xs" placeholder="Icon FontAwesome (cth: fas fa-fire)">
+                <select id="lay_warna_${idx}" class="cms-input !text-xs">
+                    ${['emerald','teal','cyan','blue','violet','amber'].map(w => `<option value="${w}" ${l.warna === w ? 'selected' : ''}>${w.charAt(0).toUpperCase()+w.slice(1)}</option>`).join('')}
+                </select>
+            </div>
+            <div class="space-y-3">
+                <textarea id="lay_desk_${idx}" class="cms-input !text-xs" rows="2" placeholder="Deskripsi singkat layanan">${l.deskripsi || ''}</textarea>
+                <textarea id="lay_detail_${idx}" class="cms-input !text-xs" rows="2" placeholder="Detail keunggulan (pisahkan koma)">${l.detail || ''}</textarea>
+                <input type="text" id="lay_foto_${idx}" value="${l.foto || ''}" class="cms-input !text-xs" placeholder="Link Foto Google Drive (opsional)">
+            </div>
+        </div>
+    `).join('');
+}
+
+function addLayananRow() {
+    layananData.push({ nama: '', deskripsi: '', detail: '', icon: 'fas fa-star', foto: '', terlaris: false, warna: 'emerald' });
+    renderLayananList();
+    // Scroll ke baris baru
+    const list = document.getElementById('layananList');
+    if (list) list.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function deleteLayananRow(idx) {
+    if (!confirm(`Hapus layanan "${layananData[idx].nama || 'ini'}"?`)) return;
+    layananData.splice(idx, 1);
+    renderLayananList();
+}
+
+async function saveLayanan() {
+    // Kumpulkan data terbaru dari semua input
+    const collected = layananData.map((_, idx) => ({
+        nama:      document.getElementById(`lay_nama_${idx}`)?.value  || '',
+        deskripsi: document.getElementById(`lay_desk_${idx}`)?.value  || '',
+        detail:    document.getElementById(`lay_detail_${idx}`)?.value || '',
+        icon:      document.getElementById(`lay_icon_${idx}`)?.value  || '',
+        foto:      document.getElementById(`lay_foto_${idx}`)?.value  || '',
+        terlaris:  document.getElementById(`lay_terlaris_${idx}`)?.checked || false,
+        warna:     document.getElementById(`lay_warna_${idx}`)?.value  || 'emerald',
+    }));
+
+    const pin = localStorage.getItem('adminPin');
+    const btn = document.getElementById('btnSaveLayanan');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(GAS_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'saveLayananList', pass: pin, layanan: collected })
+        });
+        const result = await res.json();
+        if (result.status === 'success') {
+            layananData = collected;
+            alert('✅ Daftar layanan berhasil disimpan!');
+        } else {
+            alert('❌ Gagal: ' + result.message);
+        }
+    } catch(e) {
+        alert('Error koneksi: ' + e.message);
+    } finally {
+        btn.innerHTML = orig;
+        btn.disabled = false;
     }
 }
