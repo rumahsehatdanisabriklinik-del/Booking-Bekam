@@ -460,22 +460,25 @@
             }
         }
 
-        // 5. CMS Content Loader dengan Fallback Aman
-        async function loadLandingContent() {
-            // Mencegah error jika config.js tidak ada (Fallback mode)
+        // 5. CMS Content Loader Optimasi (1 Panggilan untuk Semua)
+        async function loadAllLandingData() {
             if (typeof window.GAS_URL === 'undefined') {
                 console.info("Info: GAS_URL tidak ditemukan. Menggunakan konten statis bawaan HTML.");
                 return; 
             }
 
+            const grid = document.getElementById('services-grid');
+
             try {
                 const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const response = await fetch(`${window.GAS_URL}${connector}action=getLandingSettings`);
+                const response = await fetch(`${window.GAS_URL}${connector}action=getLandingDataFull`);
                 const result = await response.json();
                 
                 if (result.status === "success") {
-                    const d = result.data;
+                    const d = result.data.settings;
+                    const layanan = result.data.layanan;
                     
+                    // --- A. PROSES PENGATURAN (SETTINGS) ---
                     if(d.cms_nama_klinik) {
                         const nav = document.getElementById('cms-nama-klinik-nav');
                         const foot = document.getElementById('cms-nama-klinik-footer');
@@ -508,7 +511,6 @@
                         const el = document.getElementById('cms-hero-image');
                         if(el) {
                             let imgUrl = d.cms_hero_image;
-                            // Auto-fix jika masih link Drive format lama
                             if(imgUrl.includes('drive.google.com/uc')) {
                                 try {
                                     const fileId = imgUrl.split('id=')[1].split('&')[0];
@@ -540,17 +542,11 @@
                         if(el && d.cms_maps_link !== "#") el.href = d.cms_maps_link;
                     }
 
-                    // Update Services
-                    updateService('cms-layanan1', d.cms_layanan1_nama, d.cms_layanan1_deskripsi, d.cms_layanan1_detail, d.cms_layanan1_icon, 'emerald');
-                    updateService('cms-layanan2', d.cms_layanan2_nama, d.cms_layanan2_deskripsi, d.cms_layanan2_detail, d.cms_layanan2_icon, 'teal');
-                    updateService('cms-layanan3', d.cms_layanan3_nama, d.cms_layanan3_deskripsi, d.cms_layanan3_detail, d.cms_layanan3_icon, 'cyan');
-
                     if(d.cms_footer_deskripsi) {
                         const el = document.getElementById('cms-footer-deskripsi');
                         if (el) el.textContent = d.cms_footer_deskripsi;
                     }
 
-                    // Logo Replacement
                     if(d.cms_logo_image && d.cms_logo_image.trim() !== "") {
                         let logoUrl = d.cms_logo_image;
                         if(logoUrl.includes('drive.google.com/uc')) {
@@ -571,130 +567,74 @@
                         }
                     }
 
-                    // Header Keunggulan
-                    if(d.cms_keunggulan_judul_kecil) document.getElementById('cms-keunggulan-judul-kecil').textContent = d.cms_keunggulan_judul_kecil;
-                    if(d.cms_keunggulan_judul_besar) document.getElementById('cms-keunggulan-judul-besar').innerHTML = d.cms_keunggulan_judul_besar;
-                    if(d.cms_keunggulan_deskripsi) document.getElementById('cms-keunggulan-deskripsi').textContent = d.cms_keunggulan_deskripsi;
-                    if(d.cms_keunggulan_poin1) document.getElementById('cms-keunggulan-poin1').textContent = d.cms_keunggulan_poin1;
-                    if(d.cms_keunggulan_poin2) document.getElementById('cms-keunggulan-poin2').textContent = d.cms_keunggulan_poin2;
+                    if(d.cms_keunggulan_judul_kecil) document.getElementById('cms-keunggulan_judul_kecil') ? document.getElementById('cms-keunggulan_judul_kecil').textContent = d.cms_keunggulan_judul_kecil : null;
+                    if(d.cms_keunggulan_judul_besar) document.getElementById('cms-keunggulan_judul_besar') ? document.getElementById('cms-keunggulan_judul_besar').innerHTML = d.cms_keunggulan_judul_besar : null;
+                    if(d.cms_keunggulan_deskripsi) document.getElementById('cms-keunggulan_deskripsi') ? document.getElementById('cms-keunggulan_deskripsi').textContent = d.cms_keunggulan_deskripsi : null;
+                    if(d.cms_keunggulan_poin1) document.getElementById('cms-keunggulan_poin1') ? document.getElementById('cms-keunggulan_poin1').textContent = d.cms_keunggulan_poin1 : null;
+                    if(d.cms_keunggulan_poin2) document.getElementById('cms-keunggulan_poin2') ? document.getElementById('cms-keunggulan_poin2').textContent = d.cms_keunggulan_poin2 : null;
 
-                    // 4 Kartu Keunggulan
                     for(let i=1; i<=4; i++) {
                         if(d[`cms_unggul${i}_nama`]) document.getElementById(`cms-unggul${i}-nama`).textContent = d[`cms_unggul${i}_nama`];
                         if(d[`cms_unggul${i}_sub`]) document.getElementById(`cms-unggul${i}-sub`).textContent = d[`cms_unggul${i}_sub`];
                         if(d[`cms_unggul${i}_icon`]) document.getElementById(`cms-unggul${i}-icon`).className = `fas ${d['cms_unggul'+i+'_icon']}`;
                     }
 
-                    // CTA
                     if(d.cms_cta_judul) document.getElementById('cms-cta-judul').innerHTML = d.cms_cta_judul;
                     if(d.cms_cta_deskripsi) document.getElementById('cms-cta-deskripsi').textContent = d.cms_cta_deskripsi;
+
+                    // --- B. PROSES LAYANAN (SERVICES) ---
+                    if (!layanan || layanan.length === 0) {
+                        grid.innerHTML = '<div class="col-span-full py-10 text-center"><p class="text-slate-400 font-bold">Layanan belum tersedia.</p></div>';
+                    } else {
+                        const colorMap = {
+                            emerald: { bg: 'from-emerald-100 to-emerald-50', text: 'text-emerald-600', badge: 'from-emerald-500 to-emerald-600', check: 'text-emerald-500', btn: 'bg-emerald-50 text-emerald-700 hover:bg-emerald-600', shadow: 'hover:shadow-emerald-900/5' },
+                            teal:    { bg: 'from-teal-100 to-teal-50',       text: 'text-teal-600',    badge: 'from-teal-500 to-teal-600',    check: 'text-teal-500',    btn: 'bg-teal-50 text-teal-700 hover:bg-teal-600',   shadow: 'hover:shadow-teal-900/5' },
+                            cyan:    { bg: 'from-cyan-100 to-cyan-50',       text: 'text-cyan-600',    badge: 'from-cyan-500 to-cyan-600',    check: 'text-cyan-500',    btn: 'bg-cyan-50 text-cyan-700 hover:bg-cyan-600',   shadow: 'hover:shadow-cyan-900/5' },
+                            blue:    { bg: 'from-blue-100 to-blue-50',       text: 'text-blue-600',    badge: 'from-blue-500 to-blue-600',    check: 'text-blue-500',    btn: 'bg-blue-50 text-blue-700 hover:bg-blue-600',   shadow: 'hover:shadow-blue-900/5' },
+                            violet:  { bg: 'from-violet-100 to-violet-50',   text: 'text-violet-600',  badge: 'from-violet-500 to-violet-600',check: 'text-violet-500',  btn: 'bg-violet-50 text-violet-700 hover:bg-violet-600', shadow: 'hover:shadow-violet-900/5' },
+                            amber:   { bg: 'from-amber-100 to-amber-50',     text: 'text-amber-600',   badge: 'from-amber-500 to-amber-600',  check: 'text-amber-500',   btn: 'bg-amber-50 text-amber-700 hover:bg-amber-600',shadow: 'hover:shadow-amber-900/5' },
+                        };
+
+                        grid.innerHTML = layanan.map((l, i) => {
+                            const c = colorMap[l.warna] || colorMap.emerald;
+                            const delay = (i * 0.1 + 0.1).toFixed(1);
+                            const details = l.detail ? l.detail.split(',').map(dx => dx.trim()).filter(Boolean) : [];
+
+                            let mediaEl = '';
+                            if (l.foto && l.foto.trim() !== '') {
+                                let fotoUrl = l.foto;
+                                if (fotoUrl.includes('drive.google.com/uc')) {
+                                    try { const id = fotoUrl.split('id=')[1].split('&')[0]; fotoUrl = `https://lh3.googleusercontent.com/d/${id}`; } catch(e) {}
+                                }
+                                mediaEl = `<div class="w-full h-40 rounded-2xl overflow-hidden mb-6 sm:mb-8 shadow-inner"><img src="${fotoUrl}" alt="${l.nama}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div>`;
+                            } else {
+                                mediaEl = `<div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-gradient-to-br ${c.bg} ${c.text} flex items-center justify-center text-2xl sm:text-3xl mb-6 sm:mb-8 shadow-inner group-hover:scale-110 transition-transform duration-300"><i class="${l.icon || 'fas fa-star'}"></i></div>`;
+                            }
+
+                            return `<div class="relative group reveal" style="animation-delay: ${delay}s;">
+                                <div class="glass p-8 sm:p-10 rounded-[3rem] shadow-sm hover:shadow-2xl ${c.shadow} hover:-translate-y-2 transition-all duration-300 h-full flex flex-col border-white/60 overflow-hidden">
+                                    ${l.terlaris ? `<div class="absolute top-0 right-0 bg-gradient-to-bl ${c.badge} text-white text-[10px] font-black px-4 sm:px-6 py-2 rounded-bl-2xl shadow-md uppercase tracking-widest">Terlaris</div>` : ''}
+                                    ${mediaEl}
+                                    <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3 sm:mb-4 line-clamp-2 min-h-[3.5rem] sm:min-h-[4rem]">${l.nama}</h3>
+                                    <p class="text-sm sm:text-base text-slate-500 font-medium leading-relaxed mb-6 sm:mb-8 line-clamp-4 min-h-[5rem] sm:min-h-[6rem]">${l.deskripsi}</p>
+                                    ${details.length > 0 ? `<ul class="space-y-3 mb-8 sm:mb-10 flex-grow">${details.slice(0, 4).map(d => `<li class="flex items-start gap-3 text-xs sm:text-sm font-bold text-slate-600"><i class="fas fa-check-circle ${c.check} text-lg mt-0.5"></i> <span class="line-clamp-2">${d}</span></li>`).join('')}</ul>` : '<div class="flex-grow"></div>'}
+                                    <a href="booking.html" class="group/btn flex items-center justify-center gap-2 w-full py-3.5 sm:py-4 rounded-xl sm:rounded-2xl ${c.btn} hover:text-white font-extrabold transition-colors duration-300">Pesan Jadwal <i class="fas fa-arrow-right text-xs group-hover/btn:translate-x-1 transition-transform"></i></a>
+                                </div>
+                            </div>`;
+                        }).join('');
+
+                        grid.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+                    }
                 }
             } catch (error) { 
-                console.error("Gagal memuat CMS (kemungkinan masalah jaringan/CORS):", error); 
-            }
-        }
-
-        function updateService(idPrefix, nama, desk, detail, icon, color) {
-            const elNama = document.getElementById(`${idPrefix}-nama`);
-            if(elNama && nama) elNama.textContent = nama;
-            
-            const elDesk = document.getElementById(`${idPrefix}-desk`);
-            if(elDesk && desk) elDesk.textContent = desk;
-
-            const elIcon = document.getElementById(`${idPrefix}-icon`);
-            if(elIcon && icon) elIcon.className = `fas fa-${icon}`;
-            
-            if(detail) {
-                const list = document.getElementById(`${idPrefix}-detail`);
-                if(list) {
-                    const items = detail.split(',').map(item => item.trim());
-                    list.innerHTML = items.map(item => `
-                        <li class="flex items-center gap-3 text-xs sm:text-sm font-bold text-slate-600">
-                            <i class="fas fa-check-circle text-${color}-500 text-lg"></i> ${item}
-                        </li>
-                    `).join('');
-                }
+                console.error("Gagal memuat data gabungan:", error); 
+                grid.innerHTML = '<div class="col-span-full py-10 text-center"><p class="text-slate-400 font-bold">Koneksi API Gagal.</p></div>';
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            loadLandingContent();
-            loadLayananDynamic();
+            loadAllLandingData();
         });
-
-        async function loadLayananDynamic() {
-            try {
-                if (!window.GAS_URL) return;
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const res = await fetch(`${window.GAS_URL}${connector}action=getLayananList`);
-                const result = await res.json();
-                
-                const grid = document.getElementById('services-grid');
-                if (!grid) return;
-
-                if (result.status !== 'success' || !result.data || result.data.length === 0) {
-                    console.warn("Layanan Dinamis Kosong/Error:", result);
-                    grid.innerHTML = '<div class="col-span-full py-10 text-center"><p class="text-slate-400 font-bold">Layanan belum tersedia.<br><span class="font-normal text-xs">Mohon isi Daftar Layanan di Admin Panel atau jalankan Migrasi.</span></p></div>';
-                    return;
-                }
-
-                const colorMap = {
-                    emerald: { bg: 'from-emerald-100 to-emerald-50', text: 'text-emerald-600', badge: 'from-emerald-500 to-emerald-600', check: 'text-emerald-500', btn: 'bg-emerald-50 text-emerald-700 hover:bg-emerald-600', shadow: 'hover:shadow-emerald-900/5' },
-                    teal:    { bg: 'from-teal-100 to-teal-50',       text: 'text-teal-600',    badge: 'from-teal-500 to-teal-600',    check: 'text-teal-500',    btn: 'bg-teal-50 text-teal-700 hover:bg-teal-600',   shadow: 'hover:shadow-teal-900/5' },
-                    cyan:    { bg: 'from-cyan-100 to-cyan-50',       text: 'text-cyan-600',    badge: 'from-cyan-500 to-cyan-600',    check: 'text-cyan-500',    btn: 'bg-cyan-50 text-cyan-700 hover:bg-cyan-600',   shadow: 'hover:shadow-cyan-900/5' },
-                    blue:    { bg: 'from-blue-100 to-blue-50',       text: 'text-blue-600',    badge: 'from-blue-500 to-blue-600',    check: 'text-blue-500',    btn: 'bg-blue-50 text-blue-700 hover:bg-blue-600',   shadow: 'hover:shadow-blue-900/5' },
-                    violet:  { bg: 'from-violet-100 to-violet-50',   text: 'text-violet-600',  badge: 'from-violet-500 to-violet-600',check: 'text-violet-500',  btn: 'bg-violet-50 text-violet-700 hover:bg-violet-600', shadow: 'hover:shadow-violet-900/5' },
-                    amber:   { bg: 'from-amber-100 to-amber-50',     text: 'text-amber-600',   badge: 'from-amber-500 to-amber-600',  check: 'text-amber-500',   btn: 'bg-amber-50 text-amber-700 hover:bg-amber-600',shadow: 'hover:shadow-amber-900/5' },
-                };
-
-                grid.innerHTML = result.data.map((l, i) => {
-                    const c = colorMap[l.warna] || colorMap.emerald;
-                    const delay = (i * 0.1 + 0.1).toFixed(1);
-                    const details = l.detail ? l.detail.split(',').map(d => d.trim()).filter(Boolean) : [];
-
-                    let mediaEl = '';
-                    if (l.foto && l.foto.trim() !== '') {
-                        let fotoUrl = l.foto;
-                        if (fotoUrl.includes('drive.google.com/uc')) {
-                            try { const id = fotoUrl.split('id=')[1].split('&')[0]; fotoUrl = `https://lh3.googleusercontent.com/d/${id}`; } catch(e) {}
-                        }
-                        mediaEl = `<div class="w-full h-40 rounded-2xl overflow-hidden mb-6 sm:mb-8 shadow-inner">
-                            <img src="${fotoUrl}" alt="${l.nama}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                        </div>`;
-                    } else {
-                        mediaEl = `<div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-gradient-to-br ${c.bg} ${c.text} flex items-center justify-center text-2xl sm:text-3xl mb-6 sm:mb-8 shadow-inner group-hover:scale-110 transition-transform duration-300">
-                            <i class="${l.icon || 'fas fa-star'}"></i>
-                        </div>`;
-                    }
-
-                    return `<div class="relative group reveal" style="animation-delay: ${delay}s;">
-                        <div class="glass p-8 sm:p-10 rounded-[3rem] shadow-sm hover:shadow-2xl ${c.shadow} hover:-translate-y-2 transition-all duration-300 h-full flex flex-col border-white/60 overflow-hidden">
-                            ${l.terlaris ? `<div class="absolute top-0 right-0 bg-gradient-to-bl ${c.badge} text-white text-[10px] font-black px-4 sm:px-6 py-2 rounded-bl-2xl shadow-md uppercase tracking-widest">Terlaris</div>` : ''}
-                            ${mediaEl}
-                            <!-- JUDUL (Fixed Height for Alignment) -->
-                            <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3 sm:mb-4 line-clamp-2 min-h-[3.5rem] sm:min-h-[4rem]">${l.nama}</h3>
-                            
-                            <!-- DESKRIPSI (Line Clamp & Min Height) -->
-                            <p class="text-sm sm:text-base text-slate-500 font-medium leading-relaxed mb-6 sm:mb-8 line-clamp-4 min-h-[5rem] sm:min-h-[6rem]">${l.deskripsi}</p>
-                            
-                            <!-- POIN DETAIL (Max 4 items for neatness) -->
-                            ${details.length > 0 ? `<ul class="space-y-3 mb-8 sm:mb-10 flex-grow">${details.slice(0, 4).map(d => `<li class="flex items-start gap-3 text-xs sm:text-sm font-bold text-slate-600"><i class="fas fa-check-circle ${c.check} text-lg mt-0.5"></i> <span class="line-clamp-2">${d}</span></li>`).join('')}</ul>` : '<div class="flex-grow"></div>'}
-                            
-                            <!-- TOMBOL -->
-                            <a href="booking.html" class="group/btn flex items-center justify-center gap-2 w-full py-3.5 sm:py-4 rounded-xl sm:rounded-2xl ${c.btn} hover:text-white font-extrabold transition-colors duration-300">
-                                Pesan Jadwal <i class="fas fa-arrow-right text-xs group-hover/btn:translate-x-1 transition-transform"></i>
-                            </a>
-                        </div>
-                    </div>`;
-                }).join('');
-
-                // Re-observe new cards for reveal animation
-                grid.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-            } catch(e) {
-                console.warn('Layanan dinamis gagal dimuat, konten bawaan tetap ditampilkan.', e);
-            }
-        }
 
 
     </script>
