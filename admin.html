@@ -150,6 +150,10 @@
                     <div class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center"><i class="fas fa-file-medical text-base"></i></div>
                     Rekam Medis (EMR)
                 </button>
+                <button class="nav-item" id="nav-database" onclick="switchTab('tab-database', this)">
+                    <div class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center"><i class="fas fa-database text-base"></i></div>
+                    Database & Migrasi
+                </button>
             </div>
             <div class="p-6 border-t border-white/50 mt-auto bg-slate-50/50">
                 <button onclick="logout()" class="w-full py-4 text-slate-500 font-bold text-sm bg-white border border-slate-200 rounded-[1.5rem] hover:bg-red-50 hover:text-red-600 hover:border-red-200 shadow-sm transition-all flex items-center justify-center gap-2">
@@ -439,6 +443,42 @@
                         </thead>
                         <tbody id="tbEMRBody"></tbody>
                     </table>
+                </div>
+            </section>
+
+            <!-- TAB 6: DATABASE & MIGRASI -->
+            <section id="tab-database" class="tab-content hidden animate-slide-up">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Database & Migrasi</h1>
+                    <p class="text-sm font-bold text-slate-400 mt-1">Kelola koneksi Neon PostgreSQL dan pindahkan data dari Google Sheets.</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="glass-panel p-8 rounded-[2rem] shadow-sm flex flex-col items-center text-center">
+                        <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm"><i class="fas fa-tools"></i></div>
+                        <h3 class="font-extrabold text-slate-800 text-lg mb-2">Inisialisasi Database</h3>
+                        <p class="text-sm text-slate-500 mb-8 px-4">Buat tabel Pasien, Booking, dan Rekam Medis di Neon. Jalankan ini **hanya satu kali** saat pertama setup.</p>
+                        <button onclick="runDatabaseInit()" id="btnDbInit" class="w-full py-4 text-white font-extrabold text-sm bg-blue-600 rounded-[1.5rem] hover:bg-blue-700 shadow-xl shadow-blue-600/20 active:scale-95 transition-all">
+                            Setup Tabel Sekarang
+                        </button>
+                    </div>
+
+                    <div class="glass-panel p-8 rounded-[2rem] shadow-sm flex flex-col items-center text-center border-emerald-500/20">
+                        <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm"><i class="fas fa-file-export"></i></div>
+                        <h3 class="font-extrabold text-slate-800 text-lg mb-2">Migrasi Data Sheets</h3>
+                        <p class="text-sm text-slate-500 mb-8 px-4">Pindahkan semua data dari Google Sheets ke Neon secara otomatis. Data lama tidak akan terhapus.</p>
+                        <button onclick="runFullMigration()" id="btnFullMigrate" class="w-full py-4 text-white font-extrabold text-sm bg-emerald-600 rounded-[1.5rem] hover:bg-emerald-700 shadow-xl shadow-emerald-600/20 active:scale-95 transition-all">
+                            Mulai Migrasi Data
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-8 p-6 bg-amber-50 rounded-3xl border border-amber-200 flex gap-4 items-start">
+                    <i class="fas fa-exclamation-triangle text-amber-500 text-xl mt-1"></i>
+                    <div>
+                        <h4 class="font-bold text-amber-800 text-sm">Penting: Backup Data</h4>
+                        <p class="text-[11px] text-amber-700 leading-relaxed font-semibold">Proses ini tidak menghapus data di Google Sheets, namun disarankan untuk mendownload backup spreadsheet sebelum memulai migrasi besar.</p>
+                    </div>
                 </div>
             </section>
         </main>
@@ -1375,6 +1415,46 @@
                 reader.onerror = () => reject(new Error("Gagal membaca file lokal."));
                 reader.readAsDataURL(file);
             });
+        }
+        // ── DATABASE & MIGRASI ──
+        async function runDatabaseInit() {
+            if(!confirm("Yakin ingin melakukan inisialisasi tabel di Neon?")) return;
+            const btn = document.getElementById('btnDbInit');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Sedang Memproses...';
+            btn.disabled = true;
+
+            try {
+                const connector = window.GAS_URL.includes('?') ? '&' : '?';
+                const pass = localStorage.getItem('adminPin');
+                const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'initDb', pass: pass })
+                });
+                const result = await res.json();
+                alert(result.message);
+            } catch(e) { alert("Error koneksi database."); }
+            finally { btn.innerHTML = orig; btn.disabled = false; }
+        }
+
+        async function runFullMigration() {
+            if(!confirm("Mulai migrasi semua data dari Sheets ke Neon? Ini mungkin memakan waktu beberapa menit.")) return;
+            const btn = document.getElementById('btnFullMigrate');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Migrasi Berjalan...';
+            btn.disabled = true;
+
+            try {
+                const connector = window.GAS_URL.includes('?') ? '&' : '?';
+                const pass = localStorage.getItem('adminPin');
+                const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'runMigrate', pass: pass })
+                });
+                const result = await res.json();
+                alert(result.message);
+            } catch(e) { alert("Error saat proses migrasi."); }
+            finally { btn.innerHTML = orig; btn.disabled = false; }
         }
     </script>
 </body>
