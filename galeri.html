@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galeri | Rumah Sehat Dani Sabri</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Config & Style -->
+    <script src="config.js"></script>
+    <link rel="stylesheet" href="style.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'], },
+                    colors: { emerald: { 50: '#ecfdf5', 100: '#d1fae5', 500: '#10b981', 600: '#059669', 700: '#047857', 900: '#064e3b' } }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); }
+        .masonry-grid { column-count: 1; column-gap: 1.5rem; }
+        @media (min-width: 640px) { .masonry-grid { column-count: 2; } }
+        @media (min-width: 1024px) { .masonry-grid { column-count: 3; } }
+        .masonry-item { break-inside: avoid; margin-bottom: 1.5rem; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 antialiased selection:bg-emerald-200 selection:text-emerald-900 pt-20">
+
+    <!-- Navbar -->
+    <nav class="fixed w-full z-50 transition-all duration-300 top-0 glass shadow-sm py-3">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex justify-between items-center h-16">
+                <a href="index.html" class="flex items-center gap-3 md:gap-4 group">
+                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center text-lg sm:text-xl shadow-lg shadow-emerald-500/30 group-hover:scale-105 transition-transform">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-xl font-black text-slate-800 tracking-tight leading-tight">Dani Sabri</h1>
+                        <p class="text-[10px] sm:text-xs font-bold text-emerald-600 uppercase tracking-widest">Rumah Sehat</p>
+                    </div>
+                </a>
+                <div class="hidden md:flex items-center space-x-1 lg:space-x-2 bg-slate-100/50 p-1.5 rounded-full border border-slate-200/50">
+                    <a href="index.html" class="px-5 py-2 rounded-full text-sm font-bold text-slate-500 hover:text-emerald-600 transition-colors">Beranda</a>
+                    <a href="artikel.html" class="px-5 py-2 rounded-full text-sm font-bold text-slate-500 hover:text-emerald-600 transition-colors">Artikel</a>
+                    <a href="galeri.html" class="px-5 py-2 rounded-full text-sm font-bold bg-white text-emerald-600 shadow-sm transition-colors">Galeri</a>
+                    <a href="status.html" class="px-5 py-2 rounded-full text-sm font-bold text-slate-500 hover:text-emerald-600 transition-colors">Cek Status</a>
+                </div>
+                <a href="booking.html" class="hidden md:flex items-center gap-2 px-6 sm:px-7 py-2.5 sm:py-3 rounded-full bg-slate-900 text-white text-sm font-bold hover:bg-emerald-600 shadow-lg shadow-slate-900/20 hover:shadow-emerald-600/30 transition-all hover:-translate-y-0.5">
+                    Reservasi <i class="fas fa-arrow-right text-xs"></i>
+                </a>
+                <button id="mobileMenuBtn" class="md:hidden w-10 h-10 flex items-center justify-center text-slate-600 rounded-xl hover:bg-emerald-50 hover:text-emerald-600 transition-colors">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+    <div id="mobileMenu" class="fixed inset-0 z-40 bg-white transform translate-x-full transition-transform duration-300 md:hidden pt-24 px-6 pb-6 shadow-2xl flex flex-col justify-between">
+        <div class="space-y-2">
+            <a href="index.html" class="block p-4 text-center rounded-2xl bg-slate-50 text-slate-600 font-bold hover:bg-emerald-50 hover:text-emerald-600 transition-colors">Beranda</a>
+            <a href="artikel.html" class="block p-4 text-center rounded-2xl bg-slate-50 text-slate-600 font-bold hover:bg-emerald-50 hover:text-emerald-600 transition-colors">Artikel & Edukasi</a>
+            <a href="galeri.html" class="block p-4 text-center rounded-2xl bg-emerald-50 text-emerald-600 font-bold transition-colors">Galeri Foto</a>
+            <a href="status.html" class="block p-4 text-center rounded-2xl bg-slate-50 text-slate-600 font-bold hover:bg-emerald-50 hover:text-emerald-600 transition-colors">Cek Status Reservasi</a>
+        </div>
+        <a href="booking.html" class="block w-full py-4 text-center rounded-2xl bg-slate-900 text-white font-bold text-lg hover:bg-emerald-600 transition-colors">Reservasi Sekarang</a>
+        <button id="closeMobileMenuBtn" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center bg-slate-100 text-slate-600 rounded-full hover:bg-slate-200 transition-colors"><i class="fas fa-times text-lg"></i></button>
+    </div>
+
+    <!-- Header -->
+    <header class="pt-16 pb-12 sm:pt-20 sm:pb-16 px-6 text-center">
+        <span class="inline-block bg-teal-50 text-teal-600 font-black tracking-[0.2em] uppercase text-[10px] sm:text-xs px-4 py-2 rounded-full mb-4">DOKUMENTASI</span>
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">Galeri Kami</h1>
+        <p class="text-slate-500 font-medium max-w-2xl mx-auto text-sm sm:text-base">Melihat lebih dekat fasilitas, proses terapi, dan tim kami yang berdedikasi melayani Anda.</p>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 pb-24">
+        <!-- Filter Kategori -->
+        <div class="flex justify-center mb-12">
+            <div class="flex gap-2 overflow-x-auto w-full sm:w-auto pb-4 sm:pb-0 scrollbar-hide px-4 sm:px-0" id="categoryFilter">
+                <button class="px-6 py-3 rounded-full bg-slate-900 text-white text-sm font-bold whitespace-nowrap shadow-md transition-all hover:-translate-y-0.5" data-cat="Semua">Semua</button>
+                <button class="px-6 py-3 rounded-full glass text-slate-600 text-sm font-bold whitespace-nowrap hover:bg-white hover:text-slate-900 transition-all hover:-translate-y-0.5" data-cat="Fasilitas">Fasilitas</button>
+                <button class="px-6 py-3 rounded-full glass text-slate-600 text-sm font-bold whitespace-nowrap hover:bg-white hover:text-slate-900 transition-all hover:-translate-y-0.5" data-cat="Proses">Proses Terapi</button>
+                <button class="px-6 py-3 rounded-full glass text-slate-600 text-sm font-bold whitespace-nowrap hover:bg-white hover:text-slate-900 transition-all hover:-translate-y-0.5" data-cat="Tim">Tim Kami</button>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading" class="text-center py-20 text-slate-400">
+            <i class="fas fa-spinner fa-spin text-3xl mb-4"></i>
+            <p class="font-bold">Memuat galeri...</p>
+        </div>
+
+        <div id="emptyState" class="hidden text-center py-20">
+            <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center text-slate-300 mx-auto mb-4 text-3xl"><i class="fas fa-image"></i></div>
+            <h3 class="text-xl font-bold text-slate-700 mb-2">Belum ada foto</h3>
+            <p class="text-slate-500">Kategori ini masih kosong.</p>
+        </div>
+
+        <!-- Masonry Grid -->
+        <div id="galleryGrid" class="masonry-grid hidden">
+            <!-- Diisi JS -->
+        </div>
+    </main>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="fixed inset-0 z-[60] bg-black/95 backdrop-blur-sm hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <button onclick="closeLightbox()" class="absolute top-6 right-6 w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center backdrop-blur-md transition-all z-20 hover:scale-110">
+            <i class="fas fa-times text-xl"></i>
+        </button>
+        <div class="relative w-full max-w-5xl h-full sm:h-[85vh] p-4 sm:p-8 flex flex-col items-center justify-center pt-20 sm:pt-8" id="lightboxContent">
+            <div class="relative max-h-[70vh] sm:max-h-full rounded-2xl overflow-hidden shadow-2xl">
+                <img id="lightboxImg" src="" alt="" class="max-w-full max-h-[70vh] sm:max-h-full object-contain transform scale-95 transition-transform duration-300">
+            </div>
+            <div class="text-center mt-6 text-white max-w-2xl transform translate-y-4 opacity-0 transition-all duration-300 delay-100" id="lightboxText">
+                <h3 id="lightboxTitle" class="text-xl sm:text-2xl font-bold mb-2"></h3>
+                <p id="lightboxDesc" class="text-sm sm:text-base text-gray-400"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Publik -->
+    <script>
+        // Mobile Menu
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+            document.getElementById('mobileMenu').classList.remove('translate-x-full');
+        });
+        document.getElementById('closeMobileMenuBtn').addEventListener('click', () => {
+            document.getElementById('mobileMenu').classList.add('translate-x-full');
+        });
+
+        let allPhotos = [];
+        let currentFilter = 'Semua';
+
+        async function loadGaleri() {
+            try {
+                const connector = window.GAS_URL.includes('?') ? '&' : '?';
+                const res = await fetch(`${window.GAS_URL}${connector}action=getGaleriList`);
+                const result = await res.json();
+                
+                document.getElementById('loading').classList.add('hidden');
+                
+                if (result.status === 'success' && result.data.length > 0) {
+                    allPhotos = result.data;
+                    renderGaleri();
+                } else {
+                    document.getElementById('emptyState').classList.remove('hidden');
+                }
+            } catch (e) {
+                document.getElementById('loading').innerHTML = `<p class="text-red-500 font-bold"><i class="fas fa-exclamation-triangle mr-2"></i>Gagal memuat galeri.</p>`;
+            }
+        }
+
+        function renderGaleri() {
+            const grid = document.getElementById('galleryGrid');
+            const empty = document.getElementById('emptyState');
+
+            const filtered = allPhotos.filter(p => currentFilter === 'Semua' || p.kategori === currentFilter);
+
+            if (filtered.length === 0) {
+                grid.classList.add('hidden');
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            grid.classList.remove('hidden');
+
+            grid.innerHTML = filtered.map((p, i) => {
+                let fotoUrl = p.url_foto;
+                if (!fotoUrl) fotoUrl = 'https://via.placeholder.com/800x600?text=No+Image';
+                if (fotoUrl.includes('drive.google.com/uc')) {
+                    try { const id = fotoUrl.split('id=')[1].split('&')[0]; fotoUrl = `https://lh3.googleusercontent.com/d/${id}`; } catch(e){}
+                }
+
+                // Random height class for masonry varied look
+                const heights = ['h-64', 'h-80', 'h-96'];
+                const boxHeight = heights[i % heights.length];
+
+                return `
+                <div class="masonry-item group cursor-pointer" onclick="openLightbox(${i})">
+                    <div class="relative w-full ${boxHeight} rounded-3xl overflow-hidden bg-slate-200">
+                        <img src="${fotoUrl}" alt="${p.judul}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                            <span class="text-emerald-400 text-[10px] font-black uppercase tracking-widest mb-1 translate-y-4 group-hover:translate-y-0 transition-transform duration-300 ease-out">${p.kategori}</span>
+                            <h3 class="text-white font-bold text-lg translate-y-4 group-hover:translate-y-0 transition-transform duration-300 ease-out delay-75">${p.judul}</h3>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // Lightbox Functions
+        function openLightbox(idx) {
+            const filtered = allPhotos.filter(p => currentFilter === 'Semua' || p.kategori === currentFilter);
+            const p = filtered[idx];
+            if (!p) return;
+
+            let fotoUrl = p.url_foto;
+            if (fotoUrl && fotoUrl.includes('drive.google.com/uc')) {
+                try { const id = fotoUrl.split('id=')[1].split('&')[0]; fotoUrl = `https://lh3.googleusercontent.com/d/${id}`; } catch(e){}
+            } else if (!fotoUrl) {
+                fotoUrl = 'https://via.placeholder.com/800x600?text=No+Image';
+            }
+
+            document.getElementById('lightboxImg').src = fotoUrl;
+            document.getElementById('lightboxTitle').textContent = p.judul;
+            document.getElementById('lightboxDesc').textContent = p.keterangan || '';
+            document.getElementById('lightboxImg').alt = p.judul;
+
+            const modal = document.getElementById('lightbox');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                document.getElementById('lightboxImg').classList.remove('scale-95');
+                document.getElementById('lightboxText').classList.remove('translate-y-4', 'opacity-0');
+                document.body.style.overflow = 'hidden';
+            }, 10);
+        }
+
+        function closeLightbox() {
+            const modal = document.getElementById('lightbox');
+            modal.classList.add('opacity-0');
+            document.getElementById('lightboxImg').classList.add('scale-95');
+            document.getElementById('lightboxText').classList.add('translate-y-4', 'opacity-0');
+            document.body.style.overflow = '';
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('lightboxImg').src = '';
+            }, 300);
+        }
+
+        // Category Filter Logic
+        document.getElementById('categoryFilter').addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                const cat = e.target.getAttribute('data-cat');
+                currentFilter = cat;
+                
+                // Update active state visuals
+                Array.from(document.getElementById('categoryFilter').children).forEach(btn => {
+                    const isActive = btn.getAttribute('data-cat') === cat;
+                    if (isActive) {
+                        btn.className = "px-6 py-3 rounded-full bg-slate-900 text-white text-sm font-bold whitespace-nowrap shadow-md transition-all hover:-translate-y-0.5";
+                    } else {
+                        btn.className = "px-6 py-3 rounded-full glass text-slate-600 text-sm font-bold whitespace-nowrap hover:bg-white hover:text-slate-900 transition-all hover:-translate-y-0.5";
+                    }
+                });
+                
+                // Re-render
+                renderGaleri();
+            }
+        });
+
+        // Close lightbox on background click
+        document.getElementById('lightbox').addEventListener('click', (e) => {
+            if (e.target.id === 'lightbox' || e.target.id === 'lightboxContent') {
+                closeLightbox();
+            }
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !document.getElementById('lightbox').classList.contains('hidden')) {
+                closeLightbox();
+            }
+        });
+
+        // Init
+        document.addEventListener('DOMContentLoaded', loadGaleri);
+    </script>
+</body>
+</html>

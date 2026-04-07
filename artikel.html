@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artikel & Edukasi | Rumah Sehat Dani Sabri</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Config & Style -->
+    <script src="config.js"></script>
+    <link rel="stylesheet" href="style.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'], },
+                    colors: { emerald: { 50: '#ecfdf5', 100: '#d1fae5', 500: '#10b981', 600: '#059669', 700: '#047857', 900: '#064e3b' } }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); }
+        .article-content h1 { font-size: 1.5rem; font-weight: bold; margin-top: 1rem; margin-bottom: 0.5rem; color: #0f172a; }
+        .article-content h2 { font-size: 1.25rem; font-weight: bold; margin-top: 1rem; margin-bottom: 0.5rem; color: #1e293b; }
+        .article-content p { margin-bottom: 1rem; line-height: 1.7; color: #475569; }
+        .article-content ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; color: #475569; }
+        .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        #modalOverlay { backdrop-filter: blur(5px); }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 antialiased selection:bg-emerald-200 selection:text-emerald-900 overflow-x-hidden pt-20">
+
+    <!-- Navbar -->
+    <nav class="fixed w-full z-50 transition-all duration-300 top-0 glass shadow-sm py-3">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex justify-between items-center h-16">
+                <a href="index.html" class="flex items-center gap-3 md:gap-4 group">
+                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center text-lg sm:text-xl shadow-lg shadow-emerald-500/30 group-hover:scale-105 transition-transform">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-xl font-black text-slate-800 tracking-tight leading-tight">Dani Sabri</h1>
+                        <p class="text-[10px] sm:text-xs font-bold text-emerald-600 uppercase tracking-widest">Rumah Sehat</p>
+                    </div>
+                </a>
+                <div class="hidden md:flex items-center space-x-1 lg:space-x-2 bg-slate-100/50 p-1.5 rounded-full border border-slate-200/50">
+                    <a href="index.html" class="px-5 py-2 rounded-full text-sm font-bold text-slate-500 hover:text-emerald-600 transition-colors">Beranda</a>
+                    <a href="artikel.html" class="px-5 py-2 rounded-full text-sm font-bold bg-white text-emerald-600 shadow-sm transition-colors">Artikel</a>
+                    <a href="galeri.html" class="px-5 py-2 rounded-full text-sm font-bold text-slate-500 hover:text-emerald-600 transition-colors">Galeri</a>
+                    <a href="status.html" class="px-5 py-2 rounded-full text-sm font-bold text-slate-500 hover:text-emerald-600 transition-colors">Cek Status</a>
+                </div>
+                <a href="booking.html" class="hidden md:flex items-center gap-2 px-6 sm:px-7 py-2.5 sm:py-3 rounded-full bg-slate-900 text-white text-sm font-bold hover:bg-emerald-600 shadow-lg shadow-slate-900/20 hover:shadow-emerald-600/30 transition-all hover:-translate-y-0.5">
+                    Reservasi <i class="fas fa-arrow-right text-xs"></i>
+                </a>
+                <button id="mobileMenuBtn" class="md:hidden w-10 h-10 flex items-center justify-center text-slate-600 rounded-xl hover:bg-emerald-50 hover:text-emerald-600 transition-colors">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+    <div id="mobileMenu" class="fixed inset-0 z-40 bg-white transform translate-x-full transition-transform duration-300 md:hidden pt-24 px-6 pb-6 shadow-2xl flex flex-col justify-between">
+        <div class="space-y-2">
+            <a href="index.html" class="block p-4 text-center rounded-2xl bg-slate-50 text-slate-600 font-bold hover:bg-emerald-50 hover:text-emerald-600 transition-colors">Beranda</a>
+            <a href="artikel.html" class="block p-4 text-center rounded-2xl bg-emerald-50 text-emerald-600 font-bold transition-colors">Artikel & Edukasi</a>
+            <a href="galeri.html" class="block p-4 text-center rounded-2xl bg-slate-50 text-slate-600 font-bold hover:bg-emerald-50 hover:text-emerald-600 transition-colors">Galeri Foto</a>
+            <a href="status.html" class="block p-4 text-center rounded-2xl bg-slate-50 text-slate-600 font-bold hover:bg-emerald-50 hover:text-emerald-600 transition-colors">Cek Status Reservasi</a>
+        </div>
+        <a href="booking.html" class="block w-full py-4 text-center rounded-2xl bg-slate-900 text-white font-bold text-lg hover:bg-emerald-600 transition-colors">Reservasi Sekarang</a>
+        <button id="closeMobileMenuBtn" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center bg-slate-100 text-slate-600 rounded-full hover:bg-slate-200 transition-colors"><i class="fas fa-times text-lg"></i></button>
+    </div>
+
+    <!-- Header -->
+    <header class="pt-16 pb-12 sm:pt-20 sm:pb-16 px-6 text-center">
+        <span class="inline-block bg-emerald-50 text-emerald-600 font-black tracking-[0.2em] uppercase text-[10px] sm:text-xs px-4 py-2 rounded-full mb-4">LITERASI KESEHATAN</span>
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">Artikel & Edukasi</h1>
+        <p class="text-slate-500 font-medium max-w-2xl mx-auto text-sm sm:text-base">Membagikan ilmu dan wawasan seputar pengobatan Thibbun Nabawi dan pola hidup sehat Islami.</p>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 pb-24">
+        <!-- Search & Filter -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-between items-center mb-12">
+            <div class="relative w-full sm:w-96 text-slate-400 focus-within:text-emerald-500">
+                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2"></i>
+                <input type="text" id="searchInput" placeholder="Cari artikel..." class="w-full pl-11 pr-4 py-3 rounded-2xl bg-white border border-slate-200 text-sm font-medium focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all text-slate-800 placeholder-slate-400">
+            </div>
+            <div class="flex gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 scrollbar-hide" id="categoryFilter">
+                <button class="px-5 py-2.5 rounded-full bg-slate-900 text-white text-sm font-bold whitespace-nowrap" data-cat="Semua">Semua Kategori</button>
+                <button class="px-5 py-2.5 rounded-full bg-white border border-slate-200 text-slate-500 text-sm font-bold hover:bg-slate-50 whitespace-nowrap" data-cat="Bekam">Bekam</button>
+                <button class="px-5 py-2.5 rounded-full bg-white border border-slate-200 text-slate-500 text-sm font-bold hover:bg-slate-50 whitespace-nowrap" data-cat="Ruqyah">Ruqyah</button>
+                <button class="px-5 py-2.5 rounded-full bg-white border border-slate-200 text-slate-500 text-sm font-bold hover:bg-slate-50 whitespace-nowrap" data-cat="Umum">Umum</button>
+            </div>
+        </div>
+
+        <!-- Artikel Grid -->
+        <div id="loading" class="text-center py-20 text-slate-400">
+            <i class="fas fa-spinner fa-spin text-3xl mb-4"></i>
+            <p class="font-bold">Memuat artikel...</p>
+        </div>
+
+        <div id="emptyState" class="hidden text-center py-20">
+            <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center text-slate-300 mx-auto mb-4 text-3xl"><i class="fas fa-newspaper"></i></div>
+            <h3 class="text-xl font-bold text-slate-700 mb-2">Belum ada artikel</h3>
+            <p class="text-slate-500">Artikel yang Anda cari tidak ditemukan.</p>
+        </div>
+
+        <div id="articlesGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 hidden">
+            <!-- Diisi JS -->
+        </div>
+    </main>
+
+    <!-- Modal Detail Artikel -->
+    <div id="articleModal" class="hidden fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 opacity-0 transition-opacity duration-300">
+        <div class="bg-white w-full max-w-3xl max-h-[90vh] rounded-[2rem] shadow-2xl flex flex-col transform scale-95 transition-transform duration-300 overflow-hidden" id="modalWindow">
+            <div class="relative h-48 sm:h-64 bg-slate-200 shrink-0" id="modalHero">
+                <!-- Foto header -->
+                <button onclick="closeArticle()" class="absolute top-4 right-4 w-10 h-10 bg-black/30 hover:bg-black/50 text-white rounded-full flex items-center justify-center backdrop-blur-md transition-colors z-10">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+            <div class="p-6 sm:p-10 overflow-y-auto">
+                <div class="flex items-center gap-3 mb-4">
+                    <span id="modalCat" class="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-md">Kategori</span>
+                    <span id="modalDate" class="text-sm font-medium text-slate-400"><i class="far fa-calendar-alt mr-1"></i> Tanggal</span>
+                </div>
+                <h2 id="modalTitle" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-6 leading-tight">Judul Artikel</h2>
+                <div id="modalBody" class="article-content">
+                    <!-- Isi artikel format HTML -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Publik -->
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+            document.getElementById('mobileMenu').classList.remove('translate-x-full');
+        });
+        document.getElementById('closeMobileMenuBtn').addEventListener('click', () => {
+            document.getElementById('mobileMenu').classList.add('translate-x-full');
+        });
+
+        let allArticles = [];
+        let currentFilter = 'Semua';
+
+        async function loadArticles() {
+            try {
+                const connector = window.GAS_URL.includes('?') ? '&' : '?';
+                const res = await fetch(`${window.GAS_URL}${connector}action=getArtikelList`);
+                const result = await res.json();
+                
+                document.getElementById('loading').classList.add('hidden');
+                
+                if (result.status === 'success' && result.data.length > 0) {
+                    allArticles = result.data;
+                    renderArticles();
+                } else {
+                    document.getElementById('emptyState').classList.remove('hidden');
+                }
+            } catch (e) {
+                document.getElementById('loading').innerHTML = `<p class="text-red-500 font-bold"><i class="fas fa-exclamation-triangle mr-2"></i>Gagal memuat artikel.</p>`;
+            }
+        }
+
+        function renderArticles() {
+            const grid = document.getElementById('articlesGrid');
+            const empty = document.getElementById('emptyState');
+            const q = document.getElementById('searchInput').value.toLowerCase();
+
+            const filtered = allArticles.filter(a => {
+                const matchCat = currentFilter === 'Semua' || a.kategori === currentFilter;
+                const matchQ = a.judul.toLowerCase().includes(q) || a.ringkasan.toLowerCase().includes(q);
+                return matchCat && matchQ;
+            });
+
+            if (filtered.length === 0) {
+                grid.classList.add('hidden');
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            grid.classList.remove('hidden');
+
+            grid.innerHTML = filtered.map((a, i) => {
+                let imgHtml = '';
+                if (a.foto) {
+                    let fotoUrl = a.foto;
+                    if (fotoUrl.includes('drive.google.com/uc')) {
+                        try { const id = fotoUrl.split('id=')[1].split('&')[0]; fotoUrl = `https://lh3.googleusercontent.com/d/${id}`; } catch(e){}
+                    }
+                    imgHtml = `<img src="${fotoUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="${a.judul}">`;
+                } else {
+                    imgHtml = `<div class="w-full h-full bg-slate-100 flex items-center justify-center text-slate-300 text-4xl"><i class="fas fa-newspaper"></i></div>`;
+                }
+
+                return `
+                <div class="glass flex flex-col rounded-[2rem] overflow-hidden group hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-900/5 transition-all duration-300 cursor-pointer border-white/60" onclick="openArticle('${a.id}')">
+                    <div class="w-full h-48 sm:h-56 overflow-hidden relative">
+                        ${imgHtml}
+                        <div class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-slate-800 text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-sm">${a.kategori}</div>
+                    </div>
+                    <div class="p-6 sm:p-8 flex flex-col flex-grow">
+                        <div class="text-sm font-medium text-slate-400 mb-3"><i class="far fa-calendar-alt mr-1"></i> ${a.tanggal}</div>
+                        <h3 class="text-xl font-extrabold text-slate-900 mb-3 group-hover:text-emerald-600 transition-colors line-clamp-2">${a.judul}</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed mb-6 flex-grow line-clamp-3">${a.ringkasan}</p>
+                        <div class="flex items-center gap-2 text-emerald-600 font-bold text-sm mt-auto">
+                            Baca Selengkapnya <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function openArticle(id) {
+            const a = allArticles.find(x => x.id === id);
+            if (!a) return;
+
+            document.getElementById('modalCat').textContent = a.kategori;
+            document.getElementById('modalDate').textContent = a.tanggal;
+            document.getElementById('modalTitle').textContent = a.judul;
+            
+            // Konversi newline ke <br> jika format teks polos, atau render HTML biasa
+            let isi = a.isi;
+            if (!isi.includes('<p>') && !isi.includes('<h1>')) {
+                isi = '<p>' + isi.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>') + '</p>';
+            }
+            document.getElementById('modalBody').innerHTML = isi;
+
+            const hero = document.getElementById('modalHero');
+            if (a.foto) {
+                let fotoUrl = a.foto;
+                if (fotoUrl.includes('drive.google.com/uc')) {
+                    try { const id = fotoUrl.split('id=')[1].split('&')[0]; fotoUrl = `https://lh3.googleusercontent.com/d/${id}`; } catch(e){}
+                }
+                hero.style.backgroundImage = `url('${fotoUrl}')`;
+                hero.style.backgroundSize = 'cover';
+                hero.style.backgroundPosition = 'center';
+            } else {
+                hero.style.backgroundImage = 'none';
+                hero.style.backgroundColor = '#f1f5f9'; // slate-100
+                hero.innerHTML = '<div class="absolute inset-0 flex items-center justify-center text-slate-300 text-6xl"><i class="fas fa-newspaper"></i></div>' + hero.innerHTML;
+            }
+
+            const modal = document.getElementById('articleModal');
+            const win = document.getElementById('modalWindow');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                win.classList.remove('scale-95');
+                document.body.style.overflow = 'hidden';
+            }, 10);
+        }
+
+        function closeArticle() {
+            const modal = document.getElementById('articleModal');
+            const win = document.getElementById('modalWindow');
+            modal.classList.add('opacity-0');
+            win.classList.add('scale-95');
+            document.body.style.overflow = '';
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('modalHero').innerHTML = `<button onclick="closeArticle()" class="absolute top-4 right-4 w-10 h-10 bg-black/30 hover:bg-black/50 text-white rounded-full flex items-center justify-center backdrop-blur-md transition-colors z-10"><i class="fas fa-times text-lg"></i></button>`;
+            }, 300);
+        }
+
+        // Event Listeners
+        document.getElementById('searchInput').addEventListener('input', renderArticles);
+        document.getElementById('categoryFilter').addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                const cat = e.target.getAttribute('data-cat');
+                currentFilter = cat;
+                
+                // Update UI buttons
+                Array.from(document.getElementById('categoryFilter').children).forEach(btn => {
+                    const isActive = btn.getAttribute('data-cat') === cat;
+                    btn.className = isActive 
+                        ? "px-5 py-2.5 rounded-full bg-slate-900 text-white text-sm font-bold whitespace-nowrap"
+                        : "px-5 py-2.5 rounded-full bg-white border border-slate-200 text-slate-500 text-sm font-bold hover:bg-slate-50 whitespace-nowrap";
+                });
+                renderArticles();
+            }
+        });
+
+        // Click outside modal to close
+        document.getElementById('articleModal').addEventListener('click', (e) => {
+            if (e.target.id === 'articleModal') closeArticle();
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', loadArticles);
+    </script>
+</body>
+</html>

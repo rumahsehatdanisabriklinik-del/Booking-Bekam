@@ -134,6 +134,14 @@
                     <div class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center"><i class="fas fa-pen-ruler text-base"></i></div>
                     Edit Landing Page
                 </button>
+                <button class="nav-item" id="nav-artikel" onclick="switchTab('tab-artikel', this)">
+                    <div class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center"><i class="fas fa-newspaper text-base"></i></div>
+                    Manajemen Artikel
+                </button>
+                <button class="nav-item" id="nav-galeri" onclick="switchTab('tab-galeri', this)">
+                    <div class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center"><i class="fas fa-images text-base"></i></div>
+                    Kelola Galeri
+                </button>
                 <button class="nav-item" id="nav-ulasan" onclick="switchTab('tab-ulasan', this)">
                     <div class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center"><i class="fas fa-star text-base"></i></div>
                     Ulasan Pasien
@@ -357,7 +365,53 @@
                 </div>
             </section>
 
-            <!-- TAB 3: ULASAN -->
+            <!-- TAB 3: ARTIKEL -->
+            <section id="tab-artikel" class="tab-content hidden animate-slide-up">
+                <div class="mb-8 flex justify-between items-end">
+                    <div>
+                        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Manajemen Artikel</h1>
+                        <p class="text-sm font-bold text-slate-400 mt-1">Buat, edit, dan kelola artikel blog/edukasi.</p>
+                    </div>
+                    <button onclick="addArtikelRow()" class="bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-indigo-700 shadow-md transition-all flex items-center gap-2">
+                        <i class="fas fa-plus"></i> Artikel Baru
+                    </button>
+                </div>
+                <div class="glass-panel p-6 rounded-[2rem] shadow-sm mb-6">
+                    <div id="artikelList" class="space-y-4">
+                        <p class="text-slate-400 font-bold text-sm text-center py-8"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat artikel...</p>
+                    </div>
+                </div>
+                <div class="flex justify-end pr-2">
+                    <button id="btnSaveArtikel" onclick="saveArtikelList()" class="bg-slate-900 text-white px-8 py-3.5 rounded-[1.5rem] font-extrabold text-sm hover:bg-indigo-600 shadow-xl active:scale-95 transition-all text-center flex items-center gap-2">
+                        <i class="fas fa-save"></i> Simpan Semua Artikel
+                    </button>
+                </div>
+            </section>
+
+            <!-- TAB 4: GALERI -->
+            <section id="tab-galeri" class="tab-content hidden animate-slide-up">
+                <div class="mb-8 flex justify-between items-end">
+                    <div>
+                        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Kelola Galeri</h1>
+                        <p class="text-sm font-bold text-slate-400 mt-1">Atur foto-foto yang tampil di halaman Galeri.</p>
+                    </div>
+                    <button onclick="addGaleriRow()" class="bg-violet-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-violet-700 shadow-md transition-all flex items-center gap-2">
+                        <i class="fas fa-plus"></i> Tambah Foto
+                    </button>
+                </div>
+                <div class="glass-panel p-6 rounded-[2rem] shadow-sm mb-6">
+                    <div id="galeriList" class="space-y-4">
+                        <p class="text-slate-400 font-bold text-sm text-center py-8"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat galeri...</p>
+                    </div>
+                </div>
+                <div class="flex justify-end pr-2">
+                    <button id="btnSaveGaleri" onclick="saveGaleriList()" class="bg-slate-900 text-white px-8 py-3.5 rounded-[1.5rem] font-extrabold text-sm hover:bg-violet-600 shadow-xl active:scale-95 transition-all flex items-center gap-2">
+                        <i class="fas fa-save"></i> Simpan Urutan Galeri
+                    </button>
+                </div>
+            </section>
+
+            <!-- TAB 5: ULASAN -->
             <section id="tab-ulasan" class="tab-content hidden animate-slide-up">
                 <div class="mb-8">
                     <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Ulasan Pasien</h1>
@@ -466,8 +520,10 @@
             if(pin) {
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('dashboardScreen').classList.remove('hidden');
+                document.getElementById('adminNameTxt').textContent = localStorage.getItem('adminNama') || 'Admin';
                 loadAllData();
                 loadCMSData();
+                loadLayananList();
             }
         });
 
@@ -519,6 +575,13 @@
             document.getElementById(tabId).classList.remove('hidden');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             el.classList.add('active');
+
+            if (tabId === 'tab-artikel') loadArtikelListAdmin();
+            if (tabId === 'tab-galeri') loadGaleriListAdmin();
+            if (tabId === 'tab-cms') {
+                loadCMSData();
+                loadLayananList();
+            }
         }
 
         async function loadAllData() {
@@ -630,7 +693,133 @@
             document.getElementById('loader').classList.toggle('hidden', !show);
         }
 
-        // --- END DUPLICATE INLINE CMS LOGIC ---
+        // --- CMS & LAYANAN MANAGER ---
+        async function loadCMSData() {
+            try {
+                const connector = window.GAS_URL.includes('?') ? '&' : '?';
+                const res = await fetch(`${window.GAS_URL}${connector}action=getLandingSettings`);
+                const result = await res.json();
+                if (result.status === 'success') {
+                    const data = result.data;
+                    for (const key in data) {
+                        const el = document.getElementById(key);
+                        if (el) el.value = data[key];
+                    }
+                }
+            } catch (e) { console.error("Gagal load CMS:", e); }
+        }
+
+        async function saveCMS() {
+            const pin = localStorage.getItem('adminPin');
+            const btn = document.getElementById('btnSaveCMS');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Sinkronkan...';
+            btn.disabled = true;
+
+            const updatedData = {};
+            const inputs = document.querySelectorAll('#tab-cms input, #tab-cms textarea');
+            inputs.forEach(input => {
+                if (input.id && input.id.startsWith('cms_')) {
+                    updatedData[input.id] = input.value;
+                }
+            });
+
+            try {
+                const connector = window.GAS_URL.includes('?') ? '&' : '?';
+                const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'updateLandingSettings', pass: pin, updatedData: updatedData })
+                });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    alert("✅ Web Berhasil Disinkronkan (Cache dibersihkan)!");
+                } else {
+                    alert("❌ Gagal: " + result.message);
+                }
+            } catch (e) { alert("Error koneksi ke server."); }
+            finally { btn.innerHTML = orig; btn.disabled = false; }
+        }
+
+        let currentLayanan = [];
+        async function loadLayananList() {
+            try {
+                const connector = window.GAS_URL.includes('?') ? '&' : '?';
+                const res = await fetch(`${window.GAS_URL}${connector}action=getLayananList`);
+                const result = await res.json();
+                if (result.status === 'success') {
+                    currentLayanan = result.data || [];
+                    renderLayananList();
+                }
+            } catch (e) { }
+        }
+
+        function renderLayananList() {
+            const container = document.getElementById('layananList');
+            container.innerHTML = currentLayanan.map((l, idx) => `
+                <div class="bg-white/60 border border-white rounded-[1.5rem] p-5 shadow-sm relative group">
+                    <button onclick="deleteLayananRow(${idx})" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">
+                        <i class="fas fa-trash-alt text-xs"></i>
+                    </button>
+                    <div class="grid md:grid-cols-12 gap-4">
+                        <div class="md:col-span-4 space-y-3">
+                            <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nama & Icon Layanan</label>
+                            <input type="text" class="cms-input !py-3" id="lay_nama_${idx}" value="${l.nama}" placeholder="Cth: Bekam Sunnah">
+                            <input type="text" class="cms-input !py-3" id="lay_icon_${idx}" value="${l.icon}" placeholder="Cth: fas fa-leaf">
+                        </div>
+                        <div class="md:col-span-8 space-y-3">
+                            <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Deskripsi & Detail Layanan</label>
+                            <textarea class="cms-input !py-3 !text-xs" id="lay_desc_${idx}" rows="1" placeholder="Penjelasan singkat">${l.deskripsi}</textarea>
+                            <textarea class="cms-input !py-3 !text-xs" id="lay_detail_${idx}" rows="1" placeholder="Item detail (Pisahkan dengan koma)">${l.detail}</textarea>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addLayananRow() {
+            currentLayanan.push({ nama: '', deskripsi: '', detail: '', icon: 'fas fa-leaf', foto: '', terlaris: false, warna: 'emerald' });
+            renderLayananList();
+        }
+
+        function deleteLayananRow(idx) {
+            if(!confirm("Hapus layanan ini?")) return;
+            currentLayanan.splice(idx, 1);
+            renderLayananList();
+        }
+
+        async function saveLayanan() {
+            const pin = localStorage.getItem('adminPin');
+            const btn = document.getElementById('btnSaveLayanan');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Menyimpan...';
+            btn.disabled = true; 
+
+            const dataToSave = currentLayanan.map((_, idx) => ({
+                nama: document.getElementById(`lay_nama_${idx}`).value,
+                icon: document.getElementById(`lay_icon_${idx}`).value,
+                deskripsi: document.getElementById(`lay_desc_${idx}`).value,
+                detail: document.getElementById(`lay_detail_${idx}`).value,
+                foto: '',
+                terlaris: false,
+                warna: 'emerald'
+            }));
+
+            try {
+                const connector = window.GAS_URL.includes('?') ? '&' : '?';
+                const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'saveLayananList', pass: pin, layananData: dataToSave })
+                });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    alert("✅ Daftar Layanan Berhasil Diperbarui!");
+                    loadLayananList();
+                } else { alert("Gagal simpan layanan: " + result.message); }
+            } catch (e) { alert("Error koneksi saat simpan layanan."); }
+            finally { btn.innerHTML = orig; btn.disabled = false; }
+        }
+
+        // --- END CMS & LAYANAN MANAGER ---
 
         // --- MODAL STATUS ---
         function openModalStatus(row, current) {
@@ -709,6 +898,298 @@
                 btn.innerHTML = originalText;
                 btn.disabled = false; 
             }
+        }
+
+        // --- ARTIKEL MANAGER ---
+        let artikelData = [];
+        async function loadArtikelListAdmin() {
+            try {
+                const pin = localStorage.getItem('adminPin');
+                document.getElementById('artikelList').innerHTML = '<p class="text-slate-400 font-bold text-sm text-center py-8"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat artikel...</p>';
+                const connector = window.GAS_URL.includes('?') ? '&' : '?';
+                const res = await fetch(`${window.GAS_URL}${connector}action=getArtikelListAdmin&pass=${encodeURIComponent(pin)}`);
+                const result = await res.json();
+                if (result.status === 'success') {
+                    artikelData = result.data || [];
+                    renderArtikelList();
+                } else { alert("Gagal memuat artikel: " + result.message); }
+            } catch(e) { alert("Error koneksi saat memuat artikel."); }
+        }
+
+        function renderArtikelList() {
+            const container = document.getElementById('artikelList');
+            if (artikelData.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 font-bold text-sm text-center py-8"><i class="fas fa-inbox mr-2"></i>Belum ada artikel. Klik "+ Artikel Baru".</p>`;
+                return;
+            }
+            container.innerHTML = artikelData.map((a, idx) => `
+                <div class="bg-white/60 border border-white rounded-[1.5rem] p-5 sm:p-6 grid lg:grid-cols-12 gap-4 relative shadow-sm" id="artikel-row-${idx}">
+                    <div class="absolute top-4 right-4 flex items-center gap-2">
+                        <input type="hidden" id="art_id_${idx}" value="${a.id || ''}">
+                        <input type="hidden" id="art_tgl_${idx}" value="${a.tanggal || ''}">
+                        <select id="art_status_${idx}" class="text-xs font-bold rounded-lg px-2 py-1 bg-slate-100 border-none outline-none ${a.status==='published' ? 'text-emerald-600':'text-amber-600'}">
+                            <option value="draft" ${a.status!=='published'?'selected':''}>Draft</option>
+                            <option value="published" ${a.status==='published'?'selected':''}>Published</option>
+                        </select>
+                        <button onclick="deleteArtikelRecord('${a.id}', ${idx})" class="w-7 h-7 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all text-xs" title="Hapus">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="lg:col-span-4 space-y-3">
+                        <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Judul & Kategori</label>
+                        <input type="text" id="art_judul_${idx}" value="${a.judul || ''}" class="cms-input" placeholder="Judul Artikel">
+                        <div class="flex gap-2">
+                            <input type="text" id="art_kat_${idx}" value="${a.kategori || ''}" class="cms-input w-1/2" placeholder="Kategori">
+                            <div class="relative w-1/2">
+                                <input type="text" id="art_foto_${idx}" value="${a.foto || ''}" class="cms-input !pr-10" placeholder="Link Foto">
+                                <button onclick="document.getElementById('file_art_${idx}').click()" class="absolute right-2 top-1/2 -translate-y-1/2 text-emerald-500 hover:text-emerald-700"><i class="fas fa-cloud-upload-alt"></i></button>
+                                <input type="file" id="file_art_${idx}" class="hidden" accept="image/*" onchange="uploadArtikelImage(this, ${idx})">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-8 space-y-3 pt-6 lg:pt-0">
+                        <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Konten Artikel</label>
+                        <textarea id="art_ringkasan_${idx}" class="cms-input !text-xs mb-2" rows="1" placeholder="Ringkasan (tampil di kartu luar)">${a.ringkasan || ''}</textarea>
+                        <textarea id="art_isi_${idx}" class="cms-input !text-xs font-mono" rows="4" placeholder="Isi Artikel (bisa pakai HTML <p>, <b>, <ul>)">${a.isi || ''}</textarea>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addArtikelRow() {
+            artikelData.unshift({ id: '', judul: '', ringkasan: '', isi: '', foto: '', kategori: 'Umum', tanggal: '', status: 'draft' });
+            renderArtikelList();
+        }
+
+        async function saveArtikelList() {
+            const pin = localStorage.getItem('adminPin');
+            const btn = document.getElementById('btnSaveArtikel');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+            btn.disabled = true;
+
+            let successCount = 0;
+            try {
+                for (let idx = 0; idx < artikelData.length; idx++) {
+                    const elId = document.getElementById(`art_id_${idx}`);
+                    if (!elId) continue;
+                    
+                    const data = {
+                        id: elId.value,
+                        judul: document.getElementById(`art_judul_${idx}`).value,
+                        ringkasan: document.getElementById(`art_ringkasan_${idx}`).value,
+                        isi: document.getElementById(`art_isi_${idx}`).value,
+                        foto: document.getElementById(`art_foto_${idx}`).value,
+                        kategori: document.getElementById(`art_kat_${idx}`).value,
+                        tanggal: document.getElementById(`art_tgl_${idx}`).value,
+                        status: document.getElementById(`art_status_${idx}`).value
+                    };
+                    
+                    if (!data.judul) continue;
+
+                    const connector = window.GAS_URL.includes('?') ? '&' : '?';
+                    const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'saveArtikel', pass: pin, artikelData: data })
+                    });
+                    const result = await res.json();
+                    if(result.status === 'success') successCount++;
+                }
+                alert(`✅ Berhasil menyimpan ${successCount} artikel.`);
+                loadArtikelListAdmin();
+            } catch(e) { alert("Error saat menyimpan artikel."); }
+            finally { btn.innerHTML = orig; btn.disabled = false; }
+        }
+
+        async function deleteArtikelRecord(id, idx) {
+            if (!id) {
+                // Remove local draft
+                artikelData.splice(idx, 1);
+                renderArtikelList();
+                return;
+            }
+            if(!confirm("Yakin hapus artikel ini permanen?")) return;
+            try {
+                const pin = localStorage.getItem('adminPin');
+                const connector = window.GAS_URL.includes('?') ? '&' : '?';
+                const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'deleteArtikel', pass: pin, artikelId: id })
+                });
+                const result = await res.json();
+                if(result.status === 'success') {
+                    alert("Artikel dihapus.");
+                    loadArtikelListAdmin();
+                } else { alert("Gagal menghapus: " + result.message); }
+            } catch(e) { alert("Error saat menghapus."); }
+        }
+
+        // --- GALERI MANAGER ---
+        let galeriData = [];
+        async function loadGaleriListAdmin() {
+            try {
+                const pin = localStorage.getItem('adminPin');
+                document.getElementById('galeriList').innerHTML = '<p class="text-slate-400 font-bold text-sm text-center py-8"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat galeri...</p>';
+                const connector = window.GAS_URL.includes('?') ? '&' : '?';
+                const res = await fetch(`${window.GAS_URL}${connector}action=getGaleriList`);
+                const result = await res.json();
+                if (result.status === 'success') {
+                    galeriData = result.data || [];
+                    renderGaleriList();
+                } else { alert("Gagal memuat galeri."); }
+            } catch(e) { }
+        }
+
+        function renderGaleriList() {
+            const container = document.getElementById('galeriList');
+            if (galeriData.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 font-bold text-sm text-center py-8"><i class="fas fa-inbox mr-2"></i>Belum ada foto.</p>`;
+                return;
+            }
+            container.innerHTML = galeriData.map((g, idx) => `
+                <div class="bg-white/60 border border-white rounded-[1.5rem] p-4 sm:p-5 flex flex-col md:flex-row gap-4 relative shadow-sm items-center">
+                    <button onclick="deleteGaleriRow(${idx})" class="absolute top-2 right-2 w-6 h-6 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all text-[10px]">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="w-20 h-20 bg-slate-200 rounded-xl shrink-0 overflow-hidden">
+                        ${g.url_foto ? `<img src="${g.url_foto.includes('id=') ? 'https://lh3.googleusercontent.com/d/'+g.url_foto.split('id=')[1].split('&')[0] : g.url_foto}" class="w-full h-full object-cover">` : `<div class="w-full h-full flex items-center justify-center text-slate-400"><i class="fas fa-image text-xl"></i></div>`}
+                    </div>
+                    <div class="flex-grow grid grid-cols-2 md:grid-cols-4 gap-3 w-full">
+                        <div class="col-span-2">
+                            <input type="text" id="gal_judul_${idx}" value="${g.judul || ''}" class="cms-input !text-xs" placeholder="Judul Foto">
+                            <div class="relative mt-2">
+                                <input type="text" id="gal_url_${idx}" value="${g.url_foto || ''}" class="cms-input !text-xs !pr-8" placeholder="Link GDrive">
+                                <button onclick="document.getElementById('file_gal_${idx}').click()" class="absolute right-2 top-1/2 -translate-y-1/2 text-emerald-500 hover:text-emerald-700"><i class="fas fa-cloud-upload-alt"></i></button>
+                                <input type="file" id="file_gal_${idx}" class="hidden" accept="image/*" onchange="uploadGaleriImage(this, ${idx})">
+                            </div>
+                        </div>
+                        <div class="col-span-2">
+                            <div class="flex gap-2">
+                                <input type="text" id="gal_kat_${idx}" value="${g.kategori || ''}" class="cms-input !text-xs w-2/3" placeholder="Kategori">
+                                <input type="number" id="gal_urut_${idx}" value="${g.urutan || (idx+1)}" class="cms-input !text-xs w-1/3" placeholder="Urutan">
+                            </div>
+                            <input type="text" id="gal_ket_${idx}" value="${g.keterangan || ''}" class="cms-input !text-xs mt-2" placeholder="Keterangan foto">
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addGaleriRow() {
+            galeriData.push({ id: '', judul: '', url_foto: '', kategori: 'Fasilitas', urutan: galeriData.length+1, keterangan: '' });
+            renderGaleriList();
+        }
+
+        function deleteGaleriRow(idx) {
+            if(!confirm("Hapus baris ini?")) return;
+            galeriData.splice(idx, 1);
+            renderGaleriList();
+        }
+
+        async function saveGaleriList() {
+            const pin = localStorage.getItem('adminPin');
+            const btn = document.getElementById('btnSaveGaleri');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+            btn.disabled = true;
+
+            const payload = galeriData.map((_, idx) => ({
+                id: galeriData[idx].id || '',
+                judul: document.getElementById(`gal_judul_${idx}`).value,
+                url_foto: document.getElementById(`gal_url_${idx}`).value,
+                kategori: document.getElementById(`gal_kat_${idx}`).value,
+                urutan: parseInt(document.getElementById(`gal_urut_${idx}`).value) || 999,
+                keterangan: document.getElementById(`gal_ket_${idx}`).value
+            }));
+
+            try {
+                const connector = window.GAS_URL.includes('?') ? '&' : '?';
+                const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'saveGaleri', pass: pin, galeriData: payload })
+                });
+                const result = await res.json();
+                if(result.status === 'success') {
+                    alert('✅ Galeri berhasil disimpan!');
+                    loadGaleriListAdmin();
+                } else { alert("Gagal: " + result.message); }
+            } catch(e) { alert("Error menyimpan galeri."); }
+            finally { btn.innerHTML = orig; btn.disabled = false; }
+        }
+
+        // --- IMAGE UPLOAD HELPERS ---
+        async function uploadGaleriImage(input, idx) {
+            const file = input.files[0];
+            if(!file) return;
+            
+            const btn = input.previousElementSibling;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
+            
+            try {
+                const url = await uploadToDrive(file);
+                document.getElementById(`gal_url_${idx}`).value = url;
+                // Refresh preview jika ada
+                renderGaleriList();
+            } catch(e) { alert(e.message); }
+            finally { btn.innerHTML = originalHTML; }
+        }
+
+        async function uploadArtikelImage(input, idx) {
+            const file = input.files[0];
+            if(!file) return;
+            
+            const btn = input.previousElementSibling;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
+            
+            try {
+                const url = await uploadToDrive(file);
+                document.getElementById(`art_foto_${idx}`).value = url;
+            } catch(e) { alert(e.message); }
+            finally { btn.innerHTML = originalHTML; }
+        }
+
+        async function uploadHeroImage(input) {
+            const file = input.files[0];
+            if(!file) return;
+            
+            const btn = document.getElementById('btnUploadImage');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Sejenak...';
+            
+            try {
+                const url = await uploadToDrive(file);
+                document.getElementById('cms_hero_image').value = url;
+                alert("✅ Foto Hero berhasil diupdate!");
+            } catch(e) { alert(e.message); }
+            finally { btn.innerHTML = originalHTML; }
+        }
+
+        async function uploadToDrive(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const pin = localStorage.getItem('adminPin');
+                        const connector = window.GAS_URL.includes('?') ? '&' : '?';
+                        const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                action: 'uploadImage',
+                                pass: pin,
+                                base64: e.target.result,
+                                fileName: file.name,
+                                mimeType: file.type
+                            })
+                        });
+                        const result = await res.json();
+                        if(result.status === 'success') resolve(result.url);
+                        else reject(new Error(result.message));
+                    } catch(err) { reject(new Error("Gagal terhubung ke server upload.")); }
+                };
+                reader.readAsDataURL(file);
+            });
         }
     </script>
 </body>
