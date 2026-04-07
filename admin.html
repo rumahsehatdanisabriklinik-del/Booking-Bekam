@@ -59,6 +59,7 @@
         .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #a7f3d0; animation: blob 15s infinite alternate; }
         .blob-2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: #99f6e4; animation: blob 15s infinite alternate; animation-delay: -5s; }
         .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5); }
+        .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
         /* Solid Sidebar for Mobile */
         @media (max-width: 1023px) {
             #sidebar { background: #ffffff !important; backdrop-filter: none !important; border-right: 1px solid #e2e8f0; }
@@ -295,6 +296,71 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- CMS: Pengaturan Tambahan (Logo, Footer, Keunggulan, CTA) -->
+                    <div class="lg:col-span-2 glass-panel p-8 rounded-[2rem] shadow-sm mt-8">
+                        <div class="flex items-center gap-3 mb-8 pb-4 border-b border-white text-emerald-800">
+                            <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-lg"><i class="fas fa-layer-group"></i></div>
+                            <h3 class="font-extrabold text-lg">Pengaturan Tambahan (Keunggulan, CTA, Footer)</h3>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <!-- Logo & Footer -->
+                            <div class="space-y-4 bg-white/50 border border-white p-6 rounded-[2rem]">
+                                <h4 class="font-bold text-slate-800"><i class="fas fa-image text-emerald-500"></i> Logo & Footer</h4>
+                                <div><label class="block text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Link Gambar Logo (G-Drive)</label><input type="text" id="cms_logo_image" class="cms-input" placeholder="Jika kosong, pakai logo bawaan"></div>
+                                <div><label class="block text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Teks Pendek Footer</label><textarea id="cms_footer_deskripsi" class="cms-input" rows="3"></textarea></div>
+                            </div>
+                            
+                            <!-- Call To Action -->
+                            <div class="space-y-4 bg-white/50 border border-white p-6 rounded-[2rem]">
+                                <h4 class="font-bold text-slate-800"><i class="fas fa-bullhorn text-teal-500"></i> Call To Action (Banner)</h4>
+                                <div><label class="block text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Judul Kalimat Ajakan</label><input type="text" id="cms_cta_judul" class="cms-input"></div>
+                                <div><label class="block text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Deskripsi Tambahan</label><textarea id="cms_cta_deskripsi" class="cms-input" rows="3"></textarea></div>
+                            </div>
+
+                            <!-- Header Keunggulan -->
+                            <div class="md:col-span-2 space-y-4 bg-white/50 border border-white p-6 rounded-[2rem]">
+                                <h4 class="font-bold text-slate-800"><i class="fas fa-star text-amber-500"></i> Bagian Keunggulan ("Mengapa Kami")</h4>
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div><label class="block text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Label / Judul Kecil</label><input type="text" id="cms_keunggulan_judul_kecil" class="cms-input"></div>
+                                    <div><label class="block text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Judul Utama</label><input type="text" id="cms_keunggulan_judul_besar" class="cms-input"></div>
+                                    <div class="md:col-span-2"><label class="block text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Teks Deskripsi</label><textarea id="cms_keunggulan_deskripsi" class="cms-input" rows="2"></textarea></div>
+                                    <div><label class="block text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Poin Checklist 1</label><input type="text" id="cms_keunggulan_poin1" class="cms-input"></div>
+                                    <div><label class="block text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Poin Checklist 2</label><input type="text" id="cms_keunggulan_poin2" class="cms-input"></div>
+                                </div>
+                            </div>
+
+                            <!-- 4 Kartu Keunggulan -->
+                            <div class="md:col-span-2 space-y-4 bg-white/50 border border-white p-6 rounded-[2rem]">
+                                <h4 class="font-bold text-slate-800"><i class="fas fa-th-large text-emerald-600"></i> 4 Kartu Keunggulan</h4>
+                                <div class="grid md:grid-cols-4 gap-4">
+                                    <div class="space-y-2 p-3 bg-white/60 rounded-xl border border-slate-100">
+                                        <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Kartu 1</div>
+                                        <input type="text" id="cms_unggul1_nama" class="cms-input !text-xs !p-2" placeholder="Judul">
+                                        <input type="text" id="cms_unggul1_sub" class="cms-input !text-xs !p-2" placeholder="Sub">
+                                        <input type="text" id="cms_unggul1_icon" class="cms-input !text-xs !p-2" placeholder="Icon (fa-user-md)">
+                                    </div>
+                                    <div class="space-y-2 p-3 bg-white/60 rounded-xl border border-slate-100">
+                                        <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Kartu 2</div>
+                                        <input type="text" id="cms_unggul2_nama" class="cms-input !text-xs !p-2" placeholder="Judul">
+                                        <input type="text" id="cms_unggul2_sub" class="cms-input !text-xs !p-2" placeholder="Sub">
+                                        <input type="text" id="cms_unggul2_icon" class="cms-input !text-xs !p-2" placeholder="Icon (fa-microscope)">
+                                    </div>
+                                    <div class="space-y-2 p-3 bg-white/60 rounded-xl border border-slate-100">
+                                        <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Kartu 3</div>
+                                        <input type="text" id="cms_unggul3_nama" class="cms-input !text-xs !p-2" placeholder="Judul">
+                                        <input type="text" id="cms_unggul3_sub" class="cms-input !text-xs !p-2" placeholder="Sub">
+                                        <input type="text" id="cms_unggul3_icon" class="cms-input !text-xs !p-2" placeholder="Icon (fa-clock)">
+                                    </div>
+                                    <div class="space-y-2 p-3 bg-white/60 rounded-xl border border-slate-100">
+                                        <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Kartu 4</div>
+                                        <input type="text" id="cms_unggul4_nama" class="cms-input !text-xs !p-2" placeholder="Judul">
+                                        <input type="text" id="cms_unggul4_sub" class="cms-input !text-xs !p-2" placeholder="Sub">
+                                        <input type="text" id="cms_unggul4_icon" class="cms-input !text-xs !p-2" placeholder="Icon (fa-mosque)">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                 </div>
             </section>
 
@@ -571,108 +637,7 @@
             document.getElementById('loader').classList.toggle('hidden', !show);
         }
 
-        // --- CMS LOGIC ---
-        async function loadCMSData() {
-            try {
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const res = await fetch(`${window.GAS_URL}${connector}action=getLandingSettings`);
-                const result = await res.json();
-                if(result.status === 'success') {
-                    const d = result.data;
-                    const keys = [
-                        'cms_nama_klinik','cms_tagline','cms_deskripsi','cms_badge','cms_hero_image','cms_whatsapp',
-                        'cms_alamat','cms_jam_operasional','cms_maps_link','cms_instagram','cms_facebook',
-                        'cms_layanan1_nama','cms_layanan1_icon','cms_layanan1_deskripsi','cms_layanan1_detail',
-                        'cms_layanan2_nama','cms_layanan2_icon','cms_layanan2_deskripsi','cms_layanan2_detail',
-                        'cms_layanan3_nama','cms_layanan3_icon','cms_layanan3_deskripsi','cms_layanan3_detail',
-                    ];
-                    keys.forEach(k => {
-                        const el = document.getElementById(k);
-                        if(el && d[k]) el.value = d[k];
-                    });
-                }
-            } catch(e) {}
-        }
-
-        async function uploadHeroImage(input) {
-            const file = input.files[0];
-            if(!file) return;
-
-            const btn = document.getElementById('btnUploadImage');
-            const originalContent = btn.innerHTML;
-            const pin = localStorage.getItem('adminPin');
-
-            btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Loading...';
-            btn.disabled = true;
-
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const base64Data = e.target.result;
-                try {
-                    const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                    const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
-                        method: 'POST',
-                        body: JSON.stringify({ 
-                            action: 'uploadImage', 
-                            pass: pin, 
-                            base64: base64Data, 
-                            fileName: file.name, 
-                            mimeType: file.type 
-                        })
-                    });
-                    const result = await res.json();
-                    if(result.status === 'success') {
-                        document.getElementById('cms_hero_image').value = result.url;
-                        alert("Berhasil diupload ke Google Drive!");
-                    } else {
-                        alert("Upload gagal: " + result.message);
-                    }
-                } catch(err) {
-                    alert("Error upload: " + err.message);
-                } finally {
-                    btn.innerHTML = originalContent;
-                    btn.disabled = false;
-                    input.value = ''; // Reset input
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-
-        async function saveCMS() {
-            const pin = localStorage.getItem('adminPin');
-            const btn = document.getElementById('btnSaveCMS');
-            const originalContent = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> menyimpan...';
-            btn.disabled = true;
-            
-            const payload = {};
-            const keys = [
-                'cms_nama_klinik','cms_tagline','cms_deskripsi','cms_badge','cms_hero_image','cms_whatsapp',
-                'cms_alamat','cms_jam_operasional','cms_maps_link','cms_instagram','cms_facebook',
-                'cms_layanan1_nama','cms_layanan1_icon','cms_layanan1_deskripsi','cms_layanan1_detail',
-                'cms_layanan2_nama','cms_layanan2_icon','cms_layanan2_deskripsi','cms_layanan2_detail',
-                'cms_layanan3_nama','cms_layanan3_icon','cms_layanan3_deskripsi','cms_layanan3_detail',
-            ];
-            keys.forEach(k => {
-                const el = document.getElementById(k);
-                if(el) payload[k] = el.value;
-            });
-
-            try {
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'updateLandingSettings', pass: pin, settings: payload })
-                });
-                const result = await res.json();
-                if(result.status === 'success') {
-                    alert("Website berhasil terupdate!");
-                } else {
-                    alert("Error: " + result.message);
-                }
-            } catch(e) { alert("Gagal update CMS. Cek koneksi Anda."); }
-            finally { btn.innerHTML = originalContent; btn.disabled = false; }
-        }
+        // --- END DUPLICATE INLINE CMS LOGIC ---
 
         // --- MODAL STATUS ---
         function openModalStatus(row, current) {

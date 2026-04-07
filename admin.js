@@ -448,6 +448,14 @@ async function saveCmsSettings() {
         'cms_layanan1_nama','cms_layanan1_icon','cms_layanan1_deskripsi','cms_layanan1_detail',
         'cms_layanan2_nama','cms_layanan2_icon','cms_layanan2_deskripsi','cms_layanan2_detail',
         'cms_layanan3_nama','cms_layanan3_icon','cms_layanan3_deskripsi','cms_layanan3_detail',
+        'cms_logo_image','cms_footer_deskripsi',
+        'cms_keunggulan_judul_kecil','cms_keunggulan_judul_besar','cms_keunggulan_deskripsi',
+        'cms_keunggulan_poin1','cms_keunggulan_poin2',
+        'cms_unggul1_nama','cms_unggul1_sub','cms_unggul1_icon',
+        'cms_unggul2_nama','cms_unggul2_sub','cms_unggul2_icon',
+        'cms_unggul3_nama','cms_unggul3_sub','cms_unggul3_icon',
+        'cms_unggul4_nama','cms_unggul4_sub','cms_unggul4_icon',
+        'cms_cta_judul','cms_cta_deskripsi',
     ];
     const settings = {};
     keys.forEach(k => {
