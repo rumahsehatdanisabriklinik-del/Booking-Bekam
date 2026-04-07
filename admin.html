@@ -876,10 +876,15 @@
                             <input type="text" class="cms-input !py-3" id="lay_nama_${idx}" value="${l.nama}" placeholder="Cth: Bekam Sunnah">
                             <input type="text" class="cms-input !py-3" id="lay_icon_${idx}" value="${l.icon}" placeholder="Cth: fas fa-leaf">
                         </div>
-                        <div class="md:col-span-8 space-y-3">
-                            <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Deskripsi & Detail Layanan</label>
+                        <div class="md:col-span-4 space-y-3">
+                            <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Aturan Booking (Jadwal & Terapis)</label>
+                            <input type="text" class="cms-input !py-3 !text-[10px]" id="lay_hari_${idx}" value="${l.hari_aktif || ''}" placeholder="Hari Aktif (0-6, Pisah Koma)">
+                            <input type="text" class="cms-input !py-3 !text-[10px]" id="lay_terapis_${idx}" value="${l.terapis_khusus || ''}" placeholder="Terapis Khusus (Pisah Koma)">
+                        </div>
+                        <div class="md:col-span-4 space-y-3">
+                            <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Deskripsi & Detail Web</label>
                             <textarea class="cms-input !py-3 !text-xs" id="lay_desc_${idx}" rows="1" placeholder="Penjelasan singkat">${l.deskripsi}</textarea>
-                            <textarea class="cms-input !py-3 !text-xs" id="lay_detail_${idx}" rows="1" placeholder="Item detail (Pisahkan dengan koma)">${l.detail}</textarea>
+                            <textarea class="cms-input !py-3 !text-xs" id="lay_detail_${idx}" rows="1" placeholder="Item detail">${l.detail}</textarea>
                         </div>
                     </div>
                 </div>
@@ -887,7 +892,7 @@
         }
 
         function addLayananRow() {
-            currentLayanan.push({ nama: '', deskripsi: '', detail: '', icon: 'fas fa-leaf', foto: '', terlaris: false, warna: 'emerald' });
+            currentLayanan.push({ nama: '', deskripsi: '', detail: '', icon: 'fas fa-leaf', foto: '', terlaris: false, warna: 'emerald', hari_aktif: '', terapis_khusus: '' });
             renderLayananList();
         }
 
@@ -909,9 +914,11 @@
                 icon: document.getElementById(`lay_icon_${idx}`).value,
                 deskripsi: document.getElementById(`lay_desc_${idx}`).value,
                 detail: document.getElementById(`lay_detail_${idx}`).value,
-                foto: '',
-                terlaris: false,
-                warna: 'emerald'
+                foto: currentLayanan[idx].foto || '',
+                terlaris: currentLayanan[idx].terlaris || false,
+                warna: currentLayanan[idx].warna || 'emerald',
+                hari_aktif: document.getElementById(`lay_hari_${idx}`).value,
+                terapis_khusus: document.getElementById(`lay_terapis_${idx}`).value
             }));
 
             try {
