@@ -399,7 +399,7 @@ async function callGeminiAPI(promptText) {
             // Mengirim Request ke Google Apps Script backend untuk keamanan API Key
             const response = await fetch(`${window.GAS_URL}${connector}action=generateAITips`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
             
@@ -508,7 +508,7 @@ document.getElementById('bookingForm').addEventListener('submit', async (e) => {
         const connector = window.GAS_URL.includes('?') ? '&' : '?';
         const response = await fetch(`${window.GAS_URL}${connector}action=simpanBookingData`, {
             method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(backendData)
         });
         const result = await response.json();

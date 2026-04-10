@@ -284,6 +284,7 @@ async function batalBooking(row) {
 
         const response = await fetch(`${window.GAS_URL}${connector}action=batalByUser`, {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         });
         const result = await response.json();
@@ -371,6 +372,7 @@ async function sendReview() {
 
         const response = await fetch(`${window.GAS_URL}${connector}action=submitReview`, {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         });
         const result = await response.json();
