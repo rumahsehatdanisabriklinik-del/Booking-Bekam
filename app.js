@@ -1,450 +1,543 @@
-/* ================================================
-   RUMAH SEHAT DANI SABRI — Logika Booking (Advanced)
-   app.js
-   ================================================ */
-
-// ── KONFIGURASI ─────────────────────────────────────────────────────────────
-// (Berpindah ke config.js)
-
-// ── ELEMENT REFERENCES ──────────────────────────────────────────────────────
-const gridTerapis     = document.getElementById('gridTerapis');
-const gridWaktu       = document.getElementById('gridWaktu');
-const gridSesi        = document.getElementById('gridSesi');
-const gridTanggal     = document.getElementById('gridTanggal');
-
-const terapisInput    = document.getElementById('terapis');
-const waktuInput      = document.getElementById('waktu');
-const sesiBekamInput  = document.getElementById('sesiBekam');
-const tanggalSelect   = document.getElementById('tanggal'); // hidden input
-
-const btnSubmit       = document.getElementById('btnSubmit');
-const btnSpinner      = document.getElementById('btnSpinner');
-const btnText         = document.querySelector('.btn-text');
-const globalLoader    = document.getElementById('global-loader');
-const alertBox        = document.getElementById('alertBox');
-
-let allTerapisData = [];
-let allLayananData = [];
-let hariLiburList  = []; // Daftar angka hari libur dari Spreadsheet
-
-const NAMA_HARI = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
-const NAMA_HARI_PENDEK  = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
-const NAMA_BULAN_PENDEK = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-
-// ── INIT ────────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-    loadInitialData();
+// --- Custom Premium Toast Notification ---
+function showCustomToast(msg, type = 'error') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
     
-    // Listener untuk update progress bar secara real-time
-    document.querySelectorAll('input, select').forEach(input => {
-        input.addEventListener('change', updateProgressBar);
-        input.addEventListener('input', updateProgressBar);
+    const icon = type === 'success' ? '<i class="fas fa-check-circle text-emerald-500 text-lg"></i>' : '<i class="fas fa-exclamation-circle text-red-500 text-lg"></i>';
+    const bgClass = type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-red-50 border-red-200 text-red-900';
+    
+    toast.className = `flex items-center gap-3 px-5 py-4 rounded-2xl border-2 shadow-xl shadow-slate-200/50 transform translate-x-[120%] transition-transform duration-500 ease-out font-bold text-sm pointer-events-auto ${bgClass}`;
+    toast.innerHTML = `${icon} <span>${msg}</span>`;
+    
+    container.appendChild(toast);
+    
+    requestAnimationFrame(() => {
+        toast.classList.remove('translate-x-[120%]');
+        toast.classList.add('translate-x-0');
     });
+    
+    setTimeout(() => {
+        toast.classList.remove('translate-x-0');
+        toast.classList.add('translate-x-[120%]');
+        setTimeout(() => toast.remove(), 500);
+    }, 4000);
+}
+
+// --- Auto Scroll Pintar ---
+function scrollToElement(id) {
+    setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) {
+            const y = el.getBoundingClientRect().top + window.scrollY - 100; // Offset untuk floating view
+            window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+    }, 150); // Jeda kecil menunggu render UI
+}
+
+// --- Sanitasi Input Instan ---
+document.getElementById('whatsapp').addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g, ''); // Hanya terima angka
+});
+document.getElementById('usia').addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g, ''); // Hanya terima angka
 });
 
-// ── HELPER PILL SELECTION ───────────────────────────────────────────────────
-/**
- * @param {HTMLElement} clickedBtn 
- * @param {HTMLElement} grid 
- * @param {HTMLElement} hiddenInput 
- * @param {string} value 
- * @param {boolean} triggerAvailability 
- */
-function selectPill(clickedBtn, grid, hiddenInput, value, triggerAvailability = false) {
-    if (clickedBtn.classList.contains('disabled')) return;
+// ====================================================================
+// --- Integrasi Backend & Logika Inti ---
+// ====================================================================
+let allTerapis = [];
+let allLayanan = [];
+let selectedTerapisName = "";
+let selectedGender = "";
+let selectedLayanan = null;
+
+// Global object to hold booking data for AI Assistant
+window.lastBookingData = null;
+
+const submitBtn = document.getElementById('submitBtn');
+
+async function initBooking() {
+    const listTerapisUI = document.getElementById('list-terapis-nama');
     
-    // Hapus class active & tambahkan ke yang diklik
-    grid.querySelectorAll('.pill-btn').forEach(p => p.classList.remove('active'));
-    clickedBtn.classList.add('active');
+    // Set minimal tanggal = hari ini
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('tanggal').setAttribute('min', today);
+
+    if (typeof window.GAS_URL === 'undefined') {
+        showCustomToast("ERROR: File config.js tidak terbaca atau window.GAS_URL kosong.", "error");
+        return;
+    }
     
-    hiddenInput.value = value;
-    
-    // Trigger perubahan progress bar secara instan
-    updateProgressBar();
-    
-    if (triggerAvailability) {
+    try {
+        // Tampilkan loader awal
+        document.getElementById('global-loader').classList.remove('hide');
+        
+        listTerapisUI.innerHTML = '<div class="col-span-full text-slate-400 italic p-4 text-center"><i class="fas fa-circle-notch fa-spin mr-2"></i> Sedang memuat data dari server...</div>';
+        document.getElementById('section-nama-terapis').classList.remove('hidden');
+
+        const connector = window.GAS_URL.includes('?') ? '&' : '?';
+        const res = await fetch(`${window.GAS_URL}${connector}action=getInitData`);
+        if (!res.ok) throw new Error("Gagal menghubungi Server (Proxy). Status: " + res.status);
+        
+        const result = await res.json();
+        if (result.status === "success") {
+            allTerapis = result.data.terapis;
+            allLayanan = result.data.layanan || [];
+            console.log("Data Berhasil Dimuat:", { allTerapis, allLayanan });
+            
+            // Sembunyikan loader karena data sudah sinkron
+            document.getElementById('global-loader').classList.add('hide');
+
+            listTerapisUI.innerHTML = '<div class="col-span-full text-emerald-500 text-[10px] font-black uppercase tracking-widest p-2 rounded-lg bg-emerald-50 text-center animate-pulse"><i class="fas fa-check-circle"></i> Database Siap</div>';
+            
+            setTimeout(() => { 
+                if (!selectedGender) document.getElementById('section-nama-terapis').classList.add('hidden'); 
+            }, 2000);
+        } else {
+            throw new Error(result.message || "Gagal mengambil data dari Google Sheets.");
+        }
+    } catch (e) {
+        console.error("Gagal memuat data awal:", e);
+        document.getElementById('global-loader').innerHTML = `
+            <div class="p-8 text-center bg-white rounded-3xl shadow-2xl max-w-sm mx-4 border border-red-100">
+                <div class="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-4xl mx-auto mb-4"><i class="fas fa-wifi"></i></div>
+                <h3 class="text-slate-900 font-extrabold mb-2 text-xl">Koneksi Terputus</h3>
+                <p class="text-sm text-slate-500 mb-6">${e.message}</p>
+                <button onclick="location.reload()" class="bg-slate-900 hover:bg-emerald-600 text-white w-full py-4 rounded-xl font-bold uppercase text-xs transition-colors">Coba Refresh Layar</button>
+            </div>
+        `;
+    }
+}
+document.addEventListener('DOMContentLoaded', initBooking);
+
+function onLayananSelectedSafe(encodedName) {
+    const namaLayanan = decodeURIComponent(escape(atob(encodedName)));
+    selectedLayanan = allLayanan.find(l => l.nama.trim() === namaLayanan.trim());
+    console.log("Layanan dipilih (Safe):", selectedLayanan);
+    if (document.getElementById('tanggal').value) {
         checkAvailability();
     }
+    scrollToElement('section-tanggal'); // Auto-scroll
 }
 
-// ── PROGRESS BAR LOGIC ──────────────────────────────────────────────────────
-function updateProgressBar() {
-    const requiredInputs = document.querySelectorAll('input[required]:not([type="radio"]), select[required], input[type="radio"]:checked');
-    const totalRequired = 7; // Nama, NoHP, Gender, Terapis, Tanggal, Waktu, Sesi
-    
-    let filledCount = 0;
-    
-    document.querySelectorAll('input[required]:not([type="radio"]), select[required]').forEach(input => {
-        if (input.value.trim() && !input.disabled) filledCount++;
-    });
-    
-    if (document.querySelector('input[name="jenisKelamin"]:checked')) filledCount++;
-    
-    // Hitung persentase (minimal 5% agar indikator terlihat)
-    const percentage = Math.max(5, (filledCount / totalRequired) * 100);
-    const bar = document.getElementById('progressBar');
-    
-    if (bar) {
-        bar.style.width = `${percentage}%`;
-        bar.style.transition = 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-    }
+function onGenderSelected() {
+    selectedGender = document.querySelector('input[name="gender_terapis"]:checked').value;
+    filterTerapisName();
+    // Reset pilihan berikutnya
+    document.getElementById('section-layanan').classList.add('hidden');
+    selectedLayanan = null;
+    selectedTerapisName = "";
+    scrollToElement('section-nama-terapis'); // Auto-scroll
 }
 
-// ── UI HELPERS ──────────────────────────────────────────────────────────────
-function showAlert(message, type = 'error') {
-    alertBox.innerHTML = `<i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'} mr-2"></i> ${message}`;
-    alertBox.style.display = 'block';
-    alertBox.className = `alert alert-${type} animate-fade-in`;
+function filterTerapisName() {
+    if (!selectedGender) return;
+
+    const genderLabel = (selectedGender === "Pria") ? "Laki-laki" : "Perempuan";
+    const container = document.getElementById('section-nama-terapis');
+    const list = document.getElementById('list-terapis-nama');
     
-    if (type === 'success') {
-        setTimeout(hideAlert, 7000);
-    }
-}
-
-function hideAlert() { 
-    alertBox.style.display = 'none'; 
-}
-
-function setLoadingBtn(isLoading) {
-    btnSubmit.disabled = isLoading;
-    btnText.textContent = isLoading ? "Memproses..." : "Konfirmasi Booking";
-    btnSpinner.style.display = isLoading ? "block" : "none";
+    let matches = allTerapis.filter(t => t.gender === genderLabel);
     
-    if(isLoading) btnSubmit.classList.add('opacity-80', 'cursor-not-allowed');
-    else btnSubmit.classList.remove('opacity-80', 'cursor-not-allowed');
-}
-
-// ── LOAD AWAL: Terapis + Setting Klinik ─────────────────────────────────────
-async function loadInitialData() {
-    try {
-        const response = await fetch(`${GAS_URL}?action=getInitData`);
-        if (!response.ok) throw new Error("Gagal terhubung ke server klinik.");
-
-        const hasil = await response.json();
-        if (hasil.status !== 'success') throw new Error(hasil.message);
-
-        const { terapis, setting, layanan } = hasil.data;
-
-        allTerapisData = terapis;
-        hariLiburList = setting.hariLibur || [];
-
-        // Penanganan fallback layanan yang lebih elegan
-        allLayananData = (layanan?.length > 0) ? layanan : (setting.sesiBekam || []).map(s => ({
-            nama: s,
-            hariAktif: [],
-            terapisKhusus: []
-        }));
-
-        renderSesi();
-        buildDateStrip();
-
-        document.querySelectorAll('input[name="jenisKelamin"]').forEach(r => r.disabled = false);
-        btnSubmit.disabled = false;
-        
-        // Animasi fade-out loader
-        globalLoader.style.opacity = '0';
-        setTimeout(() => globalLoader.style.display = 'none', 300);
-
-    } catch (err) {
-        globalLoader.innerHTML = `<div class="text-white text-center"><i class="fas fa-wifi fa-3x mb-3"></i><p>${err.message}</p></div>`;
-        showAlert("Gagal memuat data klinik: " + err.message, 'error');
-    }
-}
-
-// ── DATE STRIP BUILDER — 30 Hari ke Depan ────────────────────────────────────
-function buildDateStrip() {
-    gridTanggal.innerHTML = '';
-    const today = new Date();
-    const fragment = document.createDocumentFragment(); // Optimasi manipulasi DOM
-
-    for (let i = 0; i < 30; i++) {
-        const d = new Date(today);
-        d.setDate(today.getDate() + i);
-
-        const isoStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        const hariIdx = d.getDay();
-        const isLibur = hariLiburList.includes(hariIdx);
-
-        const card = document.createElement('div');
-        card.className = `date-card transition-all duration-200 ${isLibur ? 'disabled opacity-50 bg-gray-100' : 'cursor-pointer hover:border-emerald-400'}`;
-        card.innerHTML = `
-            <span class="dc-day text-xs font-semibold">${NAMA_HARI_PENDEK[hariIdx]}</span>
-            <span class="dc-date text-xl font-bold my-1">${d.getDate()}</span>
-            <span class="dc-month text-xs">${NAMA_BULAN_PENDEK[d.getMonth()]}</span>
-        `;
-
-        if (isLibur) {
-            card.title = 'Klinik tutup hari ini';
-        } else {
-            card.onclick = () => {
-                gridTanggal.querySelectorAll('.date-card').forEach(c => c.classList.remove('active'));
-                card.classList.add('active');
-                tanggalSelect.value = isoStr;
-                updateProgressBar();
-                
-                // Reset slot & check ketersediaan
-                gridWaktu.innerHTML = '<div class="pill-placeholder"><i class="fas fa-circle-notch fa-spin"></i> Mengecek...</div>';
-                waktuInput.value = '';
-                checkAvailability();
-                renderSesi(); 
-            };
-        }
-        fragment.appendChild(card);
-    }
-    gridTanggal.appendChild(fragment);
-}
-
-// ── NAVIGASI PANAH DATE STRIP ────────────────────────────────────────────────
-function scrollDateStrip(direction) {
-    const cardWidth = gridTanggal.querySelector('.date-card')?.offsetWidth || 85;
-    const gap = 10; 
-    const scrollAmount = (cardWidth + gap) * 3;
-    gridTanggal.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
-}
-
-// ── FILTER TERAPIS BERDASARKAN GENDER ───────────────────────────────────────
-function filterTerapis() {
-    const genderKlien = document.querySelector('input[name="jenisKelamin"]:checked')?.value;
-    if (!genderKlien) return;
-
-    // Reset status form terkait
-    gridTerapis.innerHTML = '<div class="pill-placeholder animate-pulse">Memuat...</div>';
-    gridWaktu.innerHTML   = '<div class="pill-placeholder">Pilih terapis dan tanggal dulu</div>';
-    terapisInput.value = '';
-    waktuInput.value   = '';
-    
-    renderSesi();
-    hideAlert();
-    updateProgressBar();
-
-    const cocok = allTerapisData.filter(t => t.gender === genderKlien);
-
-    if (cocok.length === 0) {
-        gridTerapis.innerHTML = '<div class="pill-placeholder text-rose-500"><i class="fas fa-user-slash"></i> Terapis tidak tersedia</div>';
-        showAlert(`Belum ada Terapis ${genderKlien} yang tersedia saat ini.`, 'error');
-    } else {
-        gridTerapis.innerHTML = '';
-        cocok.forEach(t => {
-            const btn = document.createElement('div');
-            btn.className = 'pill-btn transition-transform hover:scale-105 active:scale-95';
-            btn.innerHTML = `<i class="fas fa-user-md mr-2"></i> ${t.nama}`;
-            btn.onclick = () => {
-                selectPill(btn, gridTerapis, terapisInput, t.nama, true);
-                renderSesi(); 
-            };
-            gridTerapis.appendChild(btn);
+    list.innerHTML = "";
+    if (matches.length > 0) {
+        container.classList.remove('hidden');
+        matches.forEach((t, index) => {
+            const div = document.createElement('label');
+            div.className = "w-full animate-fade-up";
+            div.style.animationDelay = `${index * 50}ms`; // Staggered animation
+            div.innerHTML = `
+                <input type="radio" name="pilih_nama_terapis" value="${t.nama}" class="radio-hidden" onchange="selectSpecificTerapis('${t.nama}')">
+                <div class="pill-label !py-4 !rounded-[1rem] !text-sm flex flex-row gap-3 !justify-start pl-5">
+                    <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center icon-wrapper transition-colors"><i class="fas fa-user-md"></i></div>
+                    <span class="text-title text-base font-bold">${t.nama}</span>
+                </div>
+            `;
+            list.appendChild(div);
         });
-        
-        if (tanggalSelect.value) checkAvailability();
+    } else {
+        container.classList.remove('hidden');
+        list.innerHTML = `<div class="col-span-full p-4 bg-amber-50 text-amber-700 rounded-xl text-xs font-bold border border-amber-100 flex items-center gap-3">
+            <i class="fas fa-info-circle text-lg"></i> Maaf, tidak ada terapis ${selectedGender} yang tersedia saat ini.
+        </div>`;
     }
 }
 
-// ── VALIDASI HARI LIBUR (Frontend, Instan) ───────────────────────────────────
-function validateHariLibur(tanggal) {
-    if (!tanggal) return true;
-    const hariAngka = new Date(tanggal + 'T00:00:00').getDay();
-    if (hariLiburList.includes(hariAngka)) {
-        showAlert(`⛔ Klinik tutup setiap hari ${NAMA_HARI[hariAngka]}. Silakan pilih tanggal lain.`, 'error');
-        tanggalSelect.value = ''; 
-        gridWaktu.innerHTML = '<div class="pill-placeholder">Pilih terapis dan tanggal dulu</div>';
-        waktuInput.value = '';
-        updateProgressBar();
-        return false;
+function selectSpecificTerapis(nama) {
+    selectedTerapisName = nama;
+    renderLayanan(); // Munculkan layanan setelah pilih terapis
+    if (document.getElementById('tanggal').value) {
+        checkAvailability();
     }
+    scrollToElement('section-layanan'); // Auto-scroll
+}
+
+function renderLayanan() {
+    if (!selectedTerapisName) return;
+    const container = document.getElementById('section-layanan');
+    const list = document.getElementById('list-layanan');
+    
+    // Tampilkan skeleton/loading
+    list.innerHTML = `
+        <div class="skeleton-box h-24 w-full"></div>
+        <div class="skeleton-box h-24 w-full"></div>
+        <div class="skeleton-box h-24 w-full"></div>
+    `;
+    container.classList.remove('hidden');
+
+    setTimeout(() => { // Simulasi parsing cepat agar skeleton terlihat sesaat
+        list.innerHTML = "";
+        
+        // Debugging (cek apakah data ada)
+        if (allLayanan.length === 0) {
+            list.innerHTML = `
+                <div class="col-span-full p-4 bg-amber-50 text-amber-700 rounded-xl text-xs font-bold border border-amber-100 text-center">
+                    <i class="fas fa-database mb-2 block text-lg"></i>
+                    Database Layanan Kosong secara teknis.<br>
+                    <span class="font-normal text-[10px]">Cek log console atau jalankan ulang Migrasi Data.</span>
+                </div>`;
+            return;
+        }
+
+        // Normalisasi nama terapis (hapus spasi depan/belakang dan ubah kecil)
+        const cleanTarget = selectedTerapisName.toLowerCase().trim();
+
+        // Ambil layanan yang bisa dilakukan terapis ini
+        const availableServices = allLayanan.filter(lay => {
+            // 1. Jika terapisKhusus kosong/tidak ada, tersedia untuk semua
+            if (!lay.terapisKhusus || lay.terapisKhusus.length === 0) return true;
+            
+            // 2. Jika ada pembatasan, cek kecocokan nama secara agresif
+            const isMatch = lay.terapisKhusus.some(t => {
+                const cleanT = t.toLowerCase().trim();
+                return cleanT === cleanTarget;
+            });
+            
+            return isMatch;
+        });
+
+        if (availableServices.length === 0) {
+            // Tampilkan Info Debug supaya USER bisa lapor ke AI
+            const debugInfo = allLayanan.map(l => `${l.nama}(${l.terapisKhusus.join(",")})`).join(" | ");
+            list.innerHTML = `
+                <div class="col-span-full p-6 bg-slate-50 text-slate-500 rounded-[1.5rem] text-[11px] font-bold text-center border-2 border-dashed border-slate-200">
+                    Maaf, Terapis <b class="text-slate-800">${selectedTerapisName}</b> tidak terdaftar untuk layanan manapun di Sheet.<br>
+                    <button type="button" onclick="this.nextElementSibling.classList.toggle('hidden')" class="mt-2 text-emerald-600 underline hover:text-emerald-700 transition-colors">Klik untuk Lihat Detail Debug</button>
+                    <div class="hidden mt-4 p-4 bg-white border rounded-xl font-mono text-[9px] text-left break-all shadow-inner">
+                        <b>Data dari Sheet:</b><br>${debugInfo}<br><br>
+                        <b>Target:</b> [${cleanTarget}]
+                    </div>
+                </div>`;
+            return;
+        }
+
+        availableServices.forEach((lay, index) => {
+            const card = document.createElement('label');
+            card.className = "w-full cursor-pointer animate-fade-up";
+            card.style.animationDelay = `${index * 50}ms`;
+            const iconClass = lay.icon || 'fa-hand-holding-heart';
+            const safeName = btoa(unescape(encodeURIComponent(lay.nama)));
+            
+            card.innerHTML = `
+                <input type="radio" name="layanan" value="${safeName}" class="radio-hidden" onchange="onLayananSelectedSafe('${safeName}')">
+                <div class="pill-label group relative overflow-hidden h-full !rounded-[1.25rem]">
+                    <div class="icon-wrapper w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-xl mb-2 transition-transform duration-300">
+                        <i class="fas ${iconClass}"></i>
+                    </div>
+                    <span class="text-title text-[11px] font-black uppercase tracking-wider text-slate-800 leading-tight px-2">${lay.nama}</span>
+                    ${lay.terlaris ? '<div class="absolute -top-1 -right-6 bg-amber-400 text-[9px] font-black py-1 px-6 rotate-45 text-white shadow-sm tracking-widest">TOP</div>' : ''}
+                </div>
+            `;
+            list.appendChild(card);
+        });
+    }, 300); // Simulasi delay memuat skeleton
+}
+
+async function checkAvailability() {
+    const tgl = document.getElementById('tanggal').value;
+    if (!tgl || !selectedTerapisName) return;
+
+    const gridWaktu = document.querySelector('#step-2 .grid');
+
+    // Validasi Hari Aktif Layanan Sebelum Fetch
+    if (selectedLayanan && selectedLayanan.hariAktif && selectedLayanan.hariAktif.length > 0) {
+        // Konversi YYYY-MM-DD ke Day Number secara manual (Anti-Meleset)
+        const parts = tgl.split('-').map(Number);
+        const dObj = new Date(parts[0], parts[1] - 1, parts[2]); // year, month (0-indexed), day
+        const day = dObj.getDay();
+        
+        if (!selectedLayanan.hariAktif.includes(day)) {
+            const daysMap = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+            const hariNama = selectedLayanan.hariAktif.map(h => daysMap[h]).join(", ");
+            gridWaktu.innerHTML = `
+                <div class="col-span-full p-6 bg-red-50 text-red-700 rounded-2xl border-2 border-red-100 text-center animate-fade-up">
+                    <div class="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-2xl mx-auto mb-3"><i class="fas fa-calendar-times"></i></div>
+                    <div class="font-black uppercase text-xs tracking-widest mb-1">Layanan Libur</div>
+                    <p class="text-xs font-bold font-sans opacity-80 uppercase leading-relaxed">
+                        Mohon maaf, layanan <b class="text-red-600">${selectedLayanan.nama}</b><br>hanya tersedia pada hari: <span class="underline">${hariNama}</span>.
+                    </p>
+                </div>
+            `;
+            showCustomToast(`Layanan ${selectedLayanan.nama} libur di hari tersebut.`, "error");
+            return;
+        }
+    }
+
+    // UI Skeleton Loader Slot Waktu
+    gridWaktu.innerHTML = `
+        <div class="skeleton-box h-12 w-full !rounded-xl"></div>
+        <div class="skeleton-box h-12 w-full !rounded-xl"></div>
+        <div class="skeleton-box h-12 w-full !rounded-xl"></div>
+        <div class="skeleton-box h-12 w-full !rounded-xl"></div>
+    `;
+
+    try {
+        const connector = window.GAS_URL.includes('?') ? '&' : '?';
+        const res = await fetch(`${window.GAS_URL}${connector}action=cekWaktu&tanggal=${tgl}&terapis=${encodeURIComponent(selectedTerapisName)}`);
+        const result = await res.json();
+        
+        if (result.status === "success") {
+            if (result.data.length > 0) {
+                gridWaktu.innerHTML = "";
+                
+                // LOGIKA FILTER WAKTU LAMPAU (PAST SLOTS)
+                const now = new Date();
+                const parts = tgl.split('-').map(Number);
+                const selectedDate = new Date(parts[0], parts[1]-1, parts[2]);
+                const isToday = now.toDateString() === selectedDate.toDateString();
+                
+                let dataWaktu = result.data;
+                if (isToday) {
+                    const currentHour = now.getHours();
+                    const currentMin = now.getMinutes();
+                    dataWaktu = dataWaktu.filter(slot => {
+                        const [h, m] = slot.split(':').map(Number);
+                        // Beri buffer 11 menit sebelum jam mulai (pasien tidak bisa booking jam yang sudah lewat/sedang berlangsung)
+                        if (h < currentHour) return false;
+                        if (h === currentHour && m < (currentMin + 11)) return false;
+                        return true;
+                    });
+                }
+
+                if (dataWaktu.length === 0) {
+                    gridWaktu.innerHTML = `<div class="col-span-full text-center py-6 px-4 bg-amber-50 rounded-2xl border border-amber-100 text-amber-700 font-bold text-sm"><i class="fas fa-clock mb-2 text-2xl block text-amber-400"></i>Maaf, jadwal untuk hari ini sudah terlewati.</div>`;
+                    return;
+                }
+
+                dataWaktu.forEach((jam, idx) => {
+                    const label = document.createElement('label');
+                    label.className = "animate-fade-up";
+                    label.style.animationDelay = `${idx * 40}ms`;
+                    label.innerHTML = `
+                        <input type="radio" name="waktu" value="${jam}" class="radio-hidden" ${idx === 0 ? 'checked' : ''} onchange="scrollToElement('step-3')">
+                        <div class="pill-label !py-3 !rounded-xl !text-sm hover:!bg-emerald-50 hover:!border-emerald-300 transition-colors">
+                            <span class="text-title flex items-center gap-2"><i class="far fa-clock opacity-50"></i> ${jam} WIB</span>
+                        </div>
+                    `;
+                    gridWaktu.appendChild(label);
+                });
+                
+                if(dataWaktu.length > 0) scrollToElement('section-waktu'); // Scroll ke jam
+            } else {
+                gridWaktu.innerHTML = `<div class="col-span-full text-center py-6 px-4 bg-red-50 rounded-2xl border border-red-100 text-red-600 font-bold text-sm"><i class="fas fa-calendar-times mb-2 text-2xl block text-red-400"></i>${result.info || "Maaf, jadwal penuh."}</div>`;
+            }
+        }
+    } catch (e) {
+        gridWaktu.innerHTML = '<div class="col-span-full text-center py-6 bg-red-50 rounded-2xl border border-red-100 text-red-500 font-bold"><i class="fas fa-wifi mb-2 block text-xl"></i> Gagal memuat jadwal jaringan Anda.</div>';
+    }
+}
+
+document.getElementById('tanggal').addEventListener('change', checkAvailability);
+
+function validateAll() {
+    const gender = document.querySelector('input[name="gender_terapis"]:checked');
+    const layanan = document.querySelector('input[name="layanan"]:checked');
+    const terapis = document.querySelector('input[name="pilih_nama_terapis"]:checked');
+    const tgl = document.getElementById('tanggal').value;
+    const waktu = document.querySelector('input[name="waktu"]:checked');
+    const nama = document.getElementById('nama').value.trim();
+    const wa = document.getElementById('whatsapp').value.trim();
+    
+    if(!gender) { showCustomToast('Silakan pilih Jenis Kelamin.', 'error'); scrollToElement('step-1'); return false; }
+    if(!terapis) { showCustomToast('Silakan pilih Terapis.', 'error'); scrollToElement('section-nama-terapis'); return false; }
+    if(!layanan) { showCustomToast('Silakan pilih Layanan.', 'error'); scrollToElement('section-layanan'); return false; }
+    if(!tgl) { showCustomToast('Silakan pilih Tanggal Kedatangan.', 'error'); document.getElementById('tanggal').focus(); return false; }
+    
+    if (selectedLayanan && selectedLayanan.hariAktif && selectedLayanan.hariAktif.length > 0) {
+        const parts = tgl.split('-').map(Number);
+        const day = new Date(parts[0], parts[1]-1, parts[2]).getDay();
+        if (!selectedLayanan.hariAktif.includes(day)) {
+            const daysMap = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+            const hariNama = selectedLayanan.hariAktif.map(h => daysMap[h]).join(", ");
+            showCustomToast(`Layanan ${selectedLayanan.nama} hanya tersedia di hari: ${hariNama}`, 'error');
+            scrollToElement('section-tanggal');
+            return false;
+        }
+    }
+    if(!waktu) { showCustomToast('Silakan pilih Jam Kedatangan.', 'error'); scrollToElement('section-waktu'); return false; }
+    if(!nama) { showCustomToast('Nama Lengkap wajib diisi.', 'error'); document.getElementById('nama').focus(); return false; }
+    if(!wa || wa.length < 9) { showCustomToast('No. WhatsApp tidak valid.', 'error'); document.getElementById('whatsapp').focus(); return false; }
+    
     return true;
 }
 
-// ── CEK KETERSEDIAAN SLOT JAM (Dengan AbortController) ───────────────────────
-let currentAborter = null; // Mencegah race condition jika diklik beruntun
-
-async function checkAvailability() {
-    const trp = terapisInput.value;
-    const tgl = tanggalSelect.value;
-    if (!trp || !tgl || !validateHariLibur(tgl)) return;
-
-    // Batalkan request sebelumnya jika user spam klik
-    if (currentAborter) currentAborter.abort();
-    currentAborter = new AbortController();
-
-    tanggalSelect.disabled = true;
-    gridWaktu.innerHTML = '<div class="pill-placeholder"><i class="fas fa-spinner fa-spin text-emerald-600"></i> Sinkronisasi jadwal...</div>';
-    waktuInput.value = '';
-    hideAlert();
-
-    try {
-        const res = await fetch(`${GAS_URL}?action=cekWaktu&tanggal=${tgl}&terapis=${encodeURIComponent(trp)}`, {
-            signal: currentAborter.signal
-        });
-        
-        if (!res.ok) throw new Error("Masalah koneksi jaringan.");
-        const result = await res.json();
-
-        if (result.status !== 'success') throw new Error(result.message);
-
-        if (result.data.length === 0) {
-            gridWaktu.innerHTML = '<div class="pill-placeholder text-rose-500"><i class="fas fa-calendar-times"></i> Penuh / Libur</div>';
-            showAlert(result.info || "Semua slot penuh atau klinik libur hari ini.", 'error');
-        } else {
-            gridWaktu.innerHTML = '';
-            result.data.forEach((j, index) => {
-                const btn = document.createElement('div');
-                btn.className = 'pill-btn animate-fade-in';
-                btn.style.animationDelay = `${index * 50}ms`; // Efek cascade (air terjun)
-                btn.innerHTML = `<i class="far fa-clock mr-1"></i> ${j}`;
-                btn.onclick = () => selectPill(btn, gridWaktu, waktuInput, j, false);
-                gridWaktu.appendChild(btn);
-            });
-        }
-    } catch (err) {
-        if (err.name === 'AbortError') return; // Abaikan error jika sengaja di-abort
-        gridWaktu.innerHTML = '<div class="pill-placeholder text-rose-500"><i class="fas fa-exclamation-triangle"></i> Gagal memuat</div>';
-        showAlert("Gagal mengecek jadwal: " + err.message, 'error');
-    } finally {
-        tanggalSelect.disabled = false;
-        currentAborter = null;
-    }
-}
-
-// ── SUBMIT BOOKING ───────────────────────────────────────────────────────────
-async function submitBooking() {
-    const formData = {
-        jenisKelamin : document.querySelector('input[name="jenisKelamin"]:checked')?.value || '',
-        terapis      : terapisInput.value || '',
-        sesiBekam    : sesiBekamInput.value || '',
-        tanggal      : tanggalSelect.value || '',
-        waktu        : waktuInput.value || '',
-        nama         : document.getElementById('nama').value.trim(),
-        nohp         : document.getElementById('nohp').value.trim()
+// ====================================================================
+// --- Gemini API Logic for Personalized Therapy Tips ---
+// ====================================================================
+async function callGeminiAPI(promptText) {
+    const connector = window.GAS_URL.includes('?') ? '&' : '?';
+    const payload = {
+        action: "generateAITips",
+        prompt: promptText
     };
 
-    // 1. Validasi Input Berbasis Aturan (Lebih bersih)
-    const validationRules = [
-        { condition: !formData.jenisKelamin, msg: "⚠️ Silakan pilih Jenis Kelamin terlebih dahulu." },
-        { condition: !formData.nama,         msg: "⚠️ Harap isi Nama Lengkap Anda." },
-        { condition: !formData.nohp,         msg: "⚠️ Harap isi Nomor HP / WhatsApp Anda." },
-        { condition: !formData.terapis,      msg: "⚠️ Silakan pilih Terapis." },
-        { condition: !formData.tanggal,      msg: "⚠️ Silakan pilih Tanggal Reservasi." },
-        { condition: !formData.waktu,        msg: "⚠️ Silakan pilih Slot Waktu." },
-        { condition: !formData.sesiBekam,    msg: "⚠️ Silakan pilih Jenis Layanan." }
-    ];
+    const maxRetries = 3;
+    const baseDelay = 1000;
 
-    const failedRule = validationRules.find(rule => rule.condition);
-    if (failedRule) {
-        showAlert(failedRule.msg, 'error');
-        return;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+            // Mengirim Request ke Google Apps Script backend untuk keamanan API Key
+            const response = await fetch(`${window.GAS_URL}${connector}action=generateAITips`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+            
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            
+            const result = await response.json();
+            if (result.status === "success") {
+                return result.data.text;
+            } else {
+                throw new Error("Gagal mengambil tips: " + result.message);
+            }
+        } catch (error) {
+            if (attempt === maxRetries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, baseDelay * Math.pow(2, attempt)));
+        }
     }
+}
 
-    // 2. Validasi Nomor HP (Hanya angka, minimal 10 digit)
-    const phoneClean = formData.nohp.replace(/\D/g, ''); // \D = hapus semua selain angka
-    if (phoneClean.length < 10) {
-        showAlert("⚠️ Nomor HP tidak valid. Masukkan minimal 10 digit angka.", 'error');
-        document.getElementById('nohp').focus();
-        return;
-    }
+async function generateAITips() {
+    if (!window.lastBookingData) return;
+    
+    const btn = document.getElementById('btnAiTips');
+    const resultContainer = document.getElementById('aiTipsResult');
+    const resultContent = document.getElementById('aiTipsContent');
+    
+    // UI Loading State
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin text-indigo-200"></i><span>Menganalisis Keluhan...</span>';
+    resultContainer.classList.remove('hidden');
+    resultContent.innerHTML = `
+        <div class="animate-pulse space-y-3">
+            <div class="h-4 bg-indigo-100 rounded w-full"></div>
+            <div class="h-4 bg-indigo-100 rounded w-5/6"></div>
+            <div class="h-4 bg-indigo-100 rounded w-4/6"></div>
+        </div>
+    `;
 
-    setLoadingBtn(true);
-    hideAlert();
+    // Construct Prompt based on Booking Data
+    const { usia, layanan, keluhan } = window.lastBookingData;
+    const userAge = usia ? `${usia} tahun` : "dewasa";
+    const userComplaint = (keluhan && keluhan !== "-") ? keluhan : "Hanya ingin menjaga kesehatan umum";
+    
+    const prompt = `Saya pasien berusia ${userAge}, baru saja mendaftar layanan terapi ${layanan}. Keluhan medis atau tujuan terapi saya adalah: "${userComplaint}". Berikan 3 tips singkat, ramah, dan menenangkan untuk persiapan sebelum melakukan terapi ini agar hasilnya maksimal.`;
 
     try {
-        const res = await fetch(GAS_URL, {
-            method  : 'POST',
-            headers : { 'Content-Type': 'text/plain;charset=utf-8' },
-            body    : JSON.stringify(formData)
-        });
+        const aiResponse = await callGeminiAPI(prompt);
         
-        if (!res.ok) throw new Error("Server tidak merespons. Periksa koneksi Anda.");
-        const result = await res.json();
-
-        if (result.status === 'success') {
-            showSuccessScreen(result.data);
-        } else {
-            throw new Error(result.message);
-        }
-
-    } catch (err) {
-        showAlert("❌ Booking gagal: " + err.message, 'error');
+        // Add default styling to the HTML elements returned by the LLM
+        let styledResponse = aiResponse
+            .replace(/<ul>/g, '<ul class="list-disc pl-5 space-y-2 marker:text-indigo-400">')
+            .replace(/<strong>/g, '<strong class="text-indigo-900">');
+            
+        resultContent.innerHTML = styledResponse;
+    } catch (error) {
+        resultContent.innerHTML = `<span class="text-red-500">Gagal mengambil tips AI. Silakan coba lagi nanti.</span>`;
     } finally {
-        setLoadingBtn(false);
+        // Restore Button State
+        btn.innerHTML = '<i class="fas fa-check text-indigo-200"></i><span>Tips Berhasil Dibuat</span>';
+        // Keep button disabled after successful generation to prevent spamming
     }
 }
 
-// ── TAMPILKAN HALAMAN SUKSES ──────────────────────────────────────────────────
-function showSuccessScreen(data) {
-    const formEl    = document.getElementById('bookingForm');
-    const overlayEl = document.getElementById('successOverlay');
+// ====================================================================
+// --- Form Submit Handler ---
+// ====================================================================
+document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!validateAll()) return;
     
-    // Injeksi Data ke DOM
-    document.getElementById('resNama').textContent    = data.nama;
-    document.getElementById('resTerapis').textContent = data.terapis;
-    document.getElementById('resWaktu').textContent   = `${data.tanggal} jam ${data.waktu}`;
-    document.getElementById('waLink').href            = data.whatsappUrl;
+    submitBtn.disabled = true;
+    const originalBtnHTML = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin text-lg"></i> <span class="relative z-10 ml-2">Memproses Data...</span>';
 
-    // Transisi Halus
-    formEl.style.opacity = '0';
-    setTimeout(() => {
-        formEl.style.display = 'none';
-        overlayEl.style.display = 'block';
-        setTimeout(() => overlayEl.classList.add('opacity-100', 'scale-100'), 50);
-    }, 300);
+    // Ambil data (Decode Layanan yang tadinya Base64)
+    const layananEncoded = document.querySelector('input[name="layanan"]:checked').value;
+    const layananDecoded = decodeURIComponent(escape(atob(layananEncoded)));
     
-    document.getElementById('progressBar').style.width = '100%';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+    const formData = {
+        layanan : layananDecoded,
+        terapis_pref : selectedGender,
+        tanggal : document.getElementById('tanggal').value,
+        waktu : document.querySelector('input[name="waktu"]:checked').value,
+        nama : document.getElementById('nama').value,
+        usia : document.getElementById('usia').value,
+        whatsapp : document.getElementById('whatsapp').value,
+        keluhan : document.getElementById('keluhan').value || "-"
+    };
+    
+    // Save to global scope for AI Feature
+    window.lastBookingData = formData;
 
-// ── LOGIKA LAYANAN DINAMIS ──────────────────────────────────────────────────
-function renderSesi() {
-    const tgl = tanggalSelect.value;
-    const trp = terapisInput.value;
-    const hariAngka = tgl ? new Date(tgl + 'T00:00:00').getDay() : -1;
+    // Map data untuk backend
+    const backendData = {
+        action: "simpanBookingData",
+        nama: formData.nama,
+        nohp: formData.whatsapp,
+        tanggal: formData.tanggal,
+        terapis: selectedTerapisName,
+        waktu: formData.waktu,
+        jenisKelamin: (formData.terapis_pref === "Pria" ? "Laki-laki" : "Perempuan"),
+        sesiBekam: formData.layanan,
+        keluhan: formData.keluhan
+    };
 
-    gridSesi.innerHTML = '';
-    let hasValidSelection = false;
+    try {
+        const connector = window.GAS_URL.includes('?') ? '&' : '?';
+        const response = await fetch(`${window.GAS_URL}${connector}action=simpanBookingData`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(backendData)
+        });
+        const result = await response.json();
 
-    if (!allLayananData?.length) {
-        gridSesi.innerHTML = '<div class="col-span-full p-4 bg-amber-50 text-amber-700 rounded-lg text-[11px] font-bold border border-amber-100 text-center">Database Layanan Kosong. Mohon jalankan "Migrasi Data" di Admin Panel.</div>';
-        return;
-    }
+        if (result.status === "success") {
+            // Update Success UI
+            document.getElementById('succ-nama').textContent = formData.nama;
+            document.getElementById('succ-terapis').textContent = selectedTerapisName;
+            document.getElementById('succ-layanan').textContent = formData.layanan;
+            document.getElementById('succ-tanggal').textContent = formData.tanggal;
+            document.getElementById('succ-waktu').innerHTML = `<i class="far fa-clock mr-1"></i> ${formData.waktu} WIB`;
+            
+            document.getElementById('btnWA').href = result.data.whatsappUrl;
 
-    allLayananData.forEach(lay => {
-        // Logika Pemeriksaan Kondisi
-        const validHari = !(lay.hariAktif?.length > 0 && hariAngka !== -1 && !lay.hariAktif.includes(hariAngka));
-        const validTerapis = !(lay.terapisKhusus?.length > 0 && trp && !lay.terapisKhusus.some(nama => nama.toLowerCase().trim() === trp.toLowerCase().trim()));
-        
-        const isAvailable = validHari && validTerapis;
-
-        // Render Tombol
-        const btn = document.createElement('div');
-        btn.className = `pill-btn full-width transition-all duration-300 ${isAvailable ? 'hover:shadow-md' : 'disabled opacity-70'}`;
-        
-        let label = `<div class="flex items-center justify-between w-full">
-                        <span><i class="fas fa-briefcase-medical mr-2 text-emerald-600"></i> ${lay.nama}</span>
-                     </div>`;
-                     
-        if (!isAvailable) {
-            const reasons = [!validHari && 'Jadwal Libur', !validTerapis && 'Terapis Beda'].filter(Boolean).join(', ');
-            label = `<div class="flex items-center justify-between w-full">
-                        <span class="opacity-50 line-through"><i class="fas fa-ban mr-2"></i>${lay.nama}</span>
-                        <span class="text-[10px] text-rose-500 font-semibold bg-rose-50 px-2 py-1 rounded-full">${reasons}</span>
-                     </div>`;
-                     
-            if (sesiBekamInput.value === lay.nama) sesiBekamInput.value = '';
+            // Switch Screen
+            document.getElementById('bookingForm').style.display = 'none';
+            document.getElementById('success-screen').style.display = 'block';
+            
+            // Reset Viewport to top smoothly
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            showCustomToast("Booking Berhasil Dibuat!", "success");
+        } else {
+            showCustomToast("Maaf, terjadi kesalahan: " + result.message, "error");
         }
-
-        btn.innerHTML = label;
-        
-        if (isAvailable) {
-            btn.onclick = () => selectPill(btn, gridSesi, sesiBekamInput, lay.nama, false);
-            if (sesiBekamInput.value === lay.nama) {
-                btn.classList.add('active');
-                hasValidSelection = true;
-            }
-        }
-        
-        gridSesi.appendChild(btn);
-    });
-
-    if (sesiBekamInput.value && !hasValidSelection) {
-        sesiBekamInput.value = '';
-        updateProgressBar();
+    } catch (err) {
+        showCustomToast("Gagal terhubung ke sistem. Periksa koneksi Anda.", "error");
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHTML;
     }
-}
+});
