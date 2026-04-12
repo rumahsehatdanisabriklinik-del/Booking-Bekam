@@ -848,10 +848,9 @@
             const payload = { action: "generateAITips", history: history };
 
             try {
-                // Gunakan text/plain ajaib untuk menghindari error CORS Preflight dari Google Apps Script
                 const response = await fetch(`${window.GAS_URL}${connector}action=generateAITips`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 if (!response.ok) throw new Error("Jaringan bermasalah");
