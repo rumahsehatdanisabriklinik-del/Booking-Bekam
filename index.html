@@ -741,7 +741,7 @@
                     amber:   { bg: 'from-amber-100 to-amber-50',     text: 'text-amber-600',   badge: 'from-amber-500 to-amber-600',  check: 'text-amber-500',   btn: 'bg-amber-50 text-amber-700 hover:bg-amber-600',shadow: 'hover:shadow-amber-900/5' },
                 };
 
-                grid.innerHTML = result.data.map((l, i) => {
+                grid.innerHTML = layananData.map((l, i) => {
                     try {
                         const c = colorMap[l.warna] || colorMap.emerald;
                         const delay = (i * 0.1 + 0.1).toFixed(1);
