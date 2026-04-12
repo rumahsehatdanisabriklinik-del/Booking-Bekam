@@ -102,6 +102,16 @@
 </head>
 <body class="text-slate-900 antialiased overflow-x-hidden relative">
 
+    <!-- Preloader -->
+    <div id="preloader" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center mb-4">
+            <div class="absolute inset-0 border-4 border-emerald-100 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-emerald-600 rounded-full border-t-transparent animate-spin"></div>
+            <i class="fas fa-leaf text-emerald-600 text-xl sm:text-2xl animate-pulse"></i>
+        </div>
+        <p class="text-slate-600 font-bold animate-pulse tracking-widest uppercase text-xs sm:text-sm mt-2">Memuat Data...</p>
+    </div>
+
     <!-- Background Decoration -->
     <div class="bg-blobs">
         <div class="blob blob-1"></div>
@@ -688,9 +698,19 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadLandingContent();
-            loadLayananDynamic();
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Jalankan kedua fungsi fetch secara paralel dan tunggu sampai selesai
+            await Promise.all([
+                loadLandingContent(),
+                loadLayananDynamic()
+            ]);
+            
+            // Hapus layar loading setelah semua data siap
+            const preloader = document.getElementById('preloader');
+            if (preloader) {
+                preloader.classList.add('opacity-0');
+                setTimeout(() => preloader.remove(), 500);
+            }
         });
 
         async function loadLayananDynamic() {
