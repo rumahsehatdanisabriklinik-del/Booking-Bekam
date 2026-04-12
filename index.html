@@ -79,6 +79,25 @@
         /* Glassmorphism utilities */
         .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.3); }
         .glass-dark { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.4); }
+
+        /* Chatbot Custom Styles */
+        #ai-chatbot-container { z-index: 1000; transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1); transform: translateY(20px) scale(0.9); opacity: 0; pointer-events: none; }
+        #ai-chatbot-container.active { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
+        
+        .chat-bubble { max-width: 85%; padding: 12px 16px; border-radius: 20px; font-size: 14px; line-height: 1.5; margin-bottom: 8px; position: relative; }
+        .chat-bubble.user { background: #10b981; color: white; margin-left: auto; border-bottom-right-radius: 4px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); }
+        .chat-bubble.ai { background: #f1f5f9; color: #1e293b; margin-right: auto; border-bottom-left-radius: 4px; border: 1px solid #e2e8f0; }
+        
+        .typing-indicator span { width: 4px; height: 4px; background: #94a3b8; border-radius: 50%; display: inline-block; animation: bounce 1.4s infinite ease-in-out both; }
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
+        
+        .chat-scrollbar::-webkit-scrollbar { width: 6px; }
+        .chat-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .chat-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .chat-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
     </style>
 </head>
 <body class="text-slate-900 antialiased overflow-x-hidden relative">
@@ -388,6 +407,58 @@
             </div>
         </div>
     </footer>
+
+    <!-- PREMIUM AI FLOATING CHATBOT -->
+    <div class="fixed bottom-6 right-6 z-[999]">
+        <!-- Chat FAB -->
+        <button id="chatbot-fab" onclick="toggleChatbot()" class="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl hover:scale-110 active:scale-95 transition-transform duration-300 relative group pulse-emerald">
+            <i class="fas fa-robot group-hover:rotate-12 transition-transform"></i>
+            <span class="absolute -top-1 -right-1 flex h-4 w-4">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-4 w-4 bg-amber-500 border-2 border-white"></span>
+            </span>
+        </button>
+
+        <!-- Chat Window -->
+        <div id="ai-chatbot-container" class="absolute bottom-20 right-0 w-[350px] sm:w-[400px] h-[550px] max-h-[80vh] bg-white/95 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-white/50 flex flex-col overflow-hidden origin-bottom-right">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 p-5 text-white flex items-center justify-between shadow-lg">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl">
+                        <i class="fas fa-hand-holding-heart"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm tracking-tight text-white/95">Asisten Rumah Sehat</h4>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 bg-emerald-300 rounded-full animate-pulse"></span>
+                            <span class="text-[10px] font-bold text-emerald-100 uppercase tracking-widest">Aktiv Sekarang</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="toggleChatbot()" class="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Chat Body -->
+            <div id="chat-messages" class="flex-grow overflow-y-auto p-5 space-y-4 chat-scrollbar bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:20px_20px]">
+                <div class="chat-bubble ai">
+                    Halo! Saya asisten AI Klinik <strong>Dani Sabri</strong>. Ada yang bisa saya bantu terkait layanan Bekam atau Ruqyah?
+                </div>
+            </div>
+
+            <!-- Footer / Input -->
+            <div class="p-4 bg-white border-t border-slate-100">
+                <form id="chat-form" onsubmit="handleChatSubmit(event)" class="relative flex items-center gap-2">
+                    <input type="text" id="chat-input" placeholder="Tulis pesan Anda..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-4 pr-12 text-sm font-medium text-slate-700 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all shadow-inner">
+                    <button type="submit" class="absolute right-2 w-9 h-9 bg-emerald-600 text-white rounded-xl flex items-center justify-center hover:bg-emerald-700 transition-colors shadow-md shadow-emerald-600/20 active:scale-90">
+                        <i class="fas fa-paper-plane text-xs"></i>
+                    </button>
+                </form>
+                <p class="text-[9px] text-center text-slate-400 mt-3 font-bold uppercase tracking-widest opacity-60">Powered by Gemini AI</p>
+            </div>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <!-- Jika file config.js di sistem Anda memuat variabel GAS_URL -->
