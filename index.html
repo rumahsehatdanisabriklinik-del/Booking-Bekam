@@ -739,44 +739,46 @@
                 };
 
                 grid.innerHTML = result.data.map((l, i) => {
-                    const c = colorMap[l.warna] || colorMap.emerald;
-                    const delay = (i * 0.1 + 0.1).toFixed(1);
-                    const details = l.detail ? l.detail.split(',').map(d => d.trim()).filter(Boolean) : [];
+                    try {
+                        const c = colorMap[l.warna] || colorMap.emerald;
+                        const delay = (i * 0.1 + 0.1).toFixed(1);
+                        // Pastikan l.detail adalah string sebelum di-split
+                        const details = (l.detail && typeof l.detail === 'string') ? l.detail.split(',').map(d => d.trim()).filter(Boolean) : [];
 
-                    let mediaEl = '';
-                    if (l.foto && l.foto.trim() !== '') {
-                        let fotoUrl = l.foto;
-                        if (fotoUrl.includes('drive.google.com/uc')) {
-                            try { const id = fotoUrl.split('id=')[1].split('&')[0]; fotoUrl = `https://lh3.googleusercontent.com/d/${id}`; } catch(e) {}
+                        let mediaEl = '';
+                        if (l.foto && typeof l.foto === 'string' && l.foto.trim() !== '') {
+                            let fotoUrl = l.foto;
+                            if (fotoUrl.includes('drive.google.com/uc')) {
+                                try { 
+                                    const match = fotoUrl.match(/id=([a-zA-Z0-9_-]+)/);
+                                    if(match) fotoUrl = `https://lh3.googleusercontent.com/d/${match[1]}`; 
+                                } catch(e) {}
+                            }
+                            mediaEl = `<div class="w-full h-40 rounded-2xl overflow-hidden mb-6 sm:mb-8 shadow-inner">
+                                <img src="${fotoUrl}" alt="${l.nama || 'Layanan'}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=400&auto=format&fit=crop'">
+                            </div>`;
+                        } else {
+                            mediaEl = `<div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-gradient-to-br ${c.bg} ${c.text} flex items-center justify-center text-2xl sm:text-3xl mb-6 sm:mb-8 shadow-inner group-hover:scale-110 transition-transform duration-300">
+                                <i class="${l.icon || 'fas fa-star'}"></i>
+                            </div>`;
                         }
-                        mediaEl = `<div class="w-full h-40 rounded-2xl overflow-hidden mb-6 sm:mb-8 shadow-inner">
-                            <img src="${fotoUrl}" alt="${l.nama}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                        </div>`;
-                    } else {
-                        mediaEl = `<div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-gradient-to-br ${c.bg} ${c.text} flex items-center justify-center text-2xl sm:text-3xl mb-6 sm:mb-8 shadow-inner group-hover:scale-110 transition-transform duration-300">
-                            <i class="${l.icon || 'fas fa-star'}"></i>
-                        </div>`;
-                    }
 
-                    return `<div class="relative group reveal" style="animation-delay: ${delay}s;">
-                        <div class="glass p-8 sm:p-10 rounded-[3rem] shadow-sm hover:shadow-2xl ${c.shadow} hover:-translate-y-2 transition-all duration-300 h-full flex flex-col border-white/60 overflow-hidden">
-                            ${l.terlaris ? `<div class="absolute top-0 right-0 bg-gradient-to-bl ${c.badge} text-white text-[10px] font-black px-4 sm:px-6 py-2 rounded-bl-2xl shadow-md uppercase tracking-widest">Terlaris</div>` : ''}
-                            ${mediaEl}
-                            <!-- JUDUL (Fixed Height for Alignment) -->
-                            <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3 sm:mb-4 line-clamp-2 min-h-[3.5rem] sm:min-h-[4rem]">${l.nama}</h3>
-                            
-                            <!-- DESKRIPSI (Line Clamp & Min Height) -->
-                            <p class="text-sm sm:text-base text-slate-500 font-medium leading-relaxed mb-6 sm:mb-8 line-clamp-4 min-h-[5rem] sm:min-h-[6rem]">${l.deskripsi}</p>
-                            
-                            <!-- POIN DETAIL (Max 4 items for neatness) -->
-                            ${details.length > 0 ? `<ul class="space-y-3 mb-8 sm:mb-10 flex-grow">${details.slice(0, 4).map(d => `<li class="flex items-start gap-3 text-xs sm:text-sm font-bold text-slate-600"><i class="fas fa-check-circle ${c.check} text-lg mt-0.5"></i> <span class="line-clamp-2">${d}</span></li>`).join('')}</ul>` : '<div class="flex-grow"></div>'}
-                            
-                            <!-- TOMBOL -->
-                            <a href="booking.html" class="group/btn flex items-center justify-center gap-2 w-full py-3.5 sm:py-4 rounded-xl sm:rounded-2xl ${c.btn} hover:text-white font-extrabold transition-colors duration-300">
-                                Pesan Jadwal <i class="fas fa-arrow-right text-xs group-hover/btn:translate-x-1 transition-transform"></i>
-                            </a>
-                        </div>
-                    </div>`;
+                        return `<div class="relative group reveal" style="animation-delay: ${delay}s;">
+                            <div class="glass p-8 sm:p-10 rounded-[3rem] shadow-sm hover:shadow-2xl ${c.shadow} hover:-translate-y-2 transition-all duration-300 h-full flex flex-col border-white/60 overflow-hidden">
+                                ${l.terlaris ? `<div class="absolute top-0 right-0 bg-gradient-to-bl ${c.badge} text-white text-[10px] font-black px-4 sm:px-6 py-2 rounded-bl-2xl shadow-md uppercase tracking-widest">Terlaris</div>` : ''}
+                                ${mediaEl}
+                                <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3 sm:mb-4 line-clamp-2 min-h-[3.5rem] sm:min-h-[4rem]">${l.nama || 'Layanan Tanpa Nama'}</h3>
+                                <p class="text-sm sm:text-base text-slate-500 font-medium leading-relaxed mb-6 sm:mb-8 line-clamp-4 min-h-[5rem] sm:min-h-[6rem]">${l.deskripsi || 'Tidak ada deskripsi tersedia.'}</p>
+                                ${details.length > 0 ? `<ul class="space-y-3 mb-8 sm:mb-10 flex-grow">${details.slice(0, 4).map(d => `<li class="flex items-start gap-3 text-xs sm:text-sm font-bold text-slate-600"><i class="fas fa-check-circle ${c.check} text-lg mt-0.5"></i> <span class="line-clamp-2">${d}</span></li>`).join('')}</ul>` : '<div class="flex-grow"></div>'}
+                                <a href="booking.html" class="group/btn flex items-center justify-center gap-2 w-full py-3.5 sm:py-4 rounded-xl sm:rounded-2xl ${c.btn} hover:text-white font-extrabold transition-colors duration-300">
+                                    Pesan Jadwal <i class="fas fa-arrow-right text-xs group-hover/btn:translate-x-1 transition-transform"></i>
+                                </a>
+                            </div>
+                        </div>`;
+                    } catch (e) {
+                        console.error("Item layanan rusak:", e);
+                        return "";
+                    }
                 }).join('');
 
                 // Re-observe new cards for reveal animation
