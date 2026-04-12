@@ -543,20 +543,11 @@
 
         // 5. CMS Content Loader dengan Fallback Aman
         async function loadLandingContent() {
-            // Mencegah error jika config.js tidak ada (Fallback mode)
             if (typeof window.GAS_URL === 'undefined') {
-                console.info("Info: GAS_URL tidak ditemukan. Menggunakan konten statis bawaan HTML.");
                 return; 
             }
 
-            try {
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const response = await fetch(`${window.GAS_URL}${connector}action=getLandingSettings`);
-                const result = await response.json();
-                
-                if (result.status === "success") {
-                    const d = result.data;
-                    
+            const applyCMSContent = (d) => {
                     if(d.cms_nama_klinik) {
                         const nav = document.getElementById('cms-nama-klinik-nav');
                         const foot = document.getElementById('cms-nama-klinik-footer');
@@ -669,9 +660,23 @@
                     // CTA
                     if(d.cms_cta_judul) document.getElementById('cms-cta-judul').innerHTML = d.cms_cta_judul;
                     if(d.cms_cta_deskripsi) document.getElementById('cms-cta-deskripsi').textContent = d.cms_cta_deskripsi;
+            };
+
+            const cachedCMS = localStorage.getItem('cmsDataVal');
+            if (cachedCMS) {
+                try { applyCMSContent(JSON.parse(cachedCMS)); hidePreloader(); } catch(e) {}
+            }
+
+            try {
+                const connector = window.GAS_URL.includes('?') ? '&' : '?';
+                const response = await fetch(`${window.GAS_URL}${connector}action=getLandingSettings`);
+                const result = await response.json();
+                if (result.status === "success") {
+                    localStorage.setItem('cmsDataVal', JSON.stringify(result.data));
+                    applyCMSContent(result.data);
                 }
             } catch (error) { 
-                console.error("Gagal memuat CMS (kemungkinan masalah jaringan/CORS):", error); 
+                console.error("Gagal memuat CMS:", error); 
             }
         }
 
@@ -698,6 +703,14 @@
             }
         }
 
+        function hidePreloader() {
+            const preloader = document.getElementById('preloader');
+            if (preloader && !preloader.classList.contains('opacity-0')) {
+                preloader.classList.add('opacity-0');
+                setTimeout(() => preloader.remove(), 500);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             // Jalankan kedua fungsi fetch secara paralel dan tunggu sampai selesai
             await Promise.all([
@@ -705,26 +718,16 @@
                 loadLayananDynamic()
             ]);
             
-            // Hapus layar loading setelah semua data siap
-            const preloader = document.getElementById('preloader');
-            if (preloader) {
-                preloader.classList.add('opacity-0');
-                setTimeout(() => preloader.remove(), 500);
-            }
+            // Hapus layar loading setelah semua data siap/selesai background fetch
+            hidePreloader();
         });
 
         async function loadLayananDynamic() {
-            try {
-                if (!window.GAS_URL) return;
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const res = await fetch(`${window.GAS_URL}${connector}action=getLayananList`);
-                const result = await res.json();
-                
-                const grid = document.getElementById('services-grid');
-                if (!grid) return;
+            const grid = document.getElementById('services-grid');
+            if (!grid || !window.GAS_URL) return;
 
-                if (result.status !== 'success' || !result.data || result.data.length === 0) {
-                    console.warn("Layanan Dinamis Kosong/Error:", result);
+            const applyLayananUI = (layananData) => {
+                if (!layananData || layananData.length === 0) {
                     grid.innerHTML = '<div class="col-span-full py-10 text-center"><p class="text-slate-400 font-bold">Layanan belum tersedia.<br><span class="font-normal text-xs">Mohon isi Daftar Layanan di Admin Panel atau jalankan Migrasi.</span></p></div>';
                     return;
                 }
@@ -783,9 +786,26 @@
 
                 // Re-observe new cards for reveal animation
                 grid.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+            };
 
+            const cachedLayanan = localStorage.getItem('layananDataVal');
+            if (cachedLayanan) {
+                try { applyLayananUI(JSON.parse(cachedLayanan)); hidePreloader(); } catch(e) {}
+            }
+
+            try {
+                const connector = window.GAS_URL.includes('?') ? '&' : '?';
+                const res = await fetch(`${window.GAS_URL}${connector}action=getLayananList`);
+                const result = await res.json();
+                
+                if (result.status === 'success' && result.data) {
+                    localStorage.setItem('layananDataVal', JSON.stringify(result.data));
+                    applyLayananUI(result.data);
+                } else if (!cachedLayanan) {
+                    applyLayananUI([]);
+                }
             } catch(e) {
-                console.warn('Layanan dinamis gagal dimuat, konten bawaan tetap ditampilkan.', e);
+                console.warn('Layanan dinamis gagal dimuat', e);
             }
         }
 

@@ -69,11 +69,27 @@ async function initBooking() {
     }
     
     try {
-        // Tampilkan loader awal
-        document.getElementById('global-loader').classList.remove('hide');
-        
-        listTerapisUI.innerHTML = '<div class="col-span-full text-slate-400 italic p-4 text-center"><i class="fas fa-circle-notch fa-spin mr-2"></i> Sedang memuat data dari server...</div>';
-        document.getElementById('section-nama-terapis').classList.remove('hidden');
+        const applyInitData = (terapisData, layananData) => {
+            allTerapis = terapisData;
+            allLayanan = layananData || [];
+            document.getElementById('global-loader').classList.add('hide');
+            listTerapisUI.innerHTML = '<div class="col-span-full text-emerald-500 text-[10px] font-black uppercase tracking-widest p-2 rounded-lg bg-emerald-50 text-center animate-pulse"><i class="fas fa-check-circle"></i> Database Siap</div>';
+            setTimeout(() => { 
+                if (!selectedGender) document.getElementById('section-nama-terapis').classList.add('hidden'); 
+            }, 2000);
+        };
+
+        const cachedInit = sessionStorage.getItem('initBookingData');
+        if (cachedInit) {
+            try { 
+                const data = JSON.parse(cachedInit);
+                applyInitData(data.terapis, data.layanan);
+            } catch(e) {}
+        } else {
+            document.getElementById('global-loader').classList.remove('hide');
+            listTerapisUI.innerHTML = '<div class="col-span-full text-slate-400 italic p-4 text-center"><i class="fas fa-circle-notch fa-spin mr-2"></i> Sedang memuat data dari server...</div>';
+            document.getElementById('section-nama-terapis').classList.remove('hidden');
+        }
 
         const connector = window.GAS_URL.includes('?') ? '&' : '?';
         const res = await fetch(`${window.GAS_URL}${connector}action=getInitData`);
@@ -81,18 +97,8 @@ async function initBooking() {
         
         const result = await res.json();
         if (result.status === "success") {
-            allTerapis = result.data.terapis;
-            allLayanan = result.data.layanan || [];
-            console.log("Data Berhasil Dimuat:", { allTerapis, allLayanan });
-            
-            // Sembunyikan loader karena data sudah sinkron
-            document.getElementById('global-loader').classList.add('hide');
-
-            listTerapisUI.innerHTML = '<div class="col-span-full text-emerald-500 text-[10px] font-black uppercase tracking-widest p-2 rounded-lg bg-emerald-50 text-center animate-pulse"><i class="fas fa-check-circle"></i> Database Siap</div>';
-            
-            setTimeout(() => { 
-                if (!selectedGender) document.getElementById('section-nama-terapis').classList.add('hidden'); 
-            }, 2000);
+            sessionStorage.setItem('initBookingData', JSON.stringify(result.data));
+            applyInitData(result.data.terapis, result.data.layanan);
         } else {
             throw new Error(result.message || "Gagal mengambil data dari Google Sheets.");
         }
@@ -399,7 +405,7 @@ async function callGeminiAPI(promptText) {
             // Mengirim Request ke Google Apps Script backend untuk keamanan API Key
             const response = await fetch(`${window.GAS_URL}${connector}action=generateAITips`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
             
@@ -508,7 +514,7 @@ document.getElementById('bookingForm').addEventListener('submit', async (e) => {
         const connector = window.GAS_URL.includes('?') ? '&' : '?';
         const response = await fetch(`${window.GAS_URL}${connector}action=simpanBookingData`, {
             method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(backendData)
         });
         const result = await response.json();
