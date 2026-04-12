@@ -697,6 +697,80 @@
         }
 
 
+        // --- CHATBOT LOGIC ---
+        let chatHistory = [
+            { role: "assistant", content: "Halo! Saya asisten AI Klinik <strong>Dani Sabri</strong>. Ada yang bisa saya bantu terkait layanan Bekam atau Ruqyah?" }
+        ];
+
+        function toggleChatbot() {
+            const container = document.getElementById('ai-chatbot-container');
+            container.classList.toggle('active');
+            if (container.classList.contains('active')) {
+                document.getElementById('chat-input').focus();
+            }
+        }
+
+        async function handleChatSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            input.value = "";
+            addMessageToUI("user", message);
+            chatHistory.push({ role: "user", content: message });
+
+            const messagesContainer = document.getElementById('chat-messages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = "chat-bubble ai typing-indicator mb-4";
+            typingDiv.innerHTML = "<span></span> <span></span> <span></span>";
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            try {
+                const response = await callGeminiChatAPI(chatHistory);
+                typingDiv.remove();
+                addMessageToUI("assistant", response);
+                chatHistory.push({ role: "assistant", content: response });
+                
+                if (chatHistory.length > 10) chatHistory = [chatHistory[0], ...chatHistory.slice(-9)];
+            } catch (error) {
+                typingDiv.remove();
+                addMessageToUI("assistant", "Maaf, sistem sedang sibuk. Silakan coba lagi nanti.");
+            }
+        }
+
+        function addMessageToUI(role, content) {
+            const container = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = `chat-bubble ${role === 'user' ? 'user' : 'ai'} animate-fade-up`;
+            div.innerHTML = content;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function callGeminiChatAPI(history) {
+            if (typeof window.GAS_URL === 'undefined' || !window.GAS_URL) {
+                throw new Error("Konfigurasi API URL belum tersedia");
+            }
+            const connector = window.GAS_URL.includes('?') ? '&' : '?';
+            const payload = { action: "generateAITips", history: history };
+
+            try {
+                const response = await fetch(`${window.GAS_URL}${connector}action=generateAITips`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error("Jaringan bermasalah");
+                const result = await response.json();
+                if (result.status === "success") return result.data.text;
+                throw new Error(result.message);
+            } catch (error) {
+                console.error("Chat Error:", error);
+                throw error;
+            }
+        }
     </script>
 </body>
 
