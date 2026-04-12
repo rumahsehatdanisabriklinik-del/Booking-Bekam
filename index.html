@@ -827,7 +827,7 @@
                 if (chatHistory.length > 10) chatHistory = [chatHistory[0], ...chatHistory.slice(-9)];
             } catch (error) {
                 typingDiv.remove();
-                addMessageToUI("assistant", "Maaf, sistem sedang sibuk. Silakan coba lagi nanti.");
+                addMessageToUI("assistant", "Maaf, error: " + error.message);
             }
         }
 
@@ -848,9 +848,10 @@
             const payload = { action: "generateAITips", history: history };
 
             try {
+                // Gunakan text/plain ajaib untuk menghindari error CORS Preflight dari Google Apps Script
                 const response = await fetch(`${window.GAS_URL}${connector}action=generateAITips`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(payload)
                 });
                 if (!response.ok) throw new Error("Jaringan bermasalah");
