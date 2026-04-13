@@ -143,24 +143,66 @@ function filterTerapisName() {
     const container = document.getElementById('section-nama-terapis');
     const list = document.getElementById('list-terapis-nama');
     
+    // Terapis yang cocok gender-nya dengan pasien
     let matches = allTerapis.filter(t => t.gender === genderLabel);
-    
+
+    // Cari terapis dari layanan lintas gender (tidak peduli gender terapis)
+    const lintasGenderLayanan = allLayanan.filter(l => l.lintasGender && l.terapisKhusus && l.terapisKhusus.length > 0);
+    const namaLintasTerapis = new Set();
+    lintasGenderLayanan.forEach(l => l.terapisKhusus.forEach(n => namaLintasTerapis.add(n.trim().toLowerCase())));
+
+    // Terapis lintas gender yang bukan bagian dari matches biasa
+    const matchedNamaSet = new Set(matches.map(t => t.nama.trim().toLowerCase()));
+    const terapisKhususExtra = allTerapis.filter(t =>
+        namaLintasTerapis.has(t.nama.trim().toLowerCase()) &&
+        !matchedNamaSet.has(t.nama.trim().toLowerCase())
+    );
+
+    // Kumpulkan nama layanan lintas gender per terapis untuk label
+    const getLabelLayananKhusus = (namaTerapis) => {
+        const cleanNama = namaTerapis.trim().toLowerCase();
+        return lintasGenderLayanan
+            .filter(l => l.terapisKhusus.some(n => n.trim().toLowerCase() === cleanNama))
+            .map(l => l.nama)
+            .join(", ");
+    };
+
     list.innerHTML = "";
-    if (matches.length > 0) {
-        container.classList.remove('hidden');
-        matches.forEach((t, index) => {
-            const div = document.createElement('label');
-            div.className = "w-full animate-fade-up";
-            div.style.animationDelay = `${index * 50}ms`; // Staggered animation
-            div.innerHTML = `
-                <input type="radio" name="pilih_nama_terapis" value="${t.nama}" class="radio-hidden" onchange="selectSpecificTerapis('${t.nama}')">
-                <div class="pill-label !py-4 !rounded-[1rem] !text-sm flex flex-row gap-3 !justify-start pl-5">
-                    <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center icon-wrapper transition-colors"><i class="fas fa-user-md"></i></div>
+
+    const renderTerapisCard = (t, index, isKhusus = false) => {
+        const div = document.createElement('label');
+        div.className = "w-full animate-fade-up";
+        div.style.animationDelay = `${index * 50}ms`;
+        const labelKhusus = isKhusus
+            ? `<span class="text-[9px] font-black uppercase tracking-widest text-teal-600 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-full">${getLabelLayananKhusus(t.nama)}</span>`
+            : '';
+        div.innerHTML = `
+            <input type="radio" name="pilih_nama_terapis" value="${t.nama}" class="radio-hidden" onchange="selectSpecificTerapis('${t.nama}')">
+            <div class="pill-label !py-4 !rounded-[1rem] !text-sm flex flex-row gap-3 !justify-start pl-5">
+                <div class="w-8 h-8 rounded-full ${isKhusus ? 'bg-teal-50 text-teal-500' : 'bg-emerald-50 text-emerald-500'} flex items-center justify-center icon-wrapper transition-colors"><i class="fas ${isKhusus ? 'fa-star-and-crescent' : 'fa-user-md'}"></i></div>
+                <div class="flex flex-col gap-0.5">
                     <span class="text-title text-base font-bold">${t.nama}</span>
+                    ${labelKhusus}
                 </div>
-            `;
-            list.appendChild(div);
-        });
+            </div>
+        `;
+        list.appendChild(div);
+    };
+
+    if (matches.length > 0 || terapisKhususExtra.length > 0) {
+        container.classList.remove('hidden');
+
+        // Tampilkan terapis sesuai gender
+        matches.forEach((t, i) => renderTerapisCard(t, i, false));
+
+        // Jika ada terapis layanan khusus lintas gender, tampilkan dengan separator
+        if (terapisKhususExtra.length > 0) {
+            const sep = document.createElement('div');
+            sep.className = "col-span-full flex items-center gap-3 my-1 animate-fade-up";
+            sep.innerHTML = `<div class="flex-1 h-px bg-teal-100"></div><span class="text-[9px] font-black uppercase tracking-widest text-teal-500">Layanan Khusus</span><div class="flex-1 h-px bg-teal-100"></div>`;
+            list.appendChild(sep);
+            terapisKhususExtra.forEach((t, i) => renderTerapisCard(t, matches.length + i, true));
+        }
     } else {
         container.classList.remove('hidden');
         list.innerHTML = `<div class="col-span-full p-4 bg-amber-50 text-amber-700 rounded-xl text-xs font-bold border border-amber-100 flex items-center gap-3">
@@ -168,6 +210,7 @@ function filterTerapisName() {
         </div>`;
     }
 }
+
 
 function selectSpecificTerapis(nama) {
     selectedTerapisName = nama;
