@@ -460,7 +460,7 @@ async function generateAITips() {
             
         resultContent.innerHTML = styledResponse;
     } catch (error) {
-        resultContent.innerHTML = `<span class="text-red-500">Gagal mengambil tips AI. Silakan coba lagi nanti.</span>`;
+        resultContent.innerHTML = `<span class="text-red-500 text-sm flex items-center gap-2 bg-red-50 p-3 rounded-lg border border-red-100"><i class="fas fa-exclamation-triangle"></i> Maaf, saat ini Asisten AI sedang sibuk atau mengalami gangguan koneksi. Mohon coba beberapa saat lagi ya.</span>`;
     } finally {
         // Restore Button State
         btn.innerHTML = '<i class="fas fa-check text-indigo-200"></i><span>Tips Berhasil Dibuat</span>';
