@@ -152,20 +152,33 @@ function filterTerapisName() {
     lintasGenderLayanan.forEach(l => l.terapisKhusus.forEach(n => namaLintasTerapis.add(n.trim().toLowerCase())));
 
     // Terapis lintas gender: (1) gender === 'lintas' dari inject backend, ATAU
-    // (2) namanya ada di layanan lintasGender dan bukan di matches biasa
+    // (2) namanya ada di layanan khusus (tanpa terapis perempuan) dan bukan di matches biasa
     const matchedNamaSet = new Set(matches.map(t => t.nama.trim().toLowerCase()));
+
+    // Deteksi layanan "khusus" (yang tidak punya terapis perempuan) secara dinamis
+    const namaTerapisPerempuan = new Set(
+        allTerapis.filter(t => t.gender === "Perempuan").map(t => t.nama.trim().toLowerCase())
+    );
+    const layananTanpaPerempuan = allLayanan.filter(l => {
+        if (!l.terapisKhusus || l.terapisKhusus.length === 0) return false;
+        return !l.terapisKhusus.some(n => namaTerapisPerempuan.has(n.trim().toLowerCase()));
+    });
+    const namaTerapisKhususSet = new Set();
+    layananTanpaPerempuan.forEach(l => l.terapisKhusus.forEach(n => namaTerapisKhususSet.add(n.trim().toLowerCase())));
+
     const terapisKhususExtra = allTerapis.filter(t => {
-        // Gender 'lintas' = diinjek dari layanan lintas gender di backend
-        if (t.gender === "lintas") return true;
-        // Atau nama ada di layanan lintas gender & bukan di matches gender biasa
-        return namaLintasTerapis.has(t.nama.trim().toLowerCase()) &&
-               !matchedNamaSet.has(t.nama.trim().toLowerCase());
+        const cleanNama = t.nama.trim().toLowerCase();
+        // JANGAN masukkan jika sudah ada di list matches gender biasa (cegah DOBLE)
+        if (matchedNamaSet.has(cleanNama)) return false;
+
+        // Masukkan jika gendernya 'lintas' ATAU dia terapis dari layanan tanpa perempuan
+        return t.gender === "lintas" || namaTerapisKhususSet.has(cleanNama);
     });
 
-    // Kumpulkan nama layanan lintas gender per terapis untuk label
+    // Kumpulkan nama layanan khusus per terapis untuk label
     const getLabelLayananKhusus = (namaTerapis) => {
         const cleanNama = namaTerapis.trim().toLowerCase();
-        return lintasGenderLayanan
+        return layananTanpaPerempuan
             .filter(l => l.terapisKhusus.some(n => n.trim().toLowerCase() === cleanNama))
             .map(l => l.nama)
             .join(", ");
