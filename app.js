@@ -151,12 +151,16 @@ function filterTerapisName() {
     const namaLintasTerapis = new Set();
     lintasGenderLayanan.forEach(l => l.terapisKhusus.forEach(n => namaLintasTerapis.add(n.trim().toLowerCase())));
 
-    // Terapis lintas gender yang bukan bagian dari matches biasa
+    // Terapis lintas gender: (1) gender === 'lintas' dari inject backend, ATAU
+    // (2) namanya ada di layanan lintasGender dan bukan di matches biasa
     const matchedNamaSet = new Set(matches.map(t => t.nama.trim().toLowerCase()));
-    const terapisKhususExtra = allTerapis.filter(t =>
-        namaLintasTerapis.has(t.nama.trim().toLowerCase()) &&
-        !matchedNamaSet.has(t.nama.trim().toLowerCase())
-    );
+    const terapisKhususExtra = allTerapis.filter(t => {
+        // Gender 'lintas' = diinjek dari layanan lintas gender di backend
+        if (t.gender === "lintas") return true;
+        // Atau nama ada di layanan lintas gender & bukan di matches gender biasa
+        return namaLintasTerapis.has(t.nama.trim().toLowerCase()) &&
+               !matchedNamaSet.has(t.nama.trim().toLowerCase());
+    });
 
     // Kumpulkan nama layanan lintas gender per terapis untuk label
     const getLabelLayananKhusus = (namaTerapis) => {
