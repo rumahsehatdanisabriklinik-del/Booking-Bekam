@@ -166,14 +166,25 @@ function filterTerapisName() {
     const namaTerapisKhususSet = new Set();
     layananTanpaPerempuan.forEach(l => l.terapisKhusus.forEach(n => namaTerapisKhususSet.add(n.trim().toLowerCase())));
 
+    const addedExtraNames = new Set();
     const terapisKhususExtra = allTerapis.filter(t => {
         const cleanNama = t.nama.trim().toLowerCase();
-        // JANGAN masukkan jika sudah ada di list matches gender biasa (cegah DOBLE)
+        
+        // 1. JANGAN masukkan jika sudah ada di list matches gender biasa (cegah DOBLE)
         if (matchedNamaSet.has(cleanNama)) return false;
 
-        // Masukkan jika gendernya 'lintas' ATAU dia terapis dari layanan tanpa perempuan
-        return t.gender === "lintas" || namaTerapisKhususSet.has(cleanNama);
+        // 2. JANGAN masukkan jika sudah masuk ke list extra ini sendiri (cegah DOBLE saat inject)
+        if (addedExtraNames.has(cleanNama)) return false;
+
+        // 3. Masukkan jika gendernya 'lintas' ATAU dia terapis dari layanan tanpa perempuan
+        if (t.gender === "lintas" || namaTerapisKhususSet.has(cleanNama)) {
+            addedExtraNames.add(cleanNama);
+            return true;
+        }
+        return false;
     });
+
+    list.innerHTML = "";
 
     // Kumpulkan nama layanan khusus per terapis untuk label
     const getLabelLayananKhusus = (namaTerapis) => {
