@@ -1429,6 +1429,7 @@
                 const pass = localStorage.getItem('adminPin');
                 const res = await fetch(`${window.GAS_URL}`, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'initDb', pass: pass })
                 });
                 const result = await res.json();
