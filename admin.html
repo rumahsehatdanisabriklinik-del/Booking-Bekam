@@ -875,8 +875,7 @@
             });
 
             try {
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
+                const res = await fetch(`${window.GAS_URL}`, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'updateLandingSettings', pass: pin, updatedData: updatedData })
                 });
@@ -962,8 +961,7 @@
             }));
 
             try {
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
+                const res = await fetch(`${window.GAS_URL}`, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'saveLayananList', pass: pin, layananData: dataToSave })
                 });
@@ -997,8 +995,7 @@
             btn.disabled = true;
 
             try {
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
+                const res = await fetch(`${window.GAS_URL}`, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'adminUpdateStatus', pass: pin, row: row, status: stat })
                 });
@@ -1038,8 +1035,7 @@
             btn.disabled = true;
 
             try {
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
+                const res = await fetch(`${window.GAS_URL}`, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'adminUpdateRekamMedis', pass: pin, row: row, tensi: '', keluhan: k, tindakan: t })
                 });
@@ -1170,8 +1166,7 @@
             btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Menyimpan...';
             btn.disabled = true;
             try {
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
+                const res = await fetch(`${window.GAS_URL}`, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'saveArtikel', pass: pin, artikelData: data })
                 });
@@ -1190,8 +1185,7 @@
             if(!confirm("Yakin hapus permanen? Foto di G-Drive tidak terhapus.")) return;
             try {
                 const pin = localStorage.getItem('adminPin');
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
+                const res = await fetch(`${window.GAS_URL}`, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'deleteArtikel', pass: pin, artikelId: id })
                 });
@@ -1304,8 +1298,7 @@
                 const newPayload = [...galeriData];
                 if (idx === 'new') newPayload.push(item); else newPayload[idx] = item;
 
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
+                const res = await fetch(`${window.GAS_URL}`, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'saveGaleri', pass: pin, galeriData: newPayload })
                 });
@@ -1324,8 +1317,7 @@
             const newPayload = [...galeriData];
             newPayload.splice(idx, 1);
             try {
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
+                const res = await fetch(`${window.GAS_URL}`, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'saveGaleri', pass: pin, galeriData: newPayload })
                 });
@@ -1346,8 +1338,7 @@
             
             try {
                 const pin = localStorage.getItem('adminPin');
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
+                const res = await fetch(`${window.GAS_URL}`, {
                     method: 'POST',//
                     body: JSON.stringify({ action: 'createDoc', pass: pin, judul: judul })
                 });
@@ -1387,8 +1378,7 @@
                 reader.onload = async (e) => {
                     try {
                         const pin = localStorage.getItem('adminPin');
-                        const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                        const apiUrl = `${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`;
+                        const apiUrl = `${window.GAS_URL}`;
                         
                         const res = await fetch(apiUrl, {
                             method: 'POST',
@@ -1425,9 +1415,7 @@
             btn.disabled = true;
 
             try {
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const pass = localStorage.getItem('adminPin');
-                const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
+                const res = await fetch(`${window.GAS_URL}`, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'initDb', pass: pass })
                 });
@@ -1445,9 +1433,7 @@
             btn.disabled = true;
 
             try {
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const pass = localStorage.getItem('adminPin');
-                const res = await fetch(`${window.GAS_URL}${connector}token=S3cR3t_KpK_2026!`, {
+                const res = await fetch(`${window.GAS_URL}`, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'runMigrate', pass: pass })
                 });
