@@ -875,8 +875,10 @@
             });
 
             try {
+                const pin = localStorage.getItem('adminPin');
                 const res = await fetch(`${window.GAS_URL}`, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'updateLandingSettings', pass: pin, updatedData: updatedData })
                 });
                 const result = await res.json();
@@ -961,8 +963,10 @@
             }));
 
             try {
+                const pin = localStorage.getItem('adminPin');
                 const res = await fetch(`${window.GAS_URL}`, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'saveLayananList', pass: pin, layananData: dataToSave })
                 });
                 const result = await res.json();
@@ -995,8 +999,10 @@
             btn.disabled = true;
 
             try {
+                const pin = localStorage.getItem('adminPin');
                 const res = await fetch(`${window.GAS_URL}`, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'adminUpdateStatus', pass: pin, row: row, status: stat })
                 });
                 const result = await res.json();
@@ -1035,8 +1041,10 @@
             btn.disabled = true;
 
             try {
+                const pin = localStorage.getItem('adminPin');
                 const res = await fetch(`${window.GAS_URL}`, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'adminUpdateRekamMedis', pass: pin, row: row, tensi: '', keluhan: k, tindakan: t })
                 });
                 const result = await res.json();
@@ -1166,8 +1174,10 @@
             btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Menyimpan...';
             btn.disabled = true;
             try {
+                const pin = localStorage.getItem('adminPin');
                 const res = await fetch(`${window.GAS_URL}`, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'saveArtikel', pass: pin, artikelData: data })
                 });
                 const result = await res.json();
@@ -1187,6 +1197,7 @@
                 const pin = localStorage.getItem('adminPin');
                 const res = await fetch(`${window.GAS_URL}`, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'deleteArtikel', pass: pin, artikelId: id })
                 });
                 const result = await res.json();
@@ -1415,6 +1426,7 @@
             btn.disabled = true;
 
             try {
+                const pass = localStorage.getItem('adminPin');
                 const res = await fetch(`${window.GAS_URL}`, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'initDb', pass: pass })
@@ -1433,8 +1445,10 @@
             btn.disabled = true;
 
             try {
+                const pass = localStorage.getItem('adminPin');
                 const res = await fetch(`${window.GAS_URL}`, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'runMigrate', pass: pass })
                 });
                 const result = await res.json();
