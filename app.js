@@ -281,13 +281,10 @@ function renderLayanan() {
 
         // Ambil layanan yang bisa dilakukan terapis ini
         const availableServices = allLayanan.filter(lay => {
-            // 0. Jika layanan bertanda "Lintas Gender" → tampilkan untuk semua pasien tanpa kecuali
-            if (lay.lintasGender) return true;
-
-            // 1. Jika terapisKhusus kosong/tidak ada, tersedia untuk semua
+            // 1. Jika terapisKhusus kosong/tidak ada, tersedia untuk semua terapis
             if (!lay.terapisKhusus || lay.terapisKhusus.length === 0) return true;
             
-            // 2. Jika ada pembatasan, cek kecocokan nama secara agresif
+            // 2. Jika ada pembatasan, cek kecocokan nama secara ketat
             const isMatch = lay.terapisKhusus.some(t => {
                 const cleanT = t.toLowerCase().trim();
                 return cleanT === cleanTarget;
