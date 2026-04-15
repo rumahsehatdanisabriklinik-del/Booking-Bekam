@@ -594,6 +594,7 @@ document.getElementById('bookingForm').addEventListener('submit', async (e) => {
             document.getElementById('succ-waktu').innerHTML = `<i class="far fa-clock mr-1"></i> ${formData.waktu} WIB`;
             
             document.getElementById('btnWA').href = result.data.whatsappUrl;
+            document.getElementById('btnStatusCheckin').href = `status.html?phone=${encodeURIComponent(formData.whatsapp)}`;
 
             // Switch Screen
             document.getElementById('bookingForm').style.display = 'none';

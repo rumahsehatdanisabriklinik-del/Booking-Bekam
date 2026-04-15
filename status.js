@@ -3,6 +3,12 @@ let currentRating = 0;
 let currentBookingIdForReview = "";
 let currentReviewRow = null;
 let fetchAborter = null; // Mencegah race condition pada API Call
+let currentCheckInPayload = "";
+let currentCheckInRow = null;
+let currentCheckInSummary = null;
+let checkinStream = null;
+let checkinScanLoopActive = false;
+let checkinDetector = null;
 
 // --- Fitur Baru: Custom Premium Toast Notification ---
 function showCustomToast(msg, type = 'success') {
@@ -94,6 +100,173 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+function updateCheckinStatus(message, isError = false) {
+    const el = document.getElementById('checkinScanStatus');
+    if (!el) return;
+    el.textContent = message;
+    el.className = `text-sm font-bold text-center ${isError ? 'text-red-500' : 'text-slate-500'}`;
+}
+
+function stopCheckinScanner() {
+    checkinScanLoopActive = false;
+    if (checkinStream) {
+        checkinStream.getTracks().forEach(track => track.stop());
+        checkinStream = null;
+    }
+    const video = document.getElementById('checkinVideo');
+    if (video) {
+        video.pause();
+        video.srcObject = null;
+    }
+}
+
+function closeCheckinModal() {
+    stopCheckinScanner();
+    const modal = document.getElementById('checkinModal');
+    modal.classList.add('opacity-0');
+    modal.querySelector('div').classList.remove('scale-100');
+    modal.querySelector('div').classList.add('scale-95');
+    setTimeout(() => modal.classList.add('hidden'), 300);
+}
+
+async function openCheckinModal(row, payload, summaryText) {
+    currentCheckInRow = row;
+    currentCheckInPayload = payload || "";
+    currentCheckInSummary = summaryText || "";
+    document.getElementById('manualClinicCode').value = '';
+
+    const modal = document.getElementById('checkinModal');
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        modal.querySelector('div').classList.remove('scale-95');
+        modal.querySelector('div').classList.add('scale-100');
+    }, 10);
+
+    if (!currentCheckInPayload) {
+        updateCheckinStatus('Booking ini belum memiliki token check-in. Hubungi admin.', true);
+        return;
+    }
+
+    if (!('BarcodeDetector' in window) || !navigator.mediaDevices?.getUserMedia) {
+        updateCheckinStatus('Browser ini belum mendukung scan kamera. Gunakan kolom kode manual di bawah.', true);
+        return;
+    }
+
+    try {
+        const formats = await BarcodeDetector.getSupportedFormats();
+        if (!formats.includes('qr_code')) {
+            updateCheckinStatus('Browser tidak mendukung pembacaan QR. Gunakan kode manual.', true);
+            return;
+        }
+
+        checkinDetector = new BarcodeDetector({ formats: ['qr_code'] });
+        checkinStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: 'environment' } },
+            audio: false
+        });
+
+        const video = document.getElementById('checkinVideo');
+        video.srcObject = checkinStream;
+        await video.play();
+
+        checkinScanLoopActive = true;
+        updateCheckinStatus('Arahkan kamera ke QR check-in di meja admin.');
+        requestAnimationFrame(scanClinicQrFrame);
+    } catch (error) {
+        console.error('Scanner start failed', error);
+        updateCheckinStatus('Kamera tidak bisa dibuka. Gunakan kode manual jika diperlukan.', true);
+    }
+}
+
+function openCheckinModalSafe(row, encodedPayload, encodedSummary) {
+    let payload = '';
+    let summary = '';
+    try { payload = decodeURIComponent(escape(atob(encodedPayload))); } catch (e) {}
+    try { summary = decodeURIComponent(escape(atob(encodedSummary))); } catch (e) {}
+    openCheckinModal(row, payload, summary);
+}
+
+async function scanClinicQrFrame() {
+    if (!checkinScanLoopActive || !checkinDetector) return;
+
+    const video = document.getElementById('checkinVideo');
+    if (!video || video.readyState < 2) {
+        requestAnimationFrame(scanClinicQrFrame);
+        return;
+    }
+
+    try {
+        const barcodes = await checkinDetector.detect(video);
+        if (barcodes && barcodes.length > 0) {
+            const rawValue = (barcodes[0].rawValue || '').trim();
+            if (rawValue) {
+                await processPatientCheckin(rawValue);
+                return;
+            }
+        }
+    } catch (error) {
+        console.error('Barcode detect failed', error);
+    }
+
+    if (checkinScanLoopActive) {
+        requestAnimationFrame(scanClinicQrFrame);
+    }
+}
+
+async function submitManualCheckin() {
+    const manualCode = document.getElementById('manualClinicCode').value.trim();
+    if (!manualCode) {
+        updateCheckinStatus('Masukkan atau tempel kode QR klinik terlebih dahulu.', true);
+        return;
+    }
+    await processPatientCheckin(manualCode);
+}
+
+async function processPatientCheckin(clinicCode) {
+    if (!currentCheckInPayload) {
+        updateCheckinStatus('Token booking tidak ditemukan.', true);
+        return;
+    }
+
+    checkinScanLoopActive = false;
+    updateCheckinStatus('Memproses check-in ke server...');
+
+    try {
+        const connector = window.GAS_URL.includes('?') ? '&' : '?';
+        const response = await fetch(`${window.GAS_URL}${connector}action=selfCheckIn`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'selfCheckIn',
+                payload: currentCheckInPayload,
+                clinicCode: clinicCode
+            })
+        });
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            stopCheckinScanner();
+            showCustomToast(`Check-in berhasil untuk ${result.data?.nama || currentCheckInSummary}.`, 'success');
+            closeCheckinModal();
+            checkStatus();
+        } else {
+            updateCheckinStatus(result.message || 'Check-in gagal diproses.', true);
+            if (checkinStream) {
+                checkinScanLoopActive = true;
+                requestAnimationFrame(scanClinicQrFrame);
+            }
+        }
+    } catch (error) {
+        console.error('Check-in submit failed', error);
+        updateCheckinStatus('Gagal terhubung ke server check-in.', true);
+        if (checkinStream) {
+            checkinScanLoopActive = true;
+            requestAnimationFrame(scanClinicQrFrame);
+        }
+    }
+}
+
 // Fungsi Cek Status (Diperbarui dengan AbortController)
 async function checkStatus() {
     let inputId = document.getElementById('orderIdInput').value.trim();
@@ -164,6 +337,11 @@ function renderSingleBooking(data, isLatest, delayIndex = 0) {
         iconClass = "fas fa-calendar-check";
         iconBgClass = "bg-blue-100 text-blue-500 shadow-lg shadow-blue-500/20";
         glowClass = "ring-4 ring-blue-50";
+    } else if(stat === 'HADIR') {
+        badgeClass = "bg-teal-50 text-teal-600 border border-teal-200";
+        iconClass = "fas fa-user-check";
+        iconBgClass = "bg-teal-500 text-white shadow-lg shadow-teal-500/30";
+        glowClass = "ring-4 ring-teal-50";
     } else if(stat === 'SELESAI') {
         badgeClass = "bg-emerald-50 text-emerald-600 border border-emerald-200";
         iconClass = "fas fa-check-double";
@@ -179,6 +357,16 @@ function renderSingleBooking(data, isLatest, delayIndex = 0) {
     const dateObj = new Date(data.tanggal);
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const tglStr = dateObj.toLocaleDateString('id-ID', options);
+    const checkInPayload = data.checkIn?.payload || '';
+    const encodedPayload = checkInPayload ? btoa(unescape(encodeURIComponent(checkInPayload))) : '';
+    const summaryText = `${data.terapis} - ${data.tanggal} ${data.waktu}`;
+    const encodedSummary = btoa(unescape(encodeURIComponent(summaryText)));
+    const canCheckIn = ['MENUNGGU', 'TERJADWAL', 'DITERIMA'].includes(stat) && !!checkInPayload;
+    const checkInInfo = data.checkIn ? `<div class="mt-4 p-4 rounded-2xl bg-emerald-50 border border-emerald-100">
+                    <div class="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 mb-2">Jendela Check-In</div>
+                    <div class="text-xs font-bold text-slate-700">Aktif mulai ${data.checkIn.validFrom}</div>
+                    <div class="text-xs font-bold text-slate-500 mt-1">Berakhir ${data.checkIn.expiresAt}</div>
+                </div>` : '';
 
     card.innerHTML = `
         <div class="ticket-card p-6 sm:p-8 hover:-translate-y-1 transition-transform duration-300">
@@ -216,6 +404,7 @@ function renderSingleBooking(data, isLatest, delayIndex = 0) {
                     </div>
                 </div>
             </div>
+            ${checkInInfo}
 
             ${stat === 'SELESAI' ? `
                 <div class="mt-6 pt-4 border-t border-slate-100">
@@ -225,6 +414,10 @@ function renderSingleBooking(data, isLatest, delayIndex = 0) {
                 </div>
             ` : (stat === 'MENUNGGU' || stat === 'TERJADWAL' || stat === 'DITERIMA' ? `
                 <div class="mt-6 pt-4 border-t border-slate-100">
+                    ${canCheckIn ? `
+                    <button onclick="openCheckinModalSafe(${data.row}, '${encodedPayload}', '${encodedSummary}')" class="w-full mb-3 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-lg shadow-emerald-500/30 transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-qrcode"></i> Scan QR Check-In Klinik
+                    </button>` : ''}
                     <button onclick="batalBooking(${data.row})" class="w-full py-3.5 rounded-xl bg-white border-2 border-red-100 text-red-500 font-extrabold text-sm hover:bg-red-50 transition-all flex items-center justify-center gap-2">
                         <i class="fas fa-times-circle"></i> Batalkan Reservasi
                     </button>
@@ -284,6 +477,7 @@ async function batalBooking(row) {
 
         const response = await fetch(`${window.GAS_URL}${connector}action=batalByUser`, {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         });
         const result = await response.json();
@@ -371,6 +565,7 @@ async function sendReview() {
 
         const response = await fetch(`${window.GAS_URL}${connector}action=submitReview`, {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         });
         const result = await response.json();

@@ -7,6 +7,7 @@
 
 let allBookings = [];
 let filteredBookings = [];
+let cmsSettingsCache = {};
 
 document.addEventListener('DOMContentLoaded', () => {
     const pin = localStorage.getItem('adminPin');
@@ -184,6 +185,41 @@ function showLoader(show) {
     document.getElementById('loader').classList.toggle('hidden', !show);
 }
 
+function getClinicCheckinPayload(secretCode) {
+    return `RSDS-CLINIC|${secretCode}`;
+}
+
+function renderClinicCheckinQr(secretCode) {
+    const img = document.getElementById('clinicQrImage');
+    const text = document.getElementById('clinicQrCodeText');
+    if (!img || !text) return;
+
+    if (!secretCode) {
+        img.removeAttribute('src');
+        text.textContent = 'Kode check-in belum diatur di CMS.';
+        return;
+    }
+
+    const payload = getClinicCheckinPayload(secretCode);
+    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(payload)}`;
+    text.textContent = payload;
+}
+
+async function copyClinicQrCode() {
+    const secretCode = cmsSettingsCache.cms_checkin_secret_code || '';
+    if (!secretCode) {
+        alert('Kode QR check-in belum tersedia.');
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(getClinicCheckinPayload(secretCode));
+        alert('Kode QR check-in berhasil disalin.');
+    } catch (e) {
+        alert('Gagal menyalin kode QR.');
+    }
+}
+
 // ── CMS & LAYANAN MANAGER ──
 async function loadCMSData() {
     try {
@@ -192,6 +228,8 @@ async function loadCMSData() {
         const result = await res.json();
         if (result.status === 'success') {
             const data = result.data;
+            cmsSettingsCache = data || {};
+            renderClinicCheckinQr(cmsSettingsCache.cms_checkin_secret_code || '');
             for (const key in data) {
                 const el = document.getElementById(key);
                 if (el) el.value = data[key];
