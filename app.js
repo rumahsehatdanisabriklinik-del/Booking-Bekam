@@ -143,46 +143,26 @@ function filterTerapisName() {
     const container = document.getElementById('section-nama-terapis');
     const list = document.getElementById('list-terapis-nama');
     
-    // Terapis yang cocok gender-nya dengan pasien
-    let matches = allTerapis.filter(t => t.gender === genderLabel);
-
-    // Cari terapis dari layanan lintas gender (tidak peduli gender terapis)
-    const lintasGenderLayanan = allLayanan.filter(l => l.lintasGender && l.terapisKhusus && l.terapisKhusus.length > 0);
-    const namaLintasTerapis = new Set();
-    lintasGenderLayanan.forEach(l => l.terapisKhusus.forEach(n => namaLintasTerapis.add(n.trim().toLowerCase())));
-
     // Terapis lintas gender: (1) gender === 'lintas' dari inject backend, ATAU
-    // (2) namanya ada di layanan khusus (tanpa terapis perempuan) dan bukan di matches biasa
-    const matchedNamaSet = new Set(matches.map(t => t.nama.trim().toLowerCase()));
-
-    // Deteksi layanan "khusus" (yang tidak punya terapis perempuan) secara dinamis
-    const namaTerapisPerempuan = new Set(
-        allTerapis.filter(t => t.gender === "Perempuan").map(t => t.nama.trim().toLowerCase())
-    );
-    const layananTanpaPerempuan = allLayanan.filter(l => {
-        if (!l.terapisKhusus || l.terapisKhusus.length === 0) return false;
-        return !l.terapisKhusus.some(n => namaTerapisPerempuan.has(n.trim().toLowerCase()));
-    });
-    const namaTerapisKhususSet = new Set();
-    layananTanpaPerempuan.forEach(l => l.terapisKhusus.forEach(n => namaTerapisKhususSet.add(n.trim().toLowerCase())));
-
+    // (2) namanya ada di layanan khusus (tanpa terapis perempuan)
     const addedExtraNames = new Set();
     const terapisKhususExtra = allTerapis.filter(t => {
         const cleanNama = t.nama.trim().toLowerCase();
         
-        // 1. JANGAN masukkan jika sudah ada di list matches gender biasa (cegah DOBLE)
-        if (matchedNamaSet.has(cleanNama)) return false;
-
-        // 2. JANGAN masukkan jika sudah masuk ke list extra ini sendiri (cegah DOBLE saat inject)
+        // 1. JANGAN masukkan jika sudah masuk ke list extra ini sendiri (cegah DOBLE saat inject)
         if (addedExtraNames.has(cleanNama)) return false;
 
-        // 3. Masukkan jika gendernya 'lintas' ATAU dia terapis dari layanan tanpa perempuan
+        // 2. Masukkan jika gendernya 'lintas' ATAU dia terapis dari layanan tanpa perempuan
         if (t.gender === "lintas" || namaTerapisKhususSet.has(cleanNama)) {
             addedExtraNames.add(cleanNama);
             return true;
         }
         return false;
     });
+
+    // Sesuaikan matches: JANGAN masukkan nama yang sudah ada di list Khusus/Extra
+    const extraNamaSet = new Set(terapisKhususExtra.map(t => t.nama.trim().toLowerCase()));
+    let matches = allTerapis.filter(t => t.gender === genderLabel && !extraNamaSet.has(t.nama.trim().toLowerCase()));
 
     list.innerHTML = "";
 
@@ -201,13 +181,17 @@ function filterTerapisName() {
         const div = document.createElement('label');
         div.className = "w-full animate-fade-up";
         div.style.animationDelay = `${index * 50}ms`;
-        const labelKhusus = isKhusus
+        
+        const cleanNama = t.nama.trim().toLowerCase();
+        const hasSpecialty = isKhusus || namaTerapisKhususSet.has(cleanNama);
+        
+        const labelKhusus = hasSpecialty
             ? `<span class="text-[9px] font-black uppercase tracking-widest text-teal-600 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-full">${getLabelLayananKhusus(t.nama)}</span>`
             : '';
         div.innerHTML = `
             <input type="radio" name="pilih_nama_terapis" value="${t.nama}" class="radio-hidden" onchange="selectSpecificTerapis('${t.nama}')">
             <div class="pill-label !py-4 !rounded-[1rem] !text-sm flex flex-row gap-3 !justify-start pl-5">
-                <div class="w-8 h-8 rounded-full ${isKhusus ? 'bg-teal-50 text-teal-500' : 'bg-emerald-50 text-emerald-500'} flex items-center justify-center icon-wrapper transition-colors"><i class="fas ${isKhusus ? 'fa-star-and-crescent' : 'fa-user-md'}"></i></div>
+                <div class="w-8 h-8 rounded-full ${hasSpecialty ? 'bg-teal-50 text-teal-500' : 'bg-emerald-50 text-emerald-500'} flex items-center justify-center icon-wrapper transition-colors"><i class="fas ${hasSpecialty ? 'fa-star-and-crescent' : 'fa-user-md'}"></i></div>
                 <div class="flex flex-col gap-0.5">
                     <span class="text-title text-base font-bold">${t.nama}</span>
                     ${labelKhusus}
@@ -220,10 +204,10 @@ function filterTerapisName() {
     if (matches.length > 0 || terapisKhususExtra.length > 0) {
         container.classList.remove('hidden');
 
-        // Tampilkan terapis sesuai gender
+        // Tampilkan terapis sesuai gender (Reguler)
         matches.forEach((t, i) => renderTerapisCard(t, i, false));
 
-        // Jika ada terapis layanan khusus lintas gender, tampilkan dengan separator
+        // Jika ada terapis layanan khusus/spesialis, tampilkan dengan separator
         if (terapisKhususExtra.length > 0) {
             const sep = document.createElement('div');
             sep.className = "col-span-full flex items-center gap-3 my-1 animate-fade-up";
