@@ -777,11 +777,12 @@ async function runDatabaseInit() {
     finally { btn.innerHTML = orig; btn.disabled = false; }
 }
 
-async function runFullMigration() {
-    if(!confirm("Mulai migrasi semua data dari Sheets ke Neon? Ini mungkin memakan waktu beberapa menit.")) return;
-    const btn = document.getElementById('btnFullMigrate');
+// Sinkronisasi CEPAT: Booking dari Sheets ke Neon via HTTP API (tidak timeout)
+async function runSinkronCepat() {
+    if(!confirm("Sinkronisasi semua booking dari Sheets ke Neon sekarang?\n\nProses ini aman dan tidak menghapus data.")) return;
+    const btn = document.getElementById('btnSinkronCepat');
     const orig = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Migrasi Berjalan...';
+    btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Menyinkronkan...';
     btn.disabled = true;
 
     try {
@@ -789,10 +790,23 @@ async function runFullMigration() {
         const res = await fetch(`${window.GAS_URL}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'runMigrate', pass: pass })
+            body: JSON.stringify({ action: 'sinkronCepat', pass: pass })
         });
         const result = await res.json();
-        alert(result.message);
-    } catch(e) { alert("Error saat proses migrasi."); }
+        alert(result.message || "Sinkronisasi selesai!");
+    } catch(e) { alert("Error koneksi saat sinkronisasi."); }
     finally { btn.innerHTML = orig; btn.disabled = false; }
+}
+
+// Migrasi LENGKAP: Harus dijalankan dari GAS Editor untuk dataset besar
+async function runFullMigration() {
+    alert(
+        "⚠️ PERHATIAN: Migrasi Lengkap tidak bisa dijalankan dari tombol ini.\n\n" +
+        "Alasannya: Proses JDBC membutuhkan lebih dari 30 detik, melebihi batas waktu server.\n\n" +
+        "✅ CARA YANG BENAR:\n" +
+        "1. Buka Google Apps Script Editor\n" +
+        "2. Pilih fungsi: jalankanMigrasiSemua\n" +
+        "3. Klik ▶ Run\n\n" +
+        "Untuk sinkronisasi booking harian, gunakan tombol 'Sinkron Booking ke Neon'."
+    );
 }
