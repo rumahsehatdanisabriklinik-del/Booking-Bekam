@@ -10,6 +10,9 @@ let filteredBookings = [];
 let cmsSettingsCache = {};
 
 document.addEventListener('DOMContentLoaded', () => {
+    const passInput = document.getElementById('passInput');
+    if (passInput) passInput.placeholder = '........';
+
     const pin = localStorage.getItem('adminPin');
     if(pin) {
         document.getElementById('loginScreen').classList.add('hidden');

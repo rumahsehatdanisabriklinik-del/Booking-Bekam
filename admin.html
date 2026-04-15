@@ -60,6 +60,44 @@
         .blob-2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: #99f6e4; animation: blob 15s infinite alternate; animation-delay: -5s; }
         .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5); }
         .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        .login-shell {
+            background:
+                radial-gradient(circle at top left, rgba(110, 231, 183, 0.34), transparent 28%),
+                radial-gradient(circle at top right, rgba(125, 211, 252, 0.22), transparent 26%),
+                linear-gradient(145deg, rgba(241, 245, 249, 0.92), rgba(226, 232, 240, 0.78));
+        }
+        .login-card {
+            background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.96) 100%);
+            box-shadow: 0 34px 80px rgba(15, 23, 42, 0.16), inset 0 1px 0 rgba(255,255,255,0.9);
+        }
+        .login-noise {
+            background-image:
+                linear-gradient(rgba(255,255,255,0.16), rgba(255,255,255,0.16)),
+                radial-gradient(rgba(15, 23, 42, 0.03) 0.8px, transparent 0.8px);
+            background-size: auto, 16px 16px;
+        }
+        #loginScreen #passInput {
+            width: 100%;
+            border-radius: 1.4rem;
+            border: 2px solid #f1f5f9;
+            background: rgba(248, 250, 252, 0.84);
+            padding: 1rem 1rem 1rem 3rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 1rem;
+            letter-spacing: 0.4em;
+            color: #0f172a;
+            box-shadow: none;
+        }
+        #loginScreen #passInput::placeholder {
+            color: #cbd5e1;
+            letter-spacing: 0.3em;
+        }
+        #loginScreen #passInput:focus {
+            outline: none;
+            border-color: #34d399;
+            background: #ffffff;
+            box-shadow: 0 0 0 6px rgba(16,185,129,0.10);
+        }
         @media (max-width: 1023px) {
             #sidebar { background: #ffffff !important; backdrop-filter: none !important; border-right: 1px solid #e2e8f0; }
             #sidebarOverlay { backdrop-filter: none !important; background: rgba(15, 23, 42, 0.6) !important; }
@@ -101,22 +139,42 @@
     </div>
 
     <!-- ── LOGIN SCREEN ── -->
-    <div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xl">
-        <div class="glass-modal w-full max-w-md rounded-[3rem] p-10 sm:p-12 shadow-2xl animate-slide-up border border-white/50 text-center relative overflow-hidden">
-            <div class="absolute -top-24 -right-24 w-48 h-48 bg-emerald-400/20 rounded-full blur-[40px]"></div>
-            <div class="w-20 h-20 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-[1.5rem] flex items-center justify-center text-white text-3xl shadow-xl shadow-emerald-500/30 mx-auto mb-8 relative z-10">
+    <div id="loginScreen" class="login-shell fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+        <div class="login-card login-noise w-full max-w-md rounded-[2.75rem] p-8 sm:p-10 shadow-2xl animate-slide-up border border-white/70 text-center relative overflow-hidden">
+            <div class="absolute -top-20 -left-16 h-40 w-40 rounded-full bg-emerald-200/40 blur-3xl"></div>
+            <div class="absolute -right-12 top-8 h-32 w-32 rounded-full bg-cyan-100/60 blur-3xl"></div>
+            <div class="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-emerald-200 to-transparent"></div>
+            <div class="w-24 h-24 bg-gradient-to-br from-emerald-500 via-emerald-500 to-teal-600 rounded-[2rem] flex items-center justify-center text-white text-4xl shadow-[0_24px_50px_rgba(16,185,129,0.35)] ring-1 ring-white/60 mx-auto mb-5 relative z-10">
                 <i class="fas fa-leaf"></i>
             </div>
-            <h1 class="text-2xl font-extrabold text-slate-900 mb-2 relative z-10">Portal Admin</h1>
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-8 relative z-10">Manajemen Klinik</p>
-            <div class="space-y-5 relative z-10">
+            <div class="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50/80 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.3em] text-emerald-700 relative z-10">
+                <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                Admin Secure Access
+            </div>
+            <h1 class="text-3xl sm:text-[2rem] font-extrabold tracking-tight text-slate-900 mt-5 mb-2 relative z-10">Portal Admin</h1>
+            <p class="text-sm font-semibold leading-relaxed text-slate-500 mb-8 relative z-10">Masuk ke pusat kontrol klinik untuk mengelola reservasi, konten, dan operasional harian.</p>
+            <div class="space-y-5 relative z-10 rounded-[2rem] border border-slate-100 bg-white/80 p-4 shadow-[0_16px_40px_rgba(15,23,42,0.06)]">
                 <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400"><i class="fas fa-lock"></i></div>
+                    <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-300"><i class="fas fa-shield-heart"></i></div>
                     <input type="password" id="passInput" class="cms-input !pl-12 !py-4 font-mono tracking-widest text-center" placeholder="••••••••" onkeypress="if(event.key === 'Enter') doLogin()">
                 </div>
-                <button id="btnLogin" onclick="doLogin()" class="w-full py-4 text-white font-extrabold text-sm bg-slate-900 rounded-[1.5rem] hover:bg-emerald-600 shadow-xl shadow-slate-900/20 active:scale-95 transition-all">
+                <button id="btnLogin" onclick="doLogin()" class="w-full rounded-[1.4rem] bg-slate-950 py-4 text-sm font-extrabold text-white shadow-[0_20px_40px_rgba(15,23,42,0.22)] transition-all hover:-translate-y-0.5 hover:bg-emerald-600 hover:shadow-[0_24px_44px_rgba(16,185,129,0.35)] active:scale-[0.985]">
                     Akses Sistem
                 </button>
+            </div>
+            <div class="mt-6 grid grid-cols-3 gap-3 text-left relative z-10">
+                <div class="rounded-[1.25rem] border border-white/70 bg-white/70 px-4 py-3 shadow-sm">
+                    <div class="text-[9px] font-black uppercase tracking-[0.24em] text-slate-400">Aman</div>
+                    <div class="mt-1 text-xs font-bold text-slate-700">Login privat</div>
+                </div>
+                <div class="rounded-[1.25rem] border border-white/70 bg-white/70 px-4 py-3 shadow-sm">
+                    <div class="text-[9px] font-black uppercase tracking-[0.24em] text-slate-400">Cepat</div>
+                    <div class="mt-1 text-xs font-bold text-slate-700">Akses instan</div>
+                </div>
+                <div class="rounded-[1.25rem] border border-white/70 bg-white/70 px-4 py-3 shadow-sm">
+                    <div class="text-[9px] font-black uppercase tracking-[0.24em] text-slate-400">Fokus</div>
+                    <div class="mt-1 text-xs font-bold text-slate-700">Panel klinik</div>
+                </div>
             </div>
         </div>
     </div>
