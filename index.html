@@ -16,6 +16,8 @@
     
     <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Marked.js untuk parsing Markdown dari AI Chatbot -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -58,6 +60,16 @@
         
         /* Utility untuk Scroll Reveal Animation */
         .reveal { opacity: 0; }
+
+        /* Typography Fixes UI Chat AI Markdown */
+        .chat-bubble.ai ul { list-style-type: disc !important; padding-left: 1.5rem !important; margin-top: 0.5rem !important; margin-bottom: 0.5rem !important; }
+        .chat-bubble.ai ol { list-style-type: decimal !important; padding-left: 1.5rem !important; margin-top: 0.5rem !important; margin-bottom: 0.5rem !important; }
+        .chat-bubble.ai li { margin-bottom: 0.25rem !important; display: list-item !important; }
+        .chat-bubble.ai p { margin-bottom: 0.75rem !important; line-height: 1.5; }
+        .chat-bubble.ai p:last-child { margin-bottom: 0 !important; }
+        .chat-bubble.ai strong { font-weight: 800 !important; color: #022c22 !important; }
+        .chat-bubble.ai h3 { font-size: 1rem !important; font-weight: 800 !important; margin-top: 1rem !important; margin-bottom: 0.25rem !important; color: #047857 !important; text-transform: uppercase; letter-spacing: 0.05em; }
+        .chat-bubble.user strong { font-weight: 800 !important; color: #ffffff !important; }
         
         /* Background Blobs */
         .bg-blobs {
@@ -880,7 +892,18 @@
             const container = document.getElementById('chat-messages');
             const div = document.createElement('div');
             div.className = `chat-bubble ${role === 'user' ? 'user' : 'ai'} animate-fade-up`;
-            div.innerHTML = content;
+            
+            if (role === 'assistant' || role === 'ai') {
+                try {
+                    // Gunakan marked.js untuk konversi markdown ke HTML cantik
+                    div.innerHTML = marked.parse(content);
+                } catch(e) {
+                    div.innerHTML = content;
+                }
+            } else {
+                div.innerHTML = content;
+            }
+            
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
         }
