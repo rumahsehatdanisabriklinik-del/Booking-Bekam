@@ -8,19 +8,81 @@
 let allBookings = [];
 let filteredBookings = [];
 let cmsSettingsCache = {};
+const ADMIN_SESSION_KEY = 'adminSessionToken';
+
+function getAdminSessionToken() {
+    return localStorage.getItem(ADMIN_SESSION_KEY) || '';
+}
+
+function clearAdminSession() {
+    localStorage.removeItem(ADMIN_SESSION_KEY);
+    localStorage.removeItem('adminPin');
+    localStorage.removeItem('adminRole');
+    localStorage.removeItem('adminNama');
+}
+
+function isAuthError(result) {
+    const message = (result && result.message ? result.message : '').toLowerCase();
+    return result && result.status === 'error' && (
+        message.includes('sesi login') ||
+        message.includes('login kembali') ||
+        message.includes('akses ditolak')
+    );
+}
+
+function handleAdminAuthFailure(message) {
+    clearAdminSession();
+    alert(message || 'Sesi login berakhir. Silakan login kembali.');
+    location.reload();
+}
+
+async function adminGet(action, extraParams = {}) {
+    const connector = window.GAS_URL.includes('?') ? '&' : '?';
+    const params = new URLSearchParams({ action, ...extraParams });
+    const token = getAdminSessionToken();
+    if (token) params.set('sessionToken', token);
+
+    const res = await fetch(`${window.GAS_URL}${connector}${params.toString()}`);
+    const result = await res.json();
+    if (isAuthError(result)) {
+        handleAdminAuthFailure(result.message);
+        throw new Error(result.message);
+    }
+    return result;
+}
+
+async function adminPost(payload) {
+    const body = { ...payload };
+    const token = getAdminSessionToken();
+    if (token) body.sessionToken = token;
+
+    const res = await fetch(`${window.GAS_URL}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+    const result = await res.json();
+    if (isAuthError(result)) {
+        handleAdminAuthFailure(result.message);
+        throw new Error(result.message);
+    }
+    return result;
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     const passInput = document.getElementById('passInput');
     if (passInput) passInput.placeholder = '........';
 
-    const pin = localStorage.getItem('adminPin');
-    if(pin) {
+    const sessionToken = getAdminSessionToken();
+    if (sessionToken) {
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('dashboardScreen').classList.remove('hidden');
         document.getElementById('adminNameTxt').textContent = localStorage.getItem('adminNama') || 'Admin';
         loadAllData();
         loadCMSData();
         loadLayananList();
+    } else {
+        localStorage.removeItem('adminPin');
     }
 });
 
@@ -32,24 +94,36 @@ async function doLogin() {
     btn.disabled = true;
 
     try {
-        const connector = window.GAS_URL.includes('?') ? '&' : '?';
-        const res = await fetch(`${window.GAS_URL}${connector}action=authAdmin&pass=${encodeURIComponent(pass)}`);
-        const result = await res.json();
-        if(result.status === 'success') {
-            localStorage.setItem('adminPin', pass);
+        const result = await fetch(`${window.GAS_URL}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'authAdmin', pass })
+        }).then(r => r.json());
+        if(result.status === 'success' && result.sessionToken) {
+            localStorage.setItem(ADMIN_SESSION_KEY, result.sessionToken);
             localStorage.setItem('adminRole', result.role || 'admin');
             localStorage.setItem('adminNama', result.nama || 'Admin');
             location.reload();
         } else {
-            alert(result.message);
+            alert(result.message || 'Login gagal. Silakan coba lagi.');
         }
     } catch(e) { alert("Error: " + e.message); }
     finally { btn.innerHTML = 'Akses Sistem'; btn.disabled = false; }
 }
 
 function logout() {
-    localStorage.removeItem('adminPin');
-    location.reload();
+    const token = getAdminSessionToken();
+    clearAdminSession();
+    if (!token) {
+        location.reload();
+        return;
+    }
+
+    fetch(`${window.GAS_URL}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'logoutAdmin', sessionToken: token })
+    }).finally(() => location.reload());
 }
 
 function toggleSidebar(show) {
@@ -81,12 +155,9 @@ function switchTab(tabId, el) {
 }
 
 async function loadAllData() {
-    const pin = localStorage.getItem('adminPin');
     showLoader(true);
     try {
-        const connector = window.GAS_URL.includes('?') ? '&' : '?';
-        const res = await fetch(`${window.GAS_URL}${connector}action=getSemuaBooking&pass=${encodeURIComponent(pin)}`);
-        const result = await res.json();
+        const result = await adminGet('getSemuaBooking');
         if(result.status === 'success') {
             allBookings = result.data;
             renderTables();
@@ -259,7 +330,6 @@ async function loadCMSData() {
 }
 
 async function saveCMS() {
-    const pin = localStorage.getItem('adminPin');
     const btn = document.getElementById('btnSaveCMS');
     const orig = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Sinkronkan...';
@@ -274,12 +344,7 @@ async function saveCMS() {
     });
 
     try {
-        const res = await fetch(`${window.GAS_URL}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'updateLandingSettings', pass: pin, updatedData: updatedData })
-        });
-        const result = await res.json();
+        const result = await adminPost({ action: 'updateLandingSettings', updatedData: updatedData });
         if (result.status === 'success') {
             alert("✅ Web Berhasil Disinkronkan (Cache dibersihkan)!");
         } else {
@@ -358,7 +423,6 @@ function deleteLayananRow(idx) {
 }
 
 async function saveLayanan() {
-    const pin = localStorage.getItem('adminPin');
     const btn = document.getElementById('btnSaveLayanan');
     const orig = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Menyimpan...';
@@ -378,12 +442,7 @@ async function saveLayanan() {
     }));
 
     try {
-        const res = await fetch(`${window.GAS_URL}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'saveLayananList', pass: pin, layananData: dataToSave })
-        });
-        const result = await res.json();
+        const result = await adminPost({ action: 'saveLayananList', layananData: dataToSave });
         if (result.status === 'success') {
             alert("✅ Daftar Layanan Berhasil Diperbarui!");
             loadLayananList();
@@ -401,7 +460,6 @@ function openModalStatus(row, current) {
 function closeModalStatus() { document.getElementById('modalStatus').classList.add('hidden'); }
 
 async function saveStatus() {
-    const pin = localStorage.getItem('adminPin');
     const row = document.getElementById('editRowIndex').value;
     const stat = document.getElementById('editStatus').value;
     const btn = document.getElementById('btnSaveStatus');
@@ -411,12 +469,7 @@ async function saveStatus() {
     btn.disabled = true;
 
     try {
-        const res = await fetch(`${window.GAS_URL}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'adminUpdateStatus', pass: pin, row: row, status: stat })
-        });
-        const result = await res.json();
+        const result = await adminPost({ action: 'adminUpdateStatus', row: row, status: stat });
         if(result.status === 'success') {
             closeModalStatus();
             loadAllData();
@@ -438,7 +491,6 @@ function openEMR(row, nama, keluhan, tindakan) {
 function closeEMR() { document.getElementById('modalEMR').classList.add('hidden'); }
 
 async function saveEMR() {
-    const pin = localStorage.getItem('adminPin');
     const row = document.getElementById('emrRowIndex').value;
     const k = document.getElementById('emrKeluhan').value;
     const t = document.getElementById('emrTindakan').value;
@@ -449,12 +501,7 @@ async function saveEMR() {
     btn.disabled = true;
 
     try {
-        const res = await fetch(`${window.GAS_URL}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'adminUpdateRekamMedis', pass: pin, row: row, tensi: '', keluhan: k, tindakan: t })
-        });
-        const result = await res.json();
+        const result = await adminPost({ action: 'adminUpdateRekamMedis', row: row, tensi: '', keluhan: k, tindakan: t });
         if(result.status === 'success') {
             closeEMR();
             loadAllData();
@@ -469,11 +516,8 @@ async function saveEMR() {
 let artikelData = [];
 async function loadArtikelListAdmin() {
     try {
-        const pin = localStorage.getItem('adminPin');
         document.getElementById('artikelList').innerHTML = '<p class="text-slate-400 font-bold text-sm text-center py-8"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat artikel...</p>';
-        const connector = window.GAS_URL.includes('?') ? '&' : '?';
-        const res = await fetch(`${window.GAS_URL}${connector}action=getArtikelListAdmin&pass=${encodeURIComponent(pin)}`);
-        const result = await res.json();
+        const result = await adminGet('getArtikelListAdmin');
         if (result.status === 'success') {
             artikelData = result.data || [];
             renderArtikelList();
@@ -558,7 +602,6 @@ async function uploadArtikelImageModal(input) {
 
 async function saveArtikelFromModal() {
     const idx = document.getElementById('art_idx_modal').value;
-    const pin = localStorage.getItem('adminPin');
     const btn = document.getElementById('btnSaveArtModal');
     const orig = btn.innerHTML;
 
@@ -578,12 +621,7 @@ async function saveArtikelFromModal() {
     btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Menyimpan...';
     btn.disabled = true;
     try {
-        const res = await fetch(`${window.GAS_URL}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'saveArtikel', pass: pin, artikelData: data })
-        });
-        const result = await res.json();
+        const result = await adminPost({ action: 'saveArtikel', artikelData: data });
         if(result.status === 'success') {
             alert("✅ Artikel Berhasil Disimpan!");
             closeModal('modalEditorArtikel');
@@ -597,13 +635,7 @@ async function deleteArtikelRecord(id, idx) {
     if(!id) { artikelData.splice(idx, 1); renderArtikelList(); return; }
     if(!confirm("Yakin hapus permanen? Foto di G-Drive tidak terhapus.")) return;
     try {
-        const pin = localStorage.getItem('adminPin');
-        const res = await fetch(`${window.GAS_URL}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'deleteArtikel', pass: pin, artikelId: id })
-        });
-        const result = await res.json();
+        const result = await adminPost({ action: 'deleteArtikel', artikelId: id });
         if(result.status === 'success') { loadArtikelListAdmin(); } else { alert(result.message); }
     } catch(e) { alert("Gagal hapus."); }
 }
@@ -690,7 +722,6 @@ async function uploadGaleriImageModal(input) {
 }
 
 async function saveGaleriFromModal() {
-    const pin = localStorage.getItem('adminPin');
     const btn = document.getElementById('btnSaveGalModal');
     const orig = btn.innerHTML;
 
@@ -710,11 +741,7 @@ async function saveGaleriFromModal() {
         const newPayload = [...galeriData];
         if (idx === 'new') newPayload.push(item); else newPayload[idx] = item;
 
-        const res = await fetch(`${window.GAS_URL}`, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'saveGaleri', pass: pin, galeriData: newPayload })
-        });
-        const result = await res.json();
+        const result = await adminPost({ action: 'saveGaleri', galeriData: newPayload });
         if(result.status === 'success') {
             closeModal('modalEditorGaleri');
             loadGaleriListAdmin();
@@ -725,15 +752,11 @@ async function saveGaleriFromModal() {
 
 async function deleteGaleriRecord(id, idx) {
     if(!confirm("Hapus foto ini dari galeri?")) return;
-    const pin = localStorage.getItem('adminPin');
     const newPayload = [...galeriData];
     newPayload.splice(idx, 1);
     try {
-        const res = await fetch(`${window.GAS_URL}`, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'saveGaleri', pass: pin, galeriData: newPayload })
-        });
-        if((await res.json()).status === 'success') loadGaleriListAdmin();
+        const result = await adminPost({ action: 'saveGaleri', galeriData: newPayload });
+        if(result.status === 'success') loadGaleriListAdmin();
     } catch(e) { alert("Gagal hapus."); }
 }
 
@@ -749,12 +772,7 @@ async function createDocFromModal() {
     btn.disabled = true;
 
     try {
-        const pin = localStorage.getItem('adminPin');
-        const res = await fetch(`${window.GAS_URL}`, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'createDoc', pass: pin, judul: judul })
-        });
-        const result = await res.json();
+        const result = await adminPost({ action: 'createDoc', judul: judul });
         if(result.status === 'success') {
             document.getElementById('art_doc_id_modal').value = result.data.docId;
             alert("✅ Google Doc Berhasil Dibuat!");
@@ -788,20 +806,12 @@ async function uploadToDrive(file) {
         const reader = new FileReader();
         reader.onload = async (e) => {
             try {
-                const pin = localStorage.getItem('adminPin');
-                const res = await fetch(`${window.GAS_URL}`, {
-                    method: 'POST',
-                    mode: 'cors',
-                    body: JSON.stringify({
-                        action: 'uploadImage',
-                        pass: pin,
-                        base64: e.target.result,
-                        fileName: file.name,
-                        mimeType: file.type
-                    })
+                const result = await adminPost({
+                    action: 'uploadImage',
+                    base64: e.target.result,
+                    fileName: file.name,
+                    mimeType: file.type
                 });
-                if (!res.ok) throw new Error(`Server Response: ${res.status}`);
-                const result = await res.json();
                 if(result.status === 'success') resolve(result.url);
                 else reject(new Error(result.message || "Gagal upload (Backend Error)"));
             } catch(err) {
@@ -823,13 +833,7 @@ async function runDatabaseInit() {
     btn.disabled = true;
 
     try {
-        const pass = localStorage.getItem('adminPin');
-        const res = await fetch(`${window.GAS_URL}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'initDb', pass: pass })
-        });
-        const result = await res.json();
+        const result = await adminPost({ action: 'initDb' });
         alert(result.message);
     } catch(e) { alert("Error koneksi database."); }
     finally { btn.innerHTML = orig; btn.disabled = false; }
@@ -844,13 +848,7 @@ async function runSinkronCepat() {
     btn.disabled = true;
 
     try {
-        const pass = localStorage.getItem('adminPin');
-        const res = await fetch(`${window.GAS_URL}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'sinkronCepat', pass: pass })
-        });
-        const result = await res.json();
+        const result = await adminPost({ action: 'sinkronCepat' });
         alert(result.message || "Sinkronisasi selesai!");
     } catch(e) { alert("Error koneksi saat sinkronisasi."); }
     finally { btn.innerHTML = orig; btn.disabled = false; }
