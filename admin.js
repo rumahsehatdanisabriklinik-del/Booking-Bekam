@@ -192,17 +192,24 @@ function getClinicCheckinPayload(secretCode) {
 function renderClinicCheckinQr(secretCode) {
     const img = document.getElementById('clinicQrImage');
     const text = document.getElementById('clinicQrCodeText');
+    const printImg = document.getElementById('printClinicQrImage');
+    const printText = document.getElementById('printClinicQrCodeText');
     if (!img || !text) return;
 
     if (!secretCode) {
         img.removeAttribute('src');
         text.textContent = 'Kode check-in belum diatur di CMS.';
+        if (printImg) printImg.removeAttribute('src');
+        if (printText) printText.textContent = 'Kode check-in belum diatur di CMS.';
         return;
     }
 
     const payload = getClinicCheckinPayload(secretCode);
-    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(payload)}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=700x700&data=${encodeURIComponent(payload)}`;
+    img.src = qrUrl;
     text.textContent = payload;
+    if (printImg) printImg.src = qrUrl;
+    if (printText) printText.textContent = payload;
 }
 
 async function copyClinicQrCode() {
@@ -218,6 +225,16 @@ async function copyClinicQrCode() {
     } catch (e) {
         alert('Gagal menyalin kode QR.');
     }
+}
+
+function printClinicQrPoster() {
+    const secretCode = cmsSettingsCache.cms_checkin_secret_code || '';
+    if (!secretCode) {
+        alert('Kode QR check-in belum tersedia.');
+        return;
+    }
+
+    window.print();
 }
 
 // ── CMS & LAYANAN MANAGER ──
