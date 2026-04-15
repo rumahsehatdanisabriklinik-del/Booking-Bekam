@@ -143,6 +143,17 @@ function filterTerapisName() {
     const container = document.getElementById('section-nama-terapis');
     const list = document.getElementById('list-terapis-nama');
     
+    // Deteksi layanan "khusus" (yang tidak punya terapis perempuan) secara dinamis
+    const namaTerapisPerempuan = new Set(
+        allTerapis.filter(t => t.gender === "Perempuan").map(t => t.nama.trim().toLowerCase())
+    );
+    const layananTanpaPerempuan = allLayanan.filter(l => {
+        if (!l.terapisKhusus || l.terapisKhusus.length === 0) return false;
+        return !l.terapisKhusus.some(n => namaTerapisPerempuan.has(n.trim().toLowerCase()));
+    });
+    const namaTerapisKhususSet = new Set();
+    layananTanpaPerempuan.forEach(l => l.terapisKhusus.forEach(n => namaTerapisKhususSet.add(n.trim().toLowerCase())));
+
     // Terapis lintas gender: (1) gender === 'lintas' dari inject backend, ATAU
     // (2) namanya ada di layanan khusus (tanpa terapis perempuan)
     const addedExtraNames = new Set();
