@@ -1,658 +1,798 @@
-let allData = [];
-let filteredData = [];
-let currentFilter = 'semua';
-let currentTab = 'booking';
-let searchQuery = "";
+/**
+ * ================================================
+ *  RUMAH SEHAT DANI SABRI — Admin Dashboard Logic
+ *  Dipindahkan dari admin.html untuk performa optimal
+ * ================================================
+ */
+
+let allBookings = [];
+let filteredBookings = [];
 
 document.addEventListener('DOMContentLoaded', () => {
-    const savedPin = localStorage.getItem('adminPin');
-    if (savedPin) {
-        verifyPin(savedPin);
+    const pin = localStorage.getItem('adminPin');
+    if(pin) {
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('dashboardScreen').classList.remove('hidden');
+        document.getElementById('adminNameTxt').textContent = localStorage.getItem('adminNama') || 'Admin';
+        loadAllData();
+        loadCMSData();
+        loadLayananList();
     }
 });
 
 async function doLogin() {
-    const pin = document.getElementById('adminPin').value;
+    const pass = document.getElementById('passInput').value;
+    if(!pass) return;
     const btn = document.getElementById('btnLogin');
-    const alert = document.getElementById('loginAlert');
-    alert.classList.add('hidden');
-    
-    const originalText = btn.innerHTML;
-    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Mengecek...`;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     btn.disabled = true;
 
-    await verifyPin(pin);
-
-    btn.innerHTML = originalText;
-    btn.disabled = false;
-}
-
-async function verifyPin(pin) {
     try {
-        const res = await fetch(`${GAS_URL}?action=authAdmin&pass=${encodeURIComponent(pin)}`);
+        const connector = window.GAS_URL.includes('?') ? '&' : '?';
+        const res = await fetch(`${window.GAS_URL}${connector}action=authAdmin&pass=${encodeURIComponent(pass)}`);
         const result = await res.json();
-        
-        if (result.status === 'success') {
-            localStorage.setItem('adminPin', pin);
+        if(result.status === 'success') {
+            localStorage.setItem('adminPin', pass);
             localStorage.setItem('adminRole', result.role || 'admin');
             localStorage.setItem('adminNama', result.nama || 'Admin');
-            
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('dashboardScreen').style.display = '';
-            
-            // Atur Sidebar untuk Terapis
-            if (result.role === 'terapis') {
-                document.querySelectorAll('[onclick="switchTab(\'laporan\')"]').forEach(el => el.style.display = 'none');
-                document.querySelectorAll('[onclick="switchTab(\'pengaturan\')"]').forEach(el => el.style.display = 'none');
-            }
-            // Update nama profil
-            const profilNameEls = document.querySelectorAll('.profil-nama');
-            profilNameEls.forEach(el => el.textContent = result.nama || 'Super Admin');
-
-            switchTab('booking');
+            location.reload();
         } else {
-            throw new Error(result.message);
+            alert(result.message);
         }
-    } catch (err) {
-        const al = document.getElementById('loginAlert');
-        al.textContent = err.message || "Gagal menghubungi server";
-        al.classList.remove('hidden');
-        localStorage.removeItem('adminPin');
-        localStorage.removeItem('adminRole');
-        localStorage.removeItem('adminNama');
-    }
+    } catch(e) { alert("Error: " + e.message); }
+    finally { btn.innerHTML = 'Akses Sistem'; btn.disabled = false; }
 }
 
 function logout() {
-    if(!confirm("Anda akan keluar dari sistem manajemen?")) return;
     localStorage.removeItem('adminPin');
     location.reload();
 }
 
-function switchTab(tab) {
-    currentTab = tab;
-    const pin = localStorage.getItem('adminPin');
-    const title = document.getElementById('pageTitle');
-    const sub   = document.getElementById('pageSubtitle');
-
-    // UI Tab Update
-    document.querySelectorAll('.nav-item, .bn-item').forEach(el => {
-        const target = el.getAttribute('onclick');
-        if (target && target.includes(tab)) {
-            el.classList.add('active');
-        } else {
-            el.classList.remove('active');
-        }
-    });
-    
-    document.getElementById('tabContentBooking').style.display    = tab === 'booking'    ? 'block' : 'none';
-    document.getElementById('tabContentLaporan').style.display    = tab === 'laporan'    ? 'block' : 'none';
-    document.getElementById('tabContentPengaturan').style.display = tab === 'pengaturan' ? 'block' : 'none';
-    document.getElementById('tab-database')        ? document.getElementById('tab-database').style.display = tab === 'tab-database' ? 'block' : 'none' : null;
-
-    if (tab === 'booking') {
-        title.textContent = "Manajemen Reservasi";
-        sub.textContent   = "Pantau dan kelola jadwal pasien hari ini.";
-        loadDashboardData(pin);
-    } else if (tab === 'laporan') {
-        title.textContent = "Laporan & Analitik";
-        sub.textContent   = "Data statistik performa klinik Bapak.";
-        loadLaporanData(pin);
+function toggleSidebar(show) {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (show) {
+        sidebar.classList.remove('-translate-x-[120%]');
+        overlay.classList.remove('hidden');
     } else {
-        title.textContent = "Konten Landing Page";
-        sub.textContent   = "Atur teks dan informasi yang tampil di halaman utama website.";
-        loadCmsSettings();
-        loadLayananData(); // Muat daftar layanan dinamis
+        sidebar.classList.add('-translate-x-[120%]');
+        overlay.classList.add('hidden');
     }
 }
 
-async function loadDashboardData(pin) {
-    const loader = document.getElementById('loadingDash');
-    const container = document.getElementById('listPasien');
-    
-    loader.classList.remove('hidden');
-    container.innerHTML = '';
+function switchTab(tabId, el) {
+    if (window.innerWidth < 1024) toggleSidebar(false);
 
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+    document.getElementById(tabId).classList.remove('hidden');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+
+    if (tabId === 'tab-artikel') loadArtikelListAdmin();
+    if (tabId === 'tab-galeri') loadGaleriListAdmin();
+    if (tabId === 'tab-cms') {
+        loadCMSData();
+        loadLayananList();
+    }
+}
+
+async function loadAllData() {
+    const pin = localStorage.getItem('adminPin');
+    showLoader(true);
     try {
-        const res = await fetch(`${GAS_URL}?action=getSemuaBooking&pass=${encodeURIComponent(pin)}`);
+        const connector = window.GAS_URL.includes('?') ? '&' : '?';
+        const res = await fetch(`${window.GAS_URL}${connector}action=getSemuaBooking&pass=${encodeURIComponent(pin)}`);
         const result = await res.json();
-        
-        if (result.status === 'success') {
-            allData = result.data;
-            renderData();
-        } else {
-            container.innerHTML = `<div class="col-span-full w-full bg-red-50 text-red-600 border border-red-200 p-4 rounded-xl flex items-center gap-3 font-bold"><i class="fas fa-exclamation-triangle flex-shrink-0"></i> <span>ERROR: ${result.message}</span></div>`;
+        if(result.status === 'success') {
+            allBookings = result.data;
+            renderTables();
         }
-    } catch (err) {
-        container.innerHTML = `<div class="col-span-full w-full bg-red-50 text-red-600 border border-red-200 p-4 rounded-xl flex items-center gap-3 font-bold"><i class="fas fa-exclamation-triangle flex-shrink-0"></i> <span>Gagal memuat data: ${err.message}</span></div>`;
-    } finally {
-        loader.classList.add('hidden');
-    }
+    } catch(e) { console.error(e); }
+    finally { showLoader(false); }
 }
 
-async function loadLaporanData(pin) {
-    const loader = document.getElementById('loadingLaporan');
-    const container = document.getElementById('isiLaporan');
-    
-    loader.classList.remove('hidden');
-    container.innerHTML = '';
+function renderTables() {
+    const role = localStorage.getItem('adminRole');
+    const myName = localStorage.getItem('adminNama');
 
-    try {
-        const res = await fetch(`${GAS_URL}?action=getLaporan&pass=${encodeURIComponent(pin)}`);
-        const result = await res.json();
-        
-        if (result.status === 'success') {
-            renderLaporan(result.data);
-        } else {
-            container.innerHTML = `<div class="w-full bg-red-50 text-red-600 border border-red-200 p-4 rounded-xl font-bold">Gagal: ${result.message}</div>`;
-        }
-    } catch (err) {
-        container.innerHTML = `<div class="w-full bg-red-50 text-red-600 border border-red-200 p-4 rounded-xl font-bold">Error: ${err.message}</div>`;
-    } finally {
-        loader.classList.add('hidden');
-    }
-}
-
-function applyFilter(filterMode) {
-    currentFilter = filterMode;
-    document.querySelectorAll('.pill').forEach(btn => {
-        const clickAttr = btn.getAttribute('onclick');
-        btn.classList.toggle('active', clickAttr && clickAttr.includes(filterMode));
-    });
-    renderData();
-}
-
-function handleSearch(val) {
-    searchQuery = val.toLowerCase().trim();
-    renderData();
-}
-
-function renderData() {
-    const container = document.getElementById('listPasien');
-    container.innerHTML = '';
-
-    if (!allData || allData.length === 0) {
-        container.innerHTML = `<div class="col-span-full w-full text-center p-8 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-bold">Tidak ada data reservasi sama sekali.</div>`;
-        return;
-    }
-
-    const now = new Date();
-    const todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
-    
-    // Terapis Filtering
-    const roleAdmin = localStorage.getItem('adminRole') || 'admin';
-    const namaAdmin = localStorage.getItem('adminNama') || 'Admin';
-
-    let displayData = allData.filter(item => {
-        // Filter Role: Jika Terapis, hanya lihat datanya sendiri
-        if (roleAdmin === 'terapis' && (item.terapis || "") !== namaAdmin) {
-            return false;
-        }
-
-        // Filter Mode
-        let isMatchMode = true;
-        if (currentFilter === 'terjadwal') isMatchMode = (item.status || "Terjadwal").toLowerCase() === 'terjadwal';
-        else if (currentFilter === 'hariini') isMatchMode = item.tanggal === todayStr;
-
-        // Search Query
-        let isMatchSearch = true;
-        if (searchQuery) {
-            isMatchSearch = (item.nama || "").toLowerCase().includes(searchQuery) || 
-                            (item.hp || "").toLowerCase().includes(searchQuery);
-        }
-
-        return isMatchMode && isMatchSearch;
+    const visibleData = allBookings.filter(b => {
+        if(role === 'terapis') return b.terapis === myName;
+        return true;
     });
 
-    if (displayData.length === 0) {
-        container.innerHTML = `<div class="col-span-full w-full text-center p-8 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-bold">Tidak ada data yang cocok dengan kriteria.</div>`;
-        return;
-    }
+    // 1. Table Reservasi
+    const resBody = document.getElementById('tbReservasiBody');
+    resBody.innerHTML = '';
+    visibleData.forEach(b => {
+        let badgeClass = 'bg-slate-50 text-slate-400 border-slate-100';
+        if(b.status === 'DITERIMA') badgeClass = 'bg-blue-50 text-blue-600 border-blue-200';
+        else if(b.status === 'SELESAI') badgeClass = 'bg-emerald-50 text-emerald-600 border-emerald-200';
+        else if(b.status.includes('Batal')) badgeClass = 'bg-red-50 text-red-600 border-red-200';
 
-    displayData.forEach(p => {
-        const st = (p.status || "Terjadwal").toLowerCase();
-        let badgeClass = "bg-blue-50 text-blue-600 border-blue-200 ring-1 ring-blue-100";
-        let actionBtn = "";
+        resBody.innerHTML += `
+            <tr>
+                <td>
+                    <div class="font-bold text-slate-800">${b.nama}</div>
+                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mt-1"><i class="fab fa-whatsapp text-emerald-500"></i> ${b.hp}</div>
+                </td>
+                <td>
+                    <div class="font-bold text-emerald-700">${b.layanan}</div>
+                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mt-1"><i class="fas fa-user-md"></i> ${b.terapis}</div>
+                </td>
+                <td>
+                    <div class="font-bold text-slate-700">${new Date(b.tanggal).toLocaleDateString('id-ID', {day:'numeric', month:'short'})}</div>
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">${b.waktu} WIB</div>
+                </td>
+                <td>
+                    <span class="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border ${badgeClass}">
+                        ${b.status}
+                    </span>
+                </td>
+                <td class="text-center">
+                    <button onclick="openModalStatus(${b.row}, '${b.status}')" class="bg-white border border-slate-200 hover:border-emerald-400 hover:text-emerald-600 w-9 h-9 rounded-xl flex items-center justify-center transition-colors shadow-sm mx-auto">
+                        <i class="fas fa-edit text-xs"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
 
-        // EMR Button
-        const emrBtn = `<button class="w-full mt-3 py-2 bg-slate-100 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 text-slate-600 hover:text-emerald-700 font-bold rounded-xl text-xs transition-colors flex items-center justify-center gap-2" onclick="openEMR('${p.row}', '${p.nama}', \`${p.tensi||''}\`, \`${p.keluhan||''}\`, \`${p.tindakan||''}\`)"><i class="fas fa-file-medical"></i> Catatan Rekam Medis</button>`;
+    // 2. Table Ulasan
+    const ulasanBody = document.getElementById('tbUlasanBody');
+    ulasanBody.innerHTML = '';
+    visibleData.filter(b => b.rating).forEach(b => {
+        let stars = '⭐'.repeat(parseInt(b.rating));
+        ulasanBody.innerHTML += `
+            <tr>
+                <td class="font-bold text-slate-800">${b.nama}</td>
+                <td class="text-xs font-bold text-slate-500">${b.layanan}</td>
+                <td class="text-xs">${stars}</td>
+                <td class="text-xs font-medium text-slate-600 max-w-xs italic">${b.ulasan || '-'}</td>
+            </tr>
+        `;
+    });
 
-        if (st === "batal" || st === "cancel" || st === "dibatalkan") {
-            badgeClass = "bg-red-50 text-red-600 border-red-200 ring-1 ring-red-100";
-            actionBtn = `<div class="bg-red-50/50 rounded-xl p-3 text-red-500 font-extrabold text-xs text-center border border-red-100"><i class="fas fa-times-circle"></i> Reservasi Dibatalkan</div>`;
-        } else if (st === "selesai") {
-            badgeClass = "bg-emerald-50 text-emerald-600 border-emerald-200 ring-1 ring-emerald-100";
-            actionBtn = `<div class="bg-emerald-50 rounded-xl p-3 text-emerald-600 font-extrabold text-xs text-center border border-emerald-100"><i class="fas fa-check-double text-emerald-500"></i> Layanan Selesai</div>${emrBtn}`;
-        } else {
-            badgeClass = "bg-blue-50 text-blue-600 border-blue-200 ring-1 ring-blue-100";
-            actionBtn = `
-                <div class="flex items-center gap-3 pt-4 border-t border-slate-100">
-                    <button class="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl text-xs transition-colors shadow-sm shadow-emerald-500/20" onclick="updateStatus('${p.row}', 'Selesai')"><i class="fas fa-check mr-1"></i> Selesai</button>
-                    <button class="flex-1 py-2.5 bg-white border border-red-200 hover:bg-red-50 text-red-500 hover:text-red-600 font-bold rounded-xl text-xs transition-colors" onclick="updateStatus('${p.row}', 'Batal')"><i class="fas fa-times mr-1"></i> Batal</button>
-                </div>
-                ${emrBtn}
-            `;
-        }
-
-        container.innerHTML += `
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-shadow p-5 flex flex-col gap-4 relative overflow-hidden">
-                <div class="flex justify-between items-start pb-4 border-b border-dashed border-slate-100 relative z-10">
-                    <div>
-                        <h3 class="text-base font-extrabold text-slate-800 uppercase tracking-wide">${p.nama}</h3>
-                        <div class="flex items-center gap-1.5 text-slate-500 text-xs font-bold mt-1.5"><i class="fab fa-whatsapp text-emerald-500"></i> ${p.hp}</div>
-                    </div>
-                    <span class="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border ${badgeClass}">${st}</span>
-                </div>
-                <div class="grid grid-cols-2 gap-y-4 gap-x-2 text-xs relative z-10">
-                    <div class="col-span-2 sm:col-span-1 border border-slate-100 p-3 rounded-xl bg-slate-50">
-                        <span class="block text-slate-400 font-bold uppercase text-[9px] mb-1">Tanggal & Waktu</span>
-                        <strong class="text-slate-700 flex items-center gap-1.5"><i class="far fa-clock text-slate-400"></i> ${p.waktu} &bull; ${p.tanggal}</strong>
-                    </div>
-                    <div class="col-span-2 sm:col-span-1 border border-slate-100 p-3 rounded-xl bg-slate-50">
-                        <span class="block text-slate-400 font-bold uppercase text-[9px] mb-1">Terapis</span>
-                        <strong class="text-slate-700 flex items-center gap-1.5"><i class="far fa-user text-slate-400"></i> ${p.terapis}</strong>
-                    </div>
-                    <div class="col-span-2 border border-emerald-100 p-3 rounded-xl bg-emerald-50/50">
-                        <span class="block text-emerald-600/60 font-bold uppercase text-[9px] mb-1">Layanan</span>
-                        <strong class="text-emerald-800 flex items-center gap-1.5"><i class="fas fa-notes-medical text-emerald-500"></i> ${p.layanan}</strong>
-                    </div>
-                </div>
-                ${actionBtn}
-            </div>
+    // 3. Table EMR
+    const emrBody = document.getElementById('tbEMRBody');
+    emrBody.innerHTML = '';
+    visibleData.forEach(b => {
+        emrBody.innerHTML += `
+            <tr>
+                <td class="text-xs font-mono text-slate-500">#${b.row}</td>
+                <td class="font-bold text-slate-800">${b.nama}</td>
+                <td class="text-xs font-medium text-slate-600 max-w-xs truncate">${b.keluhan || '-'}</td>
+                <td class="text-xs font-medium text-slate-600 max-w-xs truncate">${b.tindakan || '-'}</td>
+                <td class="text-center">
+                    <button onclick="openEMR(${b.row}, '${b.nama}', '${b.keluhan || ''}', '${b.tindakan || ''}')" class="bg-emerald-50 text-emerald-600 font-bold text-[10px] px-4 py-2 rounded-xl hover:bg-emerald-600 hover:text-white transition-all uppercase tracking-widest">
+                        Edit EMR
+                    </button>
+                </td>
+            </tr>
         `;
     });
 }
 
-function renderLaporan(data) {
-    const container = document.getElementById('isiLaporan');
-    const ringkasan = data.ringkasan;
-    
-    // Bar Chart Sederhana menggunakan CSS-Grid & Persentase
-    const maxTotal = Math.max(...data.perLayanan.map(l => l.jumlah), 1);
-
-    let html = `
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white p-5 rounded-3xl border border-emerald-50 shadow-sm flex flex-col hover:-translate-y-1 transition-transform">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-inner shadow-emerald-600/10"><i class="fas fa-check-double"></i></div>
-                    <span class="text-3xl font-black text-slate-800 tracking-tight">${ringkasan.selesai}</span>
-                </div>
-                <div class="text-slate-400 text-xs font-bold uppercase tracking-widest mt-auto">Selesai</div>
-            </div>
-            <div class="bg-white p-5 rounded-3xl border border-blue-50 shadow-sm flex flex-col hover:-translate-y-1 transition-transform">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shadow-inner shadow-blue-600/10"><i class="fas fa-clock"></i></div>
-                    <span class="text-3xl font-black text-slate-800 tracking-tight">${ringkasan.terjadwal}</span>
-                </div>
-                <div class="text-slate-400 text-xs font-bold uppercase tracking-widest mt-auto">Terjadwal</div>
-            </div>
-            <div class="bg-white p-5 rounded-3xl border border-red-50 shadow-sm flex flex-col hover:-translate-y-1 transition-transform">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center text-xl shadow-inner shadow-red-600/10"><i class="fas fa-user-times"></i></div>
-                    <span class="text-3xl font-black text-slate-800 tracking-tight">${ringkasan.batal}</span>
-                </div>
-                <div class="text-slate-400 text-xs font-bold uppercase tracking-widest mt-auto">Dibatalkan</div>
-            </div>
-            <div class="bg-white p-5 rounded-3xl border border-purple-50 shadow-sm flex flex-col hover:-translate-y-1 transition-transform">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shadow-inner shadow-purple-600/10"><i class="fas fa-users-viewfinder"></i></div>
-                    <span class="text-3xl font-black text-slate-800 tracking-tight">${ringkasan.pasienUnik}</span>
-                </div>
-                <div class="text-slate-400 text-xs font-bold uppercase tracking-widest mt-auto">Total Pasien</div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
-            <!-- Col 1 -->
-            <div class="space-y-6">
-                <!-- Top Layanan -->
-                <div class="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-8 shadow-sm">
-                    <h4 class="text-slate-800 font-extrabold text-lg mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 text-emerald-600 flex items-center justify-center text-sm shadow-inner"><i class="fas fa-chart-line"></i></span> Layanan Terpopuler</h4>
-                    <div class="flex flex-col gap-5">
-                        ${data.perLayanan.map(l => {
-                            const pct = (l.jumlah / maxTotal) * 100;
-                            return `
-                                <div class="flex flex-col gap-2 group">
-                                    <div class="flex justify-between text-sm font-bold text-slate-700">
-                                        <span>${l.nama}</span>
-                                        <span class="bg-slate-50 text-slate-500 px-2 py-0.5 rounded-md text-xs group-hover:bg-emerald-50 group-hover:text-emerald-700 transition-colors">${l.jumlah} sesi</span>
-                                    </div>
-                                    <div class="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
-                                        <div class="h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full transition-all duration-1000 origin-left" style="width:${pct}%"></div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-
-                <!-- Kontribusi Terapis -->
-                <div class="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-8 shadow-sm overflow-hidden">
-                    <h4 class="text-slate-800 font-extrabold text-lg mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-50 text-indigo-600 flex items-center justify-center text-sm shadow-inner"><i class="fas fa-user-md"></i></span> Efisiensi Terapis</h4>
-                    <div class="overflow-x-auto -mx-6 px-6 md:mx-0 md:px-0">
-                        <table class="w-full min-w-[400px] text-left border-collapse">
-                            <thead><tr class="text-[10px] text-slate-400 uppercase tracking-widest border-b border-slate-100"><th class="pb-3 font-bold pr-2">Terapis</th><th class="pb-3 font-bold text-center px-2">Selesai/Total</th><th class="pb-3 font-bold px-2 w-[120px]">Efisiensi</th></tr></thead>
-                            <tbody class="divide-y divide-slate-50">
-                                ${data.perTerapis.map(t => {
-                                    const efisiensi = Math.round((t.selesai / (t.total || 1)) * 100);
-                                    return `
-                                        <tr class="hover:bg-slate-50/50 transition-colors group">
-                                            <td class="py-4 font-bold text-slate-700 text-sm flex items-center gap-2.5 pr-2"><div class="w-7 h-7 rounded-full bg-slate-100 text-slate-400 group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-colors flex items-center justify-center text-xs"><i class="fas fa-user"></i></div> ${t.nama}</td>
-                                            <td class="py-4 font-bold text-slate-500 text-sm text-center px-2">${t.selesai} <span class="text-slate-300 font-normal px-0.5">/</span> ${t.total}</td>
-                                            <td class="py-4 pl-2">
-                                                <div class="flex items-center gap-2">
-                                                    <span class="font-extrabold text-xs ${efisiensi > 70 ? 'text-emerald-600' : 'text-amber-500'} w-9">${efisiensi}%</span>
-                                                    <div class="h-1.5 flex-1 bg-slate-100 rounded-full overflow-hidden"><div class="h-full ${efisiensi > 70 ? 'bg-emerald-500' : 'bg-amber-400'} rounded-full" style="width: ${efisiensi}%"></div></div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    `;
-                                }).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Col 2: Top Pasien -->
-            <div class="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-8 shadow-sm h-fit">
-                <h4 class="text-slate-800 font-extrabold text-lg mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-100 to-amber-50 text-yellow-600 flex items-center justify-center text-sm shadow-inner"><i class="fas fa-crown"></i></span> Loyalitas Pasien (Top 10)</h4>
-                <div class="overflow-x-auto -mx-6 px-6 md:mx-0 md:px-0 hide-scrollbar">
-                    <table class="w-full min-w-[500px] text-left border-collapse">
-                        <thead><tr class="text-[10px] text-slate-400 uppercase tracking-widest border-b border-slate-100"><th class="pb-3 font-bold pr-4">Nama Pasien</th><th class="pb-3 font-bold px-2">Kontak</th><th class="pb-3 font-bold px-2 text-center">Visit</th><th class="pb-3 font-bold pl-2 text-right">Terakhir</th></tr></thead>
-                        <tbody class="divide-y divide-slate-50">
-                            ${data.pasienList.slice(0, 10).map((p, idx) => `
-                                <tr class="hover:bg-slate-50/50 transition-colors">
-                                    <td class="py-3.5 pr-4">
-                                        <div class="flex items-center gap-3">
-                                            <span class="text-xs font-black ${idx < 3 ? 'text-amber-500 bg-amber-50' : 'text-slate-400 bg-slate-100'} w-6 h-6 rounded flex items-center justify-center shrink-0">${idx + 1}</span>
-                                            <span class="font-extrabold text-slate-700 text-sm truncate max-w-[140px]" title="${p.nama}">${p.nama}</span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-2 text-emerald-600 font-bold text-xs"><i class="fab fa-whatsapp opacity-70 mr-1"></i> ${p.hp}</td>
-                                    <td class="py-3.5 px-2 text-center"><span class="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 px-2 py-0.5 rounded-md text-[10px] font-black uppercase shadow-sm">${p.kunjungan}x</span></td>
-                                    <td class="py-3.5 pl-2 font-bold text-slate-400 text-[11px] text-right whitespace-nowrap">${p.terakhir}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    `;
-
-    container.innerHTML = html;
+function handleSearch(val) {
+    const query = val.toLowerCase().trim();
+    document.querySelectorAll('#tbReservasiBody tr').forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(query) ? '' : 'none';
+    });
 }
 
-async function updateStatus(row, newStatus) {
-    if(!confirm(`Apakah Bapak yakin menandai layanan ini sebagai ${newStatus.toUpperCase()}?`)) return;
-
-    const pin = localStorage.getItem('adminPin');
-    const loader = document.getElementById('loadingDash');
-    loader.classList.remove('hidden');
-
-    try {
-        const res = await fetch(GAS_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'adminUpdateStatus', pass: pin, row: row, status: newStatus })
-        });
-        const result = await res.json();
-        if (result.status === 'success') {
-            loadDashboardData(pin);
-        } else {
-            alert("Gagal memperbarui status: " + result.message);
-        }
-    } catch(err) {
-        alert("Gagal menghubungi server pusat.");
-    } finally {
-        loader.classList.add('hidden');
-    }
+function showLoader(show) {
+    document.getElementById('loader').classList.toggle('hidden', !show);
 }
 
-// ── CMS: LOAD SETTINGS ──
-async function loadCmsSettings() {
-    const loader = document.getElementById('cmsLoader');
-    const form   = document.getElementById('cmsForm');
-    loader.style.display = 'flex';
-    form.classList.add('hidden');
-
+// ── CMS & LAYANAN MANAGER ──
+async function loadCMSData() {
     try {
-        const res = await fetch(`${GAS_URL}?action=getLandingSettings`);
+        const connector = window.GAS_URL.includes('?') ? '&' : '?';
+        const res = await fetch(`${window.GAS_URL}${connector}action=getLandingSettings`);
         const result = await res.json();
         if (result.status === 'success') {
-            const d = result.data;
-            // Isi setiap field form dengan data dari server
-            Object.keys(d).forEach(key => {
+            const data = result.data;
+            for (const key in data) {
                 const el = document.getElementById(key);
-                if (el) el.value = d[key];
-            });
-            loader.style.display = 'none';
-            form.classList.remove('hidden');
-        } else {
-            loader.innerHTML = `<i class="fas fa-exclamation-triangle text-red-500 mr-2"></i><span class="text-red-600 font-bold">${result.message}</span>`;
+                if (el) el.value = data[key];
+            }
         }
-    } catch(err) {
-        loader.innerHTML = `<i class="fas fa-exclamation-triangle text-red-500 mr-2"></i><span class="text-red-600 font-bold">Gagal memuat: ${err.message}</span>`;
-    }
+    } catch (e) { console.error("Gagal load CMS:", e); }
 }
 
-// ── CMS: SAVE SETTINGS ──
-async function saveCmsSettings() {
-    const pin    = localStorage.getItem('adminPin');
-    const btn    = document.getElementById('btnSaveCms');
-    const alert  = document.getElementById('cmsAlert');
+async function saveCMS() {
+    const pin = localStorage.getItem('adminPin');
+    const btn = document.getElementById('btnSaveCMS');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Sinkronkan...';
+    btn.disabled = true;
 
-    // Kumpulkan semua nilai dari form
-    const keys = [
-        'cms_nama_klinik','cms_tagline','cms_deskripsi','cms_badge','cms_hero_image',
-        'cms_whatsapp','cms_alamat','cms_jam_operasional','cms_maps_link',
-        'cms_instagram','cms_facebook',
-        'cms_layanan1_nama','cms_layanan1_icon','cms_layanan1_deskripsi','cms_layanan1_detail',
-        'cms_layanan2_nama','cms_layanan2_icon','cms_layanan2_deskripsi','cms_layanan2_detail',
-        'cms_layanan3_nama','cms_layanan3_icon','cms_layanan3_deskripsi','cms_layanan3_detail',
-        'cms_logo_image','cms_footer_deskripsi',
-        'cms_keunggulan_judul_kecil','cms_keunggulan_judul_besar','cms_keunggulan_deskripsi',
-        'cms_keunggulan_poin1','cms_keunggulan_poin2',
-        'cms_unggul1_nama','cms_unggul1_sub','cms_unggul1_icon',
-        'cms_unggul2_nama','cms_unggul2_sub','cms_unggul2_icon',
-        'cms_unggul3_nama','cms_unggul3_sub','cms_unggul3_icon',
-        'cms_unggul4_nama','cms_unggul4_sub','cms_unggul4_icon',
-        'cms_cta_judul','cms_cta_deskripsi',
-    ];
-    const settings = {};
-    keys.forEach(k => {
-        const el = document.getElementById(k);
-        if (el) settings[k] = el.value;
+    const updatedData = {};
+    const inputs = document.querySelectorAll('#tab-cms input, #tab-cms textarea');
+    inputs.forEach(input => {
+        if (input.id && input.id.startsWith('cms_')) {
+            updatedData[input.id] = input.value;
+        }
     });
 
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menyimpan...';
-    alert.classList.add('hidden');
-
     try {
-        const res = await fetch(GAS_URL, {
+        const res = await fetch(`${window.GAS_URL}`, {
             method: 'POST',
-            body: JSON.stringify({ action: 'updateLandingSettings', pass: pin, settings })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'updateLandingSettings', pass: pin, updatedData: updatedData })
         });
         const result = await res.json();
         if (result.status === 'success') {
-            alert.className = 'flex-1 p-3 rounded-xl text-sm font-bold text-center border bg-emerald-50 text-emerald-700 border-emerald-200';
-            alert.innerHTML = '<i class="fas fa-check-circle mr-2"></i>' + result.message;
+            alert("✅ Web Berhasil Disinkronkan (Cache dibersihkan)!");
         } else {
-            alert.className = 'flex-1 p-3 rounded-xl text-sm font-bold text-center border bg-red-50 text-red-600 border-red-200';
-            alert.innerHTML = '<i class="fas fa-times-circle mr-2"></i> Gagal: ' + result.message;
+            alert("❌ Gagal: " + result.message);
         }
-        alert.classList.remove('hidden');
-    } catch(err) {
-        alert.className = 'flex-1 p-3 rounded-xl text-sm font-bold text-center border bg-red-50 text-red-600 border-red-200';
-        alert.innerHTML = '<i class="fas fa-times-circle mr-2"></i> Error: ' + err.message;
-        alert.classList.remove('hidden');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-save mr-2"></i> Simpan Perubahan';
-        setTimeout(() => alert.classList.add('hidden'), 5000);
-    }
+    } catch (e) { alert("Error koneksi ke server."); }
+    finally { btn.innerHTML = orig; btn.disabled = false; }
 }
 
-// ── EMR (Catatan Medis) ──
-let currentEmrRow = null;
-
-function openEMR(row, nama, tensi, keluhan, tindakan) {
-    currentEmrRow = row;
-    document.getElementById('emrNamaPasien').textContent = nama;
-    document.getElementById('emrTensi').value = tensi !== "undefined" ? tensi : "";
-    document.getElementById('emrKeluhan').value = keluhan !== "undefined" ? keluhan : "";
-    document.getElementById('emrTindakan').value = tindakan !== "undefined" ? tindakan : "";
-    document.getElementById('emrModal').style.display = 'flex';
-}
-
-function closeEMR() {
-    currentEmrRow = null;
-    document.getElementById('emrModal').style.display = 'none';
-}
-
-async function saveEMR() {
-    if (!currentEmrRow) return;
-    const pin = localStorage.getItem('adminPin');
-    const tensi = document.getElementById('emrTensi').value;
-    const keluhan = document.getElementById('emrKeluhan').value;
-    const tindakan = document.getElementById('emrTindakan').value;
-
-    const btn = document.getElementById('btnSaveEMR');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-
+let currentLayanan = [];
+async function loadLayananList() {
     try {
-        const res = await fetch(GAS_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'adminUpdateRekamMedis',
-                pass: pin,
-                row: currentEmrRow,
-                tensi, keluhan, tindakan
-            })
-        });
+        const connector = window.GAS_URL.includes('?') ? '&' : '?';
+        const res = await fetch(`${window.GAS_URL}${connector}action=getLayananList`);
         const result = await res.json();
         if (result.status === 'success') {
-            closeEMR();
-            loadDashboardData(pin); // Refresh data
-        } else {
-            alert('Gagal simpan EMR: ' + result.message);
-        }
-    } catch(e) {
-        alert('Internal Error: ' + e.message);
-    } finally {
-        if(btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-save"></i> Simpan Rekam Medis';
-        }
-    }
-}
-
-// ============================================================
-//  LAYANAN MANAGER — Daftar Layanan Dinamis
-// ============================================================
-
-let layananData = []; // State lokal
-
-async function loadLayananData() {
-    try {
-        const res = await fetch(`${GAS_URL}?action=getLayananList`);
-        const result = await res.json();
-        if (result.status === 'success') {
-            layananData = result.data || [];
+            currentLayanan = result.data || [];
             renderLayananList();
         }
-    } catch(e) {
-        document.getElementById('layananList').innerHTML = `<p class="text-red-500 font-bold text-sm text-center py-4"><i class="fas fa-exclamation-triangle mr-2"></i>Gagal memuat layanan: ${e.message}</p>`;
-    }
+    } catch (e) { }
 }
 
 function renderLayananList() {
     const container = document.getElementById('layananList');
-    if (!container) return;
-
-    if (layananData.length === 0) {
-        container.innerHTML = `<p class="text-slate-400 font-bold text-sm text-center py-8"><i class="fas fa-inbox mr-2"></i>Belum ada layanan. Klik "+ Tambah Layanan".</p>`;
-        return;
-    }
-
-    container.innerHTML = layananData.map((l, idx) => `
-        <div class="bg-white/60 border border-white rounded-[1.5rem] p-5 sm:p-6 grid md:grid-cols-2 gap-4 relative shadow-sm" id="layanan-row-${idx}">
-            <div class="absolute top-4 right-4 flex items-center gap-2">
-                <label class="flex items-center gap-1.5 cursor-pointer">
-                    <input type="checkbox" id="lay_terlaris_${idx}" ${l.terlaris ? 'checked' : ''} class="accent-teal-500 w-4 h-4">
-                    <span class="text-[10px] font-black text-teal-600 uppercase tracking-widest">Terlaris</span>
-                </label>
-                <button onclick="deleteLayananRow(${idx})" class="w-7 h-7 rounded-full bg-red-50 text-red-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all text-xs ml-1">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-            <div class="space-y-3 pr-24">
-                <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Layanan ${idx + 1}</div>
-                <input type="text" id="lay_nama_${idx}" value="${l.nama || ''}" class="cms-input" placeholder="Nama Layanan (cth: Bekam Basah)">
-                <input type="text" id="lay_icon_${idx}" value="${l.icon || ''}" class="cms-input !text-xs" placeholder="Icon FontAwesome (cth: fas fa-fire)">
-                <select id="lay_warna_${idx}" class="cms-input !text-xs">
-                    ${['emerald','teal','cyan','blue','violet','amber'].map(w => `<option value="${w}" ${l.warna === w ? 'selected' : ''}>${w.charAt(0).toUpperCase()+w.slice(1)}</option>`).join('')}
-                </select>
-            </div>
-            <div class="space-y-3">
-                <textarea id="lay_desk_${idx}" class="cms-input !text-xs" rows="2" placeholder="Deskripsi singkat layanan">${l.deskripsi || ''}</textarea>
-                <textarea id="lay_detail_${idx}" class="cms-input !text-xs" rows="2" placeholder="Detail keunggulan (pisahkan koma)">${l.detail || ''}</textarea>
-                <input type="text" id="lay_foto_${idx}" value="${l.foto || ''}" class="cms-input !text-xs" placeholder="Link Foto Google Drive (opsional)">
+    container.innerHTML = currentLayanan.map((l, idx) => `
+        <div class="bg-white/60 border border-white rounded-[1.5rem] p-5 shadow-sm relative group">
+            <button onclick="deleteLayananRow(${idx})" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">
+                <i class="fas fa-trash-alt text-xs"></i>
+            </button>
+            <div class="grid md:grid-cols-12 gap-6">
+                <div class="md:col-span-4 space-y-3">
+                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nama, Icon & Warna</label>
+                    <input type="text" class="cms-input !py-3" id="lay_nama_${idx}" value="${l.nama}" placeholder="Cth: Bekam Sunnah">
+                    <div class="flex gap-2">
+                        <input type="text" class="cms-input !py-3 flex-1" id="lay_icon_${idx}" value="${l.icon}" placeholder="Cth: fas fa-leaf">
+                        <select id="lay_warna_${idx}" class="cms-input !py-3 !text-xs w-24">
+                            ${['emerald','teal','cyan','blue','violet','amber'].map(w => `<option value="${w}" ${l.warna === w ? 'selected' : ''}>${w}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-4 pt-1">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="lay_terlaris_${idx}" ${l.terlaris ? 'checked' : ''} class="w-4 h-4 accent-emerald-500">
+                            <span class="text-[10px] font-bold text-slate-600">Terlaris</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="lay_lintas_${idx}" ${l.lintas_gender ? 'checked' : ''} class="w-4 h-4 accent-teal-500">
+                            <span class="text-[10px] font-bold text-slate-600">Lintas Gender</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="md:col-span-4 space-y-3">
+                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Aturan Booking (Jadwal & Terapis)</label>
+                    <input type="text" class="cms-input !py-3 !text-[10px]" id="lay_hari_${idx}" value="${l.hari_aktif || ''}" placeholder="Hari Aktif (0-6, Pisah Koma)">
+                    <input type="text" class="cms-input !py-3 !text-[10px]" id="lay_terapis_${idx}" value="${l.terapis_khusus || ''}" placeholder="Terapis Khusus (Pisah Koma)">
+                    <input type="text" class="cms-input !py-3 !text-[10px]" id="lay_foto_${idx}" value="${l.foto || ''}" placeholder="Link Foto (Opsional)">
+                </div>
+                <div class="md:col-span-4 space-y-3">
+                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Deskripsi & Detail Web</label>
+                    <textarea class="cms-input !py-3 !text-xs" id="lay_desc_${idx}" rows="2" placeholder="Penjelasan singkat">${l.deskripsi}</textarea>
+                    <textarea class="cms-input !py-3 !text-xs" id="lay_detail_${idx}" rows="2" placeholder="Item detail (pisah koma)">${l.detail}</textarea>
+                </div>
             </div>
         </div>
     `).join('');
 }
 
 function addLayananRow() {
-    layananData.push({ nama: '', deskripsi: '', detail: '', icon: 'fas fa-star', foto: '', terlaris: false, warna: 'emerald' });
+    currentLayanan.push({ nama: '', deskripsi: '', detail: '', icon: 'fas fa-leaf', foto: '', terlaris: false, warna: 'emerald', hari_aktif: '', terapis_khusus: '' });
     renderLayananList();
-    // Scroll ke baris baru
-    const list = document.getElementById('layananList');
-    if (list) list.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function deleteLayananRow(idx) {
-    if (!confirm(`Hapus layanan "${layananData[idx].nama || 'ini'}"?`)) return;
-    layananData.splice(idx, 1);
+    if(!confirm("Hapus layanan ini?")) return;
+    currentLayanan.splice(idx, 1);
     renderLayananList();
 }
 
 async function saveLayanan() {
-    // Kumpulkan data terbaru dari semua input
-    const collected = layananData.map((_, idx) => ({
-        nama:      document.getElementById(`lay_nama_${idx}`)?.value  || '',
-        deskripsi: document.getElementById(`lay_desk_${idx}`)?.value  || '',
-        detail:    document.getElementById(`lay_detail_${idx}`)?.value || '',
-        icon:      document.getElementById(`lay_icon_${idx}`)?.value  || '',
-        foto:      document.getElementById(`lay_foto_${idx}`)?.value  || '',
-        terlaris:  document.getElementById(`lay_terlaris_${idx}`)?.checked || false,
-        warna:     document.getElementById(`lay_warna_${idx}`)?.value  || 'emerald',
-    }));
-
     const pin = localStorage.getItem('adminPin');
     const btn = document.getElementById('btnSaveLayanan');
     const orig = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+    btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Menyimpan...';
     btn.disabled = true;
 
+    const dataToSave = currentLayanan.map((_, idx) => ({
+        nama: document.getElementById(`lay_nama_${idx}`).value,
+        icon: document.getElementById(`lay_icon_${idx}`).value,
+        deskripsi: document.getElementById(`lay_desc_${idx}`).value,
+        detail: document.getElementById(`lay_detail_${idx}`).value,
+        foto: document.getElementById(`lay_foto_${idx}`).value,
+        terlaris: document.getElementById(`lay_terlaris_${idx}`).checked,
+        warna: document.getElementById(`lay_warna_${idx}`).value,
+        hari_aktif: document.getElementById(`lay_hari_${idx}`).value,
+        terapis_khusus: document.getElementById(`lay_terapis_${idx}`).value,
+        lintas_gender: document.getElementById(`lay_lintas_${idx}`).checked
+    }));
+
     try {
-        const res = await fetch(GAS_URL, {
+        const res = await fetch(`${window.GAS_URL}`, {
             method: 'POST',
-            body: JSON.stringify({ action: 'saveLayananList', pass: pin, layanan: collected })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'saveLayananList', pass: pin, layananData: dataToSave })
         });
         const result = await res.json();
         if (result.status === 'success') {
-            layananData = collected;
-            alert('✅ Daftar layanan berhasil disimpan!');
+            alert("✅ Daftar Layanan Berhasil Diperbarui!");
+            loadLayananList();
+        } else { alert("Gagal simpan layanan: " + result.message); }
+    } catch (e) { alert("Error koneksi saat simpan layanan."); }
+    finally { btn.innerHTML = orig; btn.disabled = false; }
+}
+
+// ── MODAL STATUS ──
+function openModalStatus(row, current) {
+    document.getElementById('editRowIndex').value = row;
+    document.getElementById('editStatus').value = current;
+    document.getElementById('modalStatus').classList.remove('hidden');
+}
+function closeModalStatus() { document.getElementById('modalStatus').classList.add('hidden'); }
+
+async function saveStatus() {
+    const pin = localStorage.getItem('adminPin');
+    const row = document.getElementById('editRowIndex').value;
+    const stat = document.getElementById('editStatus').value;
+    const btn = document.getElementById('btnSaveStatus');
+    const originalText = btn.innerHTML;
+
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Memproses...';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(`${window.GAS_URL}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'adminUpdateStatus', pass: pin, row: row, status: stat })
+        });
+        const result = await res.json();
+        if(result.status === 'success') {
+            closeModalStatus();
+            loadAllData();
         } else {
-            alert('❌ Gagal: ' + result.message);
+            alert("Gagal update status: " + result.message);
         }
-    } catch(e) {
-        alert('Error koneksi: ' + e.message);
-    } finally {
-        btn.innerHTML = orig;
-        btn.disabled = false;
+    } catch(e) { alert("Error koneksi: Gagal memperbarui status."); }
+    finally { btn.innerHTML = originalText; btn.disabled = false; }
+}
+
+// ── MODAL EMR ──
+function openEMR(row, nama, keluhan, tindakan) {
+    document.getElementById('emrRowIndex').value = row;
+    document.getElementById('emrNamaPasien').textContent = nama;
+    document.getElementById('emrKeluhan').value = keluhan;
+    document.getElementById('emrTindakan').value = tindakan;
+    document.getElementById('modalEMR').classList.remove('hidden');
+}
+function closeEMR() { document.getElementById('modalEMR').classList.add('hidden'); }
+
+async function saveEMR() {
+    const pin = localStorage.getItem('adminPin');
+    const row = document.getElementById('emrRowIndex').value;
+    const k = document.getElementById('emrKeluhan').value;
+    const t = document.getElementById('emrTindakan').value;
+    const btn = document.getElementById('btnSaveEMR');
+    const originalText = btn.innerHTML;
+
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Menyimpan...';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(`${window.GAS_URL}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'adminUpdateRekamMedis', pass: pin, row: row, tensi: '', keluhan: k, tindakan: t })
+        });
+        const result = await res.json();
+        if(result.status === 'success') {
+            closeEMR();
+            loadAllData();
+        } else {
+            alert("Gagal simpan EMR: " + result.message);
+        }
+    } catch(e) { alert("Error koneksi: Gagal menyimpan rekam medis."); }
+    finally { btn.innerHTML = originalText; btn.disabled = false; }
+}
+
+// ── ARTIKEL MANAGER ──
+let artikelData = [];
+async function loadArtikelListAdmin() {
+    try {
+        const pin = localStorage.getItem('adminPin');
+        document.getElementById('artikelList').innerHTML = '<p class="text-slate-400 font-bold text-sm text-center py-8"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat artikel...</p>';
+        const connector = window.GAS_URL.includes('?') ? '&' : '?';
+        const res = await fetch(`${window.GAS_URL}${connector}action=getArtikelListAdmin&pass=${encodeURIComponent(pin)}`);
+        const result = await res.json();
+        if (result.status === 'success') {
+            artikelData = result.data || [];
+            renderArtikelList();
+        } else { alert("Gagal memuat artikel: " + result.message); }
+    } catch(e) { alert("Error koneksi saat memuat artikel."); }
+}
+
+function renderArtikelList() {
+    const container = document.getElementById('artikelList');
+    if (artikelData.length === 0) {
+        container.innerHTML = `<div class="col-span-full border-2 border-dashed border-slate-200 rounded-[2.5rem] p-12 text-center text-slate-400">
+            <i class="fas fa-newspaper text-5xl mb-4 opacity-20"></i>
+            <p class="font-bold">Belum ada artikel. Mulai menulis sekarang!</p>
+        </div>`;
+        return;
     }
+    container.innerHTML = artikelData.map((a, idx) => {
+        let thumb = a.foto || '';
+        if (thumb.includes('drive.google.com/uc')) {
+            try { const id = thumb.split('id=')[1].split('&')[0]; thumb = `https://lh3.googleusercontent.com/d/${id}`; } catch(e){}
+        }
+        return `
+        <div class="group bg-white/70 backdrop-blur-md border border-white rounded-[2rem] p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all relative overflow-hidden">
+            <div class="h-32 bg-slate-100 rounded-[1.5rem] overflow-hidden mb-4 relative">
+                ${thumb ? `<img src="${thumb}" class="w-full h-full object-cover">` : `<div class="w-full h-full flex items-center justify-center text-slate-300"><i class="fas fa-image text-3xl"></i></div>`}
+                <div class="absolute top-2 left-2 px-2 py-1 bg-white/90 backdrop-blur-md rounded-lg text-[8px] font-black uppercase tracking-widest text-indigo-600">${a.kategori || 'Umum'}</div>
+            </div>
+            <h3 class="font-bold text-slate-800 text-sm line-clamp-2 leading-tight mb-4 pr-10">${a.judul || '(Tanpa Judul)'}</h3>
+            <div class="flex items-center justify-between">
+                <span class="text-[9px] font-black uppercase tracking-widest ${a.status==='published' ? 'text-emerald-500' : 'text-amber-500'}">${a.status || 'Draft'}</span>
+                <div class="flex gap-2 relative z-10">
+                    <button onclick="openEditArtikel(${idx})" class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white flex items-center justify-center transition-all shadow-sm"><i class="fas fa-pencil-alt text-xs"></i></button>
+                    <button onclick="deleteArtikelRecord('${a.id}', ${idx})" class="w-9 h-9 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all shadow-sm"><i class="fas fa-trash-alt text-xs"></i></button>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function openEditArtikel(idx) {
+    const modal = document.getElementById('modalEditorArtikel');
+    const isNew = idx === null;
+    const data = isNew ? { id: '', judul: '', ringkasan: '', isi: '', foto: '', kategori: 'Umum', status: 'draft' } : artikelData[idx];
+
+    document.getElementById('art_idx_modal').value = isNew ? 'new' : idx;
+    document.getElementById('art_id_modal').value = data.id || '';
+    document.getElementById('art_judul_modal').value = data.judul || '';
+    document.getElementById('art_kat_modal').value = data.kategori || 'Umum';
+    document.getElementById('art_status_modal').value = data.status || 'draft';
+    document.getElementById('art_foto_modal').value = data.foto || '';
+    document.getElementById('art_ringkasan_modal').value = data.ringkasan || '';
+    document.getElementById('art_isi_modal').value = data.isi || '';
+    document.getElementById('art_doc_id_modal').value = data.doc_id || '';
+
+    updateArtPreview(data.foto);
+    modal.classList.remove('hidden');
+}
+
+function updateArtPreview(url) {
+    const img = document.getElementById('art_preview_modal');
+    if(url) {
+        let thumb = url;
+        if (thumb.includes('id=')) { thumb = 'https://lh3.googleusercontent.com/d/' + thumb.split('id=')[1].split('&')[0]; }
+        img.src = thumb;
+        img.classList.remove('hidden');
+    } else { img.classList.add('hidden'); }
+}
+
+async function uploadArtikelImageModal(input) {
+    const file = input.files[0];
+    if(!file) return;
+    const btn = input.previousElementSibling;
+    const orig = btn.innerHTML; btn.innerHTML = '<i class="fas fa-sync fa-spin"></i>';
+    try {
+        const url = await uploadToDrive(file);
+        document.getElementById('art_foto_modal').value = url;
+        updateArtPreview(url);
+        alert("✅ Foto Terunggah!");
+    } catch(e) { alert(e.message); }
+    finally { btn.innerHTML = orig; }
+}
+
+async function saveArtikelFromModal() {
+    const idx = document.getElementById('art_idx_modal').value;
+    const pin = localStorage.getItem('adminPin');
+    const btn = document.getElementById('btnSaveArtModal');
+    const orig = btn.innerHTML;
+
+    const data = {
+        id: document.getElementById('art_id_modal').value,
+        judul: document.getElementById('art_judul_modal').value,
+        ringkasan: document.getElementById('art_ringkasan_modal').value,
+        isi: document.getElementById('art_isi_modal').value,
+        foto: document.getElementById('art_foto_modal').value,
+        kategori: document.getElementById('art_kat_modal').value,
+        status: document.getElementById('art_status_modal').value,
+        doc_id: document.getElementById('art_doc_id_modal').value
+    };
+
+    if(!data.judul) return alert("Judul wajib diisi!");
+
+    btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Menyimpan...';
+    btn.disabled = true;
+    try {
+        const res = await fetch(`${window.GAS_URL}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'saveArtikel', pass: pin, artikelData: data })
+        });
+        const result = await res.json();
+        if(result.status === 'success') {
+            alert("✅ Artikel Berhasil Disimpan!");
+            closeModal('modalEditorArtikel');
+            loadArtikelListAdmin();
+        } else { alert(result.message); }
+    } catch(e) { alert("Error koneksi saat simpan."); }
+    finally { btn.innerHTML = orig; btn.disabled = false; }
+}
+
+async function deleteArtikelRecord(id, idx) {
+    if(!id) { artikelData.splice(idx, 1); renderArtikelList(); return; }
+    if(!confirm("Yakin hapus permanen? Foto di G-Drive tidak terhapus.")) return;
+    try {
+        const pin = localStorage.getItem('adminPin');
+        const res = await fetch(`${window.GAS_URL}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'deleteArtikel', pass: pin, artikelId: id })
+        });
+        const result = await res.json();
+        if(result.status === 'success') { loadArtikelListAdmin(); } else { alert(result.message); }
+    } catch(e) { alert("Gagal hapus."); }
+}
+
+// ── GALERI MANAGER ──
+let galeriData = [];
+async function loadGaleriListAdmin() {
+    try {
+        document.getElementById('galeriList').innerHTML = '<p class="text-slate-400 font-bold text-sm text-center py-8"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat galeri...</p>';
+        const connector = window.GAS_URL.includes('?') ? '&' : '?';
+        const res = await fetch(`${window.GAS_URL}${connector}action=getGaleriList`);
+        const result = await res.json();
+        if (result.status === 'success') {
+            galeriData = result.data || [];
+            renderGaleriList();
+        } else { alert("Gagal memuat galeri."); }
+    } catch(e) { }
+}
+
+function renderGaleriList() {
+    const container = document.getElementById('galeriList');
+    if (galeriData.length === 0) {
+        container.innerHTML = `<div class="col-span-full border-2 border-dashed border-slate-200 rounded-[2.5rem] p-12 text-center text-slate-400">
+            <i class="fas fa-images text-5xl mb-4 opacity-20"></i>
+            <p class="font-bold">Galeri masih kosong. Tambahkan momen terbaik Anda.</p>
+        </div>`;
+        return;
+    }
+    container.innerHTML = galeriData.map((g, idx) => {
+        let thumb = g.url_foto || '';
+        if (thumb.includes('drive.google.com/uc')) {
+            try { const id = thumb.split('id=')[1].split('&')[0]; thumb = `https://lh3.googleusercontent.com/d/${id}`; } catch(e){}
+        }
+        return `
+        <div class="group bg-white/70 backdrop-blur-md border border-white rounded-[2rem] p-3 shadow-sm hover:shadow-xl transition-all relative overflow-hidden flex flex-col">
+            <div class="aspect-square bg-slate-100 rounded-[1.5rem] overflow-hidden mb-3 relative shadow-inner">
+                ${thumb ? `<img src="${thumb}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">` : `<div class="w-full h-full flex items-center justify-center text-slate-300"><i class="fas fa-image text-3xl"></i></div>`}
+                <div class="absolute top-2 left-2 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-lg text-[7px] font-black uppercase tracking-widest text-slate-500">${g.kategori || 'Galeri'}</div>
+            </div>
+            <div class="px-2 pb-2">
+                <h4 class="font-bold text-slate-800 text-[10px] truncate mb-2">${g.judul || '(Tanpa Nama)'}</h4>
+                <div class="flex gap-2 justify-end">
+                    <button onclick="openEditGaleri(${idx})" class="w-7 h-7 rounded-lg bg-violet-50 text-violet-600 hover:bg-violet-600 hover:text-white flex items-center justify-center transition-all"><i class="fas fa-pencil-alt text-[10px]"></i></button>
+                    <button onclick="deleteGaleriRecord('${g.id}', ${idx})" class="w-7 h-7 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all"><i class="fas fa-trash-alt text-[10px]"></i></button>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function openEditGaleri(idx) {
+    const modal = document.getElementById('modalEditorGaleri');
+    const isNew = idx === null;
+    const data = isNew ? { id: '', judul: '', url_foto: '', kategori: 'Fasilitas', urutan: 999, keterangan: '' } : galeriData[idx];
+
+    document.getElementById('gal_idx_modal').value = isNew ? 'new' : idx;
+    document.getElementById('gal_judul_modal').value = data.judul || '';
+    document.getElementById('gal_kat_modal').value = data.kategori || 'Fasilitas';
+    document.getElementById('gal_urut_modal').value = data.urutan || 999;
+    document.getElementById('gal_ket_modal').value = data.keterangan || '';
+    document.getElementById('gal_url_modal').value = data.url_foto || '';
+
+    updateGalPreview(data.url_foto);
+    modal.classList.remove('hidden');
+}
+
+function updateGalPreview(url) {
+    const img = document.getElementById('gal_preview_modal');
+    if(url) {
+        let thumb = url;
+        if (thumb.includes('id=')) { thumb = 'https://lh3.googleusercontent.com/d/' + thumb.split('id=')[1].split('&')[0]; }
+        img.src = thumb;
+        img.classList.remove('hidden');
+    } else { img.classList.add('hidden'); }
+}
+
+async function uploadGaleriImageModal(input) {
+    const file = input.files[0];
+    if(!file) return;
+    const url = await uploadToDrive(file);
+    document.getElementById('gal_url_modal').value = url;
+    updateGalPreview(url);
+    alert("✅ Foto Terpasang!");
+}
+
+async function saveGaleriFromModal() {
+    const pin = localStorage.getItem('adminPin');
+    const btn = document.getElementById('btnSaveGalModal');
+    const orig = btn.innerHTML;
+
+    const item = {
+        id: galeriData[document.getElementById('gal_idx_modal').value]?.id || '',
+        judul: document.getElementById('gal_judul_modal').value,
+        url_foto: document.getElementById('gal_url_modal').value,
+        kategori: document.getElementById('gal_kat_modal').value,
+        urutan: parseInt(document.getElementById('gal_urut_modal').value) || 999,
+        keterangan: document.getElementById('gal_ket_modal').value
+    };
+
+    btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Menyimpan...';
+    btn.disabled = true;
+    try {
+        const idx = document.getElementById('gal_idx_modal').value;
+        const newPayload = [...galeriData];
+        if (idx === 'new') newPayload.push(item); else newPayload[idx] = item;
+
+        const res = await fetch(`${window.GAS_URL}`, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'saveGaleri', pass: pin, galeriData: newPayload })
+        });
+        const result = await res.json();
+        if(result.status === 'success') {
+            closeModal('modalEditorGaleri');
+            loadGaleriListAdmin();
+        } else { alert(result.message); }
+    } catch(e) { alert("Error simpan galeri."); }
+    finally { btn.innerHTML = orig; btn.disabled = false; }
+}
+
+async function deleteGaleriRecord(id, idx) {
+    if(!confirm("Hapus foto ini dari galeri?")) return;
+    const pin = localStorage.getItem('adminPin');
+    const newPayload = [...galeriData];
+    newPayload.splice(idx, 1);
+    try {
+        const res = await fetch(`${window.GAS_URL}`, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'saveGaleri', pass: pin, galeriData: newPayload })
+        });
+        if((await res.json()).status === 'success') loadGaleriListAdmin();
+    } catch(e) { alert("Gagal hapus."); }
+}
+
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+async function createDocFromModal() {
+    const judul = document.getElementById('art_judul_modal').value;
+    if(!judul) return alert("Isi Judul Artikel terlebih dahulu!");
+
+    const btn = document.getElementById('btnCreateDocModal');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Sedang Membuat...';
+    btn.disabled = true;
+
+    try {
+        const pin = localStorage.getItem('adminPin');
+        const res = await fetch(`${window.GAS_URL}`, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'createDoc', pass: pin, judul: judul })
+        });
+        const result = await res.json();
+        if(result.status === 'success') {
+            document.getElementById('art_doc_id_modal').value = result.data.docId;
+            alert("✅ Google Doc Berhasil Dibuat!");
+            window.open('https://docs.google.com/document/d/' + result.data.docId, '_blank');
+        } else { alert(result.message); }
+    } catch(e) { alert("Error koneksi saat membuat dokumen."); }
+    finally { btn.innerHTML = orig; btn.disabled = false; }
+}
+
+async function uploadHeroImage(input) {
+    const file = input.files[0];
+    if(!file) return;
+
+    const btn = document.getElementById('btnUploadImage');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Sejenak...';
+
+    try {
+        const url = await uploadToDrive(file);
+        document.getElementById('cms_hero_image').value = url;
+        alert("✅ Foto Hero berhasil diupdate!");
+    } catch(e) { alert(e.message); }
+    finally { btn.innerHTML = originalHTML; }
+}
+
+async function uploadToDrive(file) {
+    return new Promise((resolve, reject) => {
+        if (!window.GAS_URL) {
+            return reject(new Error("GAS_URL tidak ditemukan. Cek config.js"));
+        }
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const pin = localStorage.getItem('adminPin');
+                const res = await fetch(`${window.GAS_URL}`, {
+                    method: 'POST',
+                    mode: 'cors',
+                    body: JSON.stringify({
+                        action: 'uploadImage',
+                        pass: pin,
+                        base64: e.target.result,
+                        fileName: file.name,
+                        mimeType: file.type
+                    })
+                });
+                if (!res.ok) throw new Error(`Server Response: ${res.status}`);
+                const result = await res.json();
+                if(result.status === 'success') resolve(result.url);
+                else reject(new Error(result.message || "Gagal upload (Backend Error)"));
+            } catch(err) {
+                console.error("Fetch Upload Error:", err);
+                reject(new Error("Gagal terhubung ke server upload: " + err.message));
+            }
+        };
+        reader.onerror = () => reject(new Error("Gagal membaca file lokal."));
+        reader.readAsDataURL(file);
+    });
+}
+
+// ── DATABASE & MIGRASI ──
+async function runDatabaseInit() {
+    if(!confirm("Yakin ingin melakukan inisialisasi tabel di Neon?")) return;
+    const btn = document.getElementById('btnDbInit');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Sedang Memproses...';
+    btn.disabled = true;
+
+    try {
+        const pass = localStorage.getItem('adminPin');
+        const res = await fetch(`${window.GAS_URL}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'initDb', pass: pass })
+        });
+        const result = await res.json();
+        alert(result.message);
+    } catch(e) { alert("Error koneksi database."); }
+    finally { btn.innerHTML = orig; btn.disabled = false; }
+}
+
+async function runFullMigration() {
+    if(!confirm("Mulai migrasi semua data dari Sheets ke Neon? Ini mungkin memakan waktu beberapa menit.")) return;
+    const btn = document.getElementById('btnFullMigrate');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Migrasi Berjalan...';
+    btn.disabled = true;
+
+    try {
+        const pass = localStorage.getItem('adminPin');
+        const res = await fetch(`${window.GAS_URL}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'runMigrate', pass: pass })
+        });
+        const result = await res.json();
+        alert(result.message);
+    } catch(e) { alert("Error saat proses migrasi."); }
+    finally { btn.innerHTML = orig; btn.disabled = false; }
 }
