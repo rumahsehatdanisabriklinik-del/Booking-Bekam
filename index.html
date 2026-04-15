@@ -98,6 +98,11 @@
         .chat-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .chat-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
         .chat-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .chip-suggestion { @apply px-3 py-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full border border-emerald-100 hover:bg-emerald-100 transition-all active:scale-95 whitespace-nowrap; }
     </style>
 </head>
 <body class="text-slate-900 antialiased overflow-x-hidden relative">
@@ -452,9 +457,17 @@
 
             <!-- Chat Body -->
             <div id="chat-messages" class="flex-grow overflow-y-auto p-5 space-y-4 chat-scrollbar bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:20px_20px]">
-                <div class="chat-bubble ai">
+                <div class="chat-bubble ai animate-fade-up">
                     Assalamualaikum! Saya asisten AI Klinik <strong>Dani Sabri</strong>. Ada yang bisa saya bantu terkait layanan Bekam atau Ruqyah?
                 </div>
+            </div>
+
+            <!-- Suggestion Chips -->
+            <div id="chat-suggestions" class="px-4 py-2 flex gap-2 overflow-x-auto no-scrollbar bg-white/50 backdrop-blur-sm border-t border-slate-50">
+                <button onclick="sendQuickMessage('Manfaat Bekam Sunnah')" class="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full border border-emerald-100 hover:bg-emerald-100 transition-all active:scale-95 whitespace-nowrap">✨ Manfaat Bekam</button>
+                <button onclick="sendQuickMessage('Tanggal Sunnah Terdekat')" class="px-3 py-1.5 bg-teal-50 text-teal-700 text-[10px] font-bold rounded-full border border-teal-100 hover:bg-teal-100 transition-all active:scale-95 whitespace-nowrap">📅 Jadwal Sunnah</button>
+                <button onclick="sendQuickMessage('Apa itu Ruqyah Syariyyah?')" class="px-3 py-1.5 bg-cyan-50 text-cyan-700 text-[10px] font-bold rounded-full border border-cyan-100 hover:bg-cyan-100 transition-all active:scale-95 whitespace-nowrap">🛡️ Tentang Ruqyah</button>
+                <button onclick="sendQuickMessage('Lokasi & Jam Buka')" class="px-3 py-1.5 bg-slate-50 text-slate-700 text-[10px] font-bold rounded-full border border-slate-100 hover:bg-slate-100 transition-all active:scale-95 whitespace-nowrap">📍 Lokasi</button>
             </div>
 
             <!-- Footer / Input -->
@@ -812,8 +825,14 @@
 
         // --- CHATBOT LOGIC ---
         let chatHistory = [
-            { role: "assistant", content: "Halo! Saya Asisten AI <strong>Klinik Rumah Sehat Dani Sabri</strong>. Ada yang bisa saya bantu terkait layanan Bekam atau Ruqyah?" }
+            { role: "assistant", content: "Assalamualaikum! Saya Asisten AI <strong>Klinik Rumah Sehat Dani Sabri</strong>. Ada yang bisa saya bantu terkait layanan Bekam atau Ruqyah?" }
         ];
+
+        function sendQuickMessage(msg) {
+            const input = document.getElementById('chat-input');
+            input.value = msg;
+            handleChatSubmit(new Event('submit'));
+        }
 
         function toggleChatbot() {
             const container = document.getElementById('ai-chatbot-container');
@@ -832,6 +851,10 @@
             input.value = "";
             addMessageToUI("user", message);
             chatHistory.push({ role: "user", content: message });
+            
+            // Sembunyikan chips saat sedang chat
+            document.getElementById('chat-suggestions').classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => document.getElementById('chat-suggestions').classList.add('hidden'), 300);
 
             const messagesContainer = document.getElementById('chat-messages');
             const typingDiv = document.createElement('div');
