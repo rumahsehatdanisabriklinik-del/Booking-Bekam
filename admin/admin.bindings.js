@@ -165,6 +165,9 @@ window.AdminApp.bindings.handleAdminInput = function handleAdminInput(inputEl) {
 };
 
 window.AdminApp.bindings.bindAdminEvents = function bindAdminEvents() {
+    if (window.AdminState.ui.bindingsBound) return;
+    window.AdminState.ui.bindingsBound = true;
+
     document.addEventListener('click', (event) => {
         const actionEl = event.target.closest('[data-action]');
         if (!actionEl) return;

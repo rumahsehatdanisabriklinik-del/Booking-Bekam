@@ -16,8 +16,6 @@ window.AdminApp.bootstrap = function bootstrapAdmin() {
         document.getElementById('dashboardScreen').classList.remove('hidden');
         document.getElementById('adminNameTxt').textContent = localStorage.getItem('adminNama') || 'Admin';
         window.AdminApp.loadAllData();
-        window.AdminApp.cms.loadCMSData();
-        window.AdminApp.cms.loadLayananList();
     } else {
         localStorage.removeItem('adminPin');
     }

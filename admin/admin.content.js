@@ -4,20 +4,39 @@
  * ================================================
  */
 
-window.AdminApp.content.loadArtikelListAdmin = async function loadArtikelListAdmin() {
-    try {
-        document.getElementById('artikelList').innerHTML = '<p class="text-slate-400 font-bold text-sm text-center py-8"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat artikel...</p>';
-        const result = await window.AdminApp.auth.adminGet('getArtikelListAdmin');
-
-        if (result.status === 'success') {
-            window.AdminState.content.artikel = result.data || [];
-            window.AdminApp.content.renderArtikelList();
-        } else {
-            alert(`Gagal memuat artikel: ${result.message}`);
-        }
-    } catch (e) {
-        alert('Error koneksi saat memuat artikel.');
+window.AdminApp.content.loadArtikelListAdmin = async function loadArtikelListAdmin(options = {}) {
+    const force = Boolean(options.force);
+    if (!force && window.AdminState.content.hasLoadedArtikel) {
+        window.AdminApp.content.renderArtikelList();
+        return window.AdminState.content.artikel;
     }
+
+    if (!force && window.AdminState.content.artikelPromise) {
+        return window.AdminState.content.artikelPromise;
+    }
+
+    const loadPromise = (async () => {
+        try {
+            document.getElementById('artikelList').innerHTML = '<p class="text-slate-400 font-bold text-sm text-center py-8"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat artikel...</p>';
+            const result = await window.AdminApp.auth.adminGet('getArtikelListAdmin');
+
+            if (result.status === 'success') {
+                window.AdminState.content.artikel = result.data || [];
+                window.AdminState.content.hasLoadedArtikel = true;
+                window.AdminApp.content.renderArtikelList();
+            } else {
+                alert(`Gagal memuat artikel: ${result.message}`);
+            }
+        } catch (e) {
+            alert('Error koneksi saat memuat artikel.');
+        } finally {
+            window.AdminState.content.artikelPromise = null;
+        }
+        return window.AdminState.content.artikel;
+    })();
+
+    window.AdminState.content.artikelPromise = loadPromise;
+    return loadPromise;
 };
 
 window.AdminApp.content.renderArtikelList = function renderArtikelList() {
@@ -127,7 +146,8 @@ window.AdminApp.content.saveArtikelFromModal = async function saveArtikelFromMod
         if (result.status === 'success') {
             alert('Artikel berhasil disimpan.');
             window.AdminApp.ui.closeModal('modalEditorArtikel');
-            window.AdminApp.content.loadArtikelListAdmin();
+            window.AdminState.content.hasLoadedArtikel = false;
+            window.AdminApp.content.loadArtikelListAdmin({ force: true });
         } else {
             alert(result.message);
         }
@@ -151,7 +171,8 @@ window.AdminApp.content.deleteArtikelRecord = async function deleteArtikelRecord
     try {
         const result = await window.AdminApp.auth.adminPost({ action: 'deleteArtikel', artikelId: id });
         if (result.status === 'success') {
-            window.AdminApp.content.loadArtikelListAdmin();
+            window.AdminState.content.hasLoadedArtikel = false;
+            window.AdminApp.content.loadArtikelListAdmin({ force: true });
         } else {
             alert(result.message);
         }
@@ -160,20 +181,40 @@ window.AdminApp.content.deleteArtikelRecord = async function deleteArtikelRecord
     }
 };
 
-window.AdminApp.content.loadGaleriListAdmin = async function loadGaleriListAdmin() {
-    try {
-        document.getElementById('galeriList').innerHTML = '<p class="text-slate-400 font-bold text-sm text-center py-8"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat galeri...</p>';
-        const connector = window.GAS_URL.includes('?') ? '&' : '?';
-        const res = await fetch(`${window.GAS_URL}${connector}action=getGaleriList`);
-        const result = await res.json();
+window.AdminApp.content.loadGaleriListAdmin = async function loadGaleriListAdmin(options = {}) {
+    const force = Boolean(options.force);
+    if (!force && window.AdminState.content.hasLoadedGaleri) {
+        window.AdminApp.content.renderGaleriList();
+        return window.AdminState.content.galeri;
+    }
 
-        if (result.status === 'success') {
-            window.AdminState.content.galeri = result.data || [];
-            window.AdminApp.content.renderGaleriList();
-        } else {
-            alert('Gagal memuat galeri.');
+    if (!force && window.AdminState.content.galeriPromise) {
+        return window.AdminState.content.galeriPromise;
+    }
+
+    const loadPromise = (async () => {
+        try {
+            document.getElementById('galeriList').innerHTML = '<p class="text-slate-400 font-bold text-sm text-center py-8"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat galeri...</p>';
+            const connector = window.GAS_URL.includes('?') ? '&' : '?';
+            const res = await fetch(`${window.GAS_URL}${connector}action=getGaleriList`);
+            const result = await res.json();
+
+            if (result.status === 'success') {
+                window.AdminState.content.galeri = result.data || [];
+                window.AdminState.content.hasLoadedGaleri = true;
+                window.AdminApp.content.renderGaleriList();
+            } else {
+                alert('Gagal memuat galeri.');
+            }
+        } catch (e) {
+        } finally {
+            window.AdminState.content.galeriPromise = null;
         }
-    } catch (e) {}
+        return window.AdminState.content.galeri;
+    })();
+
+    window.AdminState.content.galeriPromise = loadPromise;
+    return loadPromise;
 };
 
 window.AdminApp.content.renderGaleriList = function renderGaleriList() {
@@ -268,7 +309,8 @@ window.AdminApp.content.saveGaleriFromModal = async function saveGaleriFromModal
         const result = await window.AdminApp.auth.adminPost({ action: 'saveGaleri', galeriData: newPayload });
         if (result.status === 'success') {
             window.AdminApp.ui.closeModal('modalEditorGaleri');
-            window.AdminApp.content.loadGaleriListAdmin();
+            window.AdminState.content.hasLoadedGaleri = false;
+            window.AdminApp.content.loadGaleriListAdmin({ force: true });
         } else {
             alert(result.message);
         }
@@ -288,7 +330,10 @@ window.AdminApp.content.deleteGaleriRecord = async function deleteGaleriRecord(i
 
     try {
         const result = await window.AdminApp.auth.adminPost({ action: 'saveGaleri', galeriData: newPayload });
-        if (result.status === 'success') window.AdminApp.content.loadGaleriListAdmin();
+        if (result.status === 'success') {
+            window.AdminState.content.hasLoadedGaleri = false;
+            window.AdminApp.content.loadGaleriListAdmin({ force: true });
+        }
     } catch (e) {
         alert('Gagal hapus.');
     }

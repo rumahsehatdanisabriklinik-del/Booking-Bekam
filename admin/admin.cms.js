@@ -58,25 +58,51 @@ window.AdminApp.cms.printClinicQrPoster = function printClinicQrPoster() {
     window.print();
 };
 
-window.AdminApp.cms.loadCMSData = async function loadCMSData() {
-    try {
-        const connector = window.GAS_URL.includes('?') ? '&' : '?';
-        const res = await fetch(`${window.GAS_URL}${connector}action=getLandingSettings`);
-        const result = await res.json();
-
-        if (result.status === 'success') {
-            const data = result.data || {};
-            window.AdminState.cms.settingsCache = data;
-            window.AdminApp.cms.renderClinicCheckinQr(window.AdminState.cms.settingsCache.cms_checkin_secret_code || '');
-
-            Object.keys(data).forEach((key) => {
-                const el = document.getElementById(key);
-                if (el) el.value = data[key];
-            });
-        }
-    } catch (e) {
-        console.error('Gagal load CMS:', e);
+window.AdminApp.cms.loadCMSData = async function loadCMSData(options = {}) {
+    const force = Boolean(options.force);
+    if (!force && window.AdminState.cms.hasLoadedSettings) {
+        const data = window.AdminState.cms.settingsCache || {};
+        window.AdminApp.cms.renderClinicCheckinQr(data.cms_checkin_secret_code || '');
+        Object.keys(data).forEach((key) => {
+            const el = document.getElementById(key);
+            if (el) el.value = data[key];
+        });
+        return data;
     }
+
+    if (!force && window.AdminState.cms.settingsPromise) {
+        return window.AdminState.cms.settingsPromise;
+    }
+
+    const loadPromise = (async () => {
+        try {
+            const connector = window.GAS_URL.includes('?') ? '&' : '?';
+            const res = await fetch(`${window.GAS_URL}${connector}action=getLandingSettings`);
+            const result = await res.json();
+
+            if (result.status === 'success') {
+                const data = result.data || {};
+                window.AdminState.cms.settingsCache = data;
+                window.AdminState.cms.hasLoadedSettings = true;
+                window.AdminApp.cms.renderClinicCheckinQr(window.AdminState.cms.settingsCache.cms_checkin_secret_code || '');
+
+                Object.keys(data).forEach((key) => {
+                    const el = document.getElementById(key);
+                    if (el) el.value = data[key];
+                });
+
+                return data;
+            }
+        } catch (e) {
+            console.error('Gagal load CMS:', e);
+        } finally {
+            window.AdminState.cms.settingsPromise = null;
+        }
+        return window.AdminState.cms.settingsCache;
+    })();
+
+    window.AdminState.cms.settingsPromise = loadPromise;
+    return loadPromise;
 };
 
 window.AdminApp.cms.saveCMS = async function saveCMS() {
@@ -96,6 +122,12 @@ window.AdminApp.cms.saveCMS = async function saveCMS() {
     try {
         const result = await window.AdminApp.auth.adminPost({ action: 'updateLandingSettings', updatedData });
         if (result.status === 'success') {
+            window.AdminState.cms.settingsCache = {
+                ...window.AdminState.cms.settingsCache,
+                ...updatedData
+            };
+            window.AdminState.cms.hasLoadedSettings = true;
+            window.AdminApp.cms.renderClinicCheckinQr(window.AdminState.cms.settingsCache.cms_checkin_secret_code || '');
             alert('Web berhasil disinkronkan (cache dibersihkan).');
         } else {
             alert(`Gagal: ${result.message}`);
@@ -108,17 +140,37 @@ window.AdminApp.cms.saveCMS = async function saveCMS() {
     }
 };
 
-window.AdminApp.cms.loadLayananList = async function loadLayananList() {
-    try {
-        const connector = window.GAS_URL.includes('?') ? '&' : '?';
-        const res = await fetch(`${window.GAS_URL}${connector}action=getLayananList`);
-        const result = await res.json();
+window.AdminApp.cms.loadLayananList = async function loadLayananList(options = {}) {
+    const force = Boolean(options.force);
+    if (!force && window.AdminState.cms.hasLoadedLayanan) {
+        window.AdminApp.cms.renderLayananList();
+        return window.AdminState.cms.layanan;
+    }
 
-        if (result.status === 'success') {
-            window.AdminState.cms.layanan = result.data || [];
-            window.AdminApp.cms.renderLayananList();
+    if (!force && window.AdminState.cms.layananPromise) {
+        return window.AdminState.cms.layananPromise;
+    }
+
+    const loadPromise = (async () => {
+        try {
+            const connector = window.GAS_URL.includes('?') ? '&' : '?';
+            const res = await fetch(`${window.GAS_URL}${connector}action=getLayananList`);
+            const result = await res.json();
+
+            if (result.status === 'success') {
+                window.AdminState.cms.layanan = result.data || [];
+                window.AdminState.cms.hasLoadedLayanan = true;
+                window.AdminApp.cms.renderLayananList();
+            }
+        } catch (e) {
+        } finally {
+            window.AdminState.cms.layananPromise = null;
         }
-    } catch (e) {}
+        return window.AdminState.cms.layanan;
+    })();
+
+    window.AdminState.cms.layananPromise = loadPromise;
+    return loadPromise;
 };
 
 window.AdminApp.cms.renderLayananList = function renderLayananList() {
@@ -209,7 +261,8 @@ window.AdminApp.cms.saveLayanan = async function saveLayanan() {
         const result = await window.AdminApp.auth.adminPost({ action: 'saveLayananList', layananData: dataToSave });
         if (result.status === 'success') {
             alert('Daftar layanan berhasil diperbarui.');
-            window.AdminApp.cms.loadLayananList();
+            window.AdminState.cms.hasLoadedLayanan = false;
+            window.AdminApp.cms.loadLayananList({ force: true });
         } else {
             alert(`Gagal simpan layanan: ${result.message}`);
         }

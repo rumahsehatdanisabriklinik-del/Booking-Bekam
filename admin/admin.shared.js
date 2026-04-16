@@ -19,11 +19,22 @@ window.AdminState = window.AdminState || {
     },
     cms: {
         settingsCache: {},
-        layanan: []
+        layanan: [],
+        hasLoadedSettings: false,
+        hasLoadedLayanan: false,
+        settingsPromise: null,
+        layananPromise: null
     },
     content: {
         artikel: [],
-        galeri: []
+        galeri: [],
+        hasLoadedArtikel: false,
+        hasLoadedGaleri: false,
+        artikelPromise: null,
+        galeriPromise: null
+    },
+    ui: {
+        bindingsBound: false
     }
 };
 
@@ -207,12 +218,7 @@ window.AdminApp.ui.switchTab = function switchTab(tabId, el) {
     document.querySelectorAll('.nav-item').forEach((navItem) => navItem.classList.remove('active'));
     el.classList.add('active');
 
-    if (tabId === 'tab-artikel') window.AdminApp.content.loadArtikelListAdmin();
-    if (tabId === 'tab-galeri') window.AdminApp.content.loadGaleriListAdmin();
-    if (tabId === 'tab-cms') {
-        window.AdminApp.cms.loadCMSData();
-        window.AdminApp.cms.loadLayananList();
-    }
+    window.AdminApp.ui.ensureTabData(tabId);
 };
 
 window.AdminApp.showLoader = function showLoader(show) {
@@ -225,6 +231,18 @@ window.AdminApp.ui.showLoader = window.AdminApp.showLoader;
 
 window.AdminApp.ui.closeModal = function closeModal(id) {
     document.getElementById(id).classList.add('hidden');
+};
+
+window.AdminApp.ui.ensureTabData = function ensureTabData(tabId, options = {}) {
+    if (tabId === 'tab-artikel') return window.AdminApp.content.loadArtikelListAdmin(options);
+    if (tabId === 'tab-galeri') return window.AdminApp.content.loadGaleriListAdmin(options);
+    if (tabId === 'tab-cms') {
+        return Promise.all([
+            window.AdminApp.cms.loadCMSData(options),
+            window.AdminApp.cms.loadLayananList(options)
+        ]);
+    }
+    return Promise.resolve();
 };
 
 window.AdminApp.loadAllData = async function loadAllData() {
