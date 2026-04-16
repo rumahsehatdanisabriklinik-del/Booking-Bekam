@@ -79,6 +79,15 @@ window.AdminApp.bindings.handleAdminAction = function handleAdminAction(actionEl
         case 'run-db-init':
             window.AdminApp.system.runDatabaseInit();
             break;
+        case 'apply-report-filter':
+            window.AdminApp.reports.loadSummary({ force: true });
+            break;
+        case 'preset-report-7':
+            window.AdminApp.reports.applyFilterPreset(7);
+            break;
+        case 'preset-report-30':
+            window.AdminApp.reports.applyFilterPreset(30);
+            break;
         case 'run-sinkron-cepat':
             window.AdminApp.system.runSinkronCepat();
             break;

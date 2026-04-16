@@ -13,6 +13,7 @@ window.AdminState = window.AdminState || {
     bookings: {
         all: [],
         byRow: {},
+        version: 0,
         filtered: [],
         currentPage: 1,
         searchQuery: '',
@@ -35,6 +36,12 @@ window.AdminState = window.AdminState || {
         artikelPromise: null,
         galeriPromise: null
     },
+    reports: {
+        filterStart: '',
+        filterEnd: '',
+        lastRenderedVersion: -1,
+        lastRenderedKey: ''
+    },
     ui: {
         bindingsBound: false
     }
@@ -45,6 +52,7 @@ window.AdminApp = window.AdminApp || {
     ui: {},
     utils: {},
     bookings: {},
+    reports: {},
     cms: {},
     content: {},
     system: {},
@@ -249,6 +257,7 @@ window.AdminApp.ui.closeModal = function closeModal(id) {
 window.AdminApp.ui.ensureTabData = function ensureTabData(tabId, options = {}) {
     if (tabId === 'tab-artikel') return window.AdminApp.content.loadArtikelListAdmin(options);
     if (tabId === 'tab-galeri') return window.AdminApp.content.loadGaleriListAdmin(options);
+    if (tabId === 'tab-laporan') return window.AdminApp.reports.loadSummary(options);
     if (tabId === 'tab-cms') {
         return Promise.all([
             window.AdminApp.cms.loadCMSData(options),
@@ -275,8 +284,13 @@ window.AdminApp.loadAllData = async function loadAllData() {
                     if (rowKey) acc[rowKey] = booking;
                     return acc;
                 }, {});
+                window.AdminState.bookings.version = (window.AdminState.bookings.version || 0) + 1;
                 window.AdminState.bookings.currentPage = 1;
                 window.AdminApp.bookings.renderTables();
+                const reportTab = document.getElementById('tab-laporan');
+                if (reportTab && !reportTab.classList.contains('hidden') && window.AdminApp.reports?.loadSummary) {
+                    window.AdminApp.reports.loadSummary({ force: true });
+                }
             }
         } catch (e) {
             console.error(e);

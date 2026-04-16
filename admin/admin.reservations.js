@@ -223,6 +223,7 @@ window.AdminApp.bookings.saveStatus = async function saveStatus() {
         if (result.status === 'success') {
             const booking = window.AdminApp.bookings.getBookingByRow(row);
             if (booking) booking.status = stat;
+            window.AdminState.bookings.version += 1;
             window.AdminApp.bookings.refreshFilteredBookings();
             window.AdminApp.bookings.renderReservationsTable();
             window.AdminApp.bookings.closeModalStatus();
@@ -274,6 +275,7 @@ window.AdminApp.bookings.saveEMR = async function saveEMR() {
                 booking.keluhan = keluhan;
                 booking.tindakan = tindakan;
             }
+            window.AdminState.bookings.version += 1;
             window.AdminApp.bookings.renderEMRTable();
             window.AdminApp.bookings.closeEMR();
         } else {
