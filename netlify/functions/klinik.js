@@ -16,6 +16,14 @@ function buildRequestSignature(secret, method, params, bodyString) {
     return { ts, nonce, sig };
 }
 
+function buildClientKey(event) {
+    const headers = event && event.headers ? event.headers : {};
+    const xfwdRaw = headers['x-forwarded-for'] || headers['X-Forwarded-For'] || '';
+    const ip = String(xfwdRaw).split(',')[0].trim() || headers['client-ip'] || 'unknown';
+    const ua = headers['user-agent'] || headers['User-Agent'] || 'ua';
+    return crypto.createHash('sha256').update(`${ip}|${ua}`).digest('hex').slice(0, 24);
+}
+
 exports.handler = async function(event, context) {
     // A. Handle CORS Preflight (OPTIONS)
     if (event.httpMethod === "OPTIONS") {
@@ -53,6 +61,7 @@ exports.handler = async function(event, context) {
     }
 
     const bodyString = (event.httpMethod === "POST" && event.body) ? event.body : "";
+    forwardedParams.clientKey = buildClientKey(event);
     const signature = buildRequestSignature(APP_TOKEN, event.httpMethod, forwardedParams, bodyString);
 
     // 2. Rakit URL Rahasia dengan signature (tanpa token statis di query)

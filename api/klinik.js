@@ -17,6 +17,13 @@ function buildRequestSignature(secret, method, params, bodyString) {
     return { ts, nonce, sig };
 }
 
+function buildClientKey(req) {
+    const xfwd = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+    const ip = xfwd || req.socket?.remoteAddress || 'unknown';
+    const ua = String(req.headers['user-agent'] || 'ua');
+    return crypto.createHash('sha256').update(`${ip}|${ua}`).digest('hex').slice(0, 24);
+}
+
 export default async function handler(req, res) {
     // 1. Set CORS Headers (Sangat Penting agar domain frontend bisa baca API)
     res.setHeader('Access-Control-Allow-Credentials', true)
@@ -57,6 +64,7 @@ export default async function handler(req, res) {
         if (req.method === 'POST') {
             bodyString = typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {});
         }
+        forwardedParams.clientKey = buildClientKey(req);
 
         const signature = buildRequestSignature(APP_TOKEN, req.method, forwardedParams, bodyString);
 
