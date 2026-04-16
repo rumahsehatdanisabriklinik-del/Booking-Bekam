@@ -30,6 +30,7 @@ window.AdminState = window.AdminState || {
 window.AdminApp = window.AdminApp || {
     auth: {},
     ui: {},
+    utils: {},
     bookings: {},
     cms: {},
     content: {},
@@ -37,24 +38,20 @@ window.AdminApp = window.AdminApp || {
     bindings: {}
 };
 
-function getAdminSessionToken() {
-    return localStorage.getItem(window.AdminConfig.sessionKey) || '';
-}
-
-function escapeHtml(value) {
+window.AdminApp.utils.escapeHtml = function escapeHtml(value) {
     return String(value ?? '')
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
-}
+};
 
-function escapeAttr(value) {
-    return escapeHtml(value);
-}
+window.AdminApp.utils.escapeAttr = function escapeAttr(value) {
+    return window.AdminApp.utils.escapeHtml(value);
+};
 
-function escapeJsSingle(value) {
+window.AdminApp.utils.escapeJsSingle = function escapeJsSingle(value) {
     return String(value ?? '')
         .replace(/\\/g, '\\\\')
         .replace(/'/g, "\\'")
@@ -62,9 +59,9 @@ function escapeJsSingle(value) {
         .replace(/\n/g, '\\n')
         .replace(/</g, '\\x3C')
         .replace(/>/g, '\\x3E');
-}
+};
 
-function normalizeThumbUrl(url) {
+window.AdminApp.utils.normalizeThumbUrl = function normalizeThumbUrl(url) {
     let thumb = String(url || '').trim();
     if (!thumb) return '';
 
@@ -80,48 +77,52 @@ function normalizeThumbUrl(url) {
     }
 
     return thumb;
-}
+};
 
-function clearAdminSession() {
+window.AdminApp.auth.getAdminSessionToken = function getAdminSessionToken() {
+    return localStorage.getItem(window.AdminConfig.sessionKey) || '';
+};
+
+window.AdminApp.auth.clearAdminSession = function clearAdminSession() {
     localStorage.removeItem(window.AdminConfig.sessionKey);
     localStorage.removeItem('adminPin');
     localStorage.removeItem('adminRole');
     localStorage.removeItem('adminNama');
-}
+};
 
-function isAuthError(result) {
+window.AdminApp.auth.isAuthError = function isAuthError(result) {
     const message = (result && result.message ? result.message : '').toLowerCase();
     return result && result.status === 'error' && (
         message.includes('sesi login') ||
         message.includes('login kembali') ||
         message.includes('akses ditolak')
     );
-}
+};
 
-function handleAdminAuthFailure(message) {
-    clearAdminSession();
+window.AdminApp.auth.handleAdminAuthFailure = function handleAdminAuthFailure(message) {
+    window.AdminApp.auth.clearAdminSession();
     alert(message || 'Sesi login berakhir. Silakan login kembali.');
     location.reload();
-}
+};
 
-async function adminGet(action, extraParams = {}) {
+window.AdminApp.auth.adminGet = async function adminGet(action, extraParams = {}) {
     const connector = window.GAS_URL.includes('?') ? '&' : '?';
     const params = new URLSearchParams({ action, ...extraParams });
-    const token = getAdminSessionToken();
+    const token = window.AdminApp.auth.getAdminSessionToken();
     if (token) params.set('sessionToken', token);
 
     const res = await fetch(`${window.GAS_URL}${connector}${params.toString()}`);
     const result = await res.json();
-    if (isAuthError(result)) {
-        handleAdminAuthFailure(result.message);
+    if (window.AdminApp.auth.isAuthError(result)) {
+        window.AdminApp.auth.handleAdminAuthFailure(result.message);
         throw new Error(result.message);
     }
     return result;
-}
+};
 
-async function adminPost(payload) {
+window.AdminApp.auth.adminPost = async function adminPost(payload) {
     const body = { ...payload };
-    const token = getAdminSessionToken();
+    const token = window.AdminApp.auth.getAdminSessionToken();
     if (token) body.sessionToken = token;
 
     const res = await fetch(`${window.GAS_URL}`, {
@@ -130,14 +131,14 @@ async function adminPost(payload) {
         body: JSON.stringify(body)
     });
     const result = await res.json();
-    if (isAuthError(result)) {
-        handleAdminAuthFailure(result.message);
+    if (window.AdminApp.auth.isAuthError(result)) {
+        window.AdminApp.auth.handleAdminAuthFailure(result.message);
         throw new Error(result.message);
     }
     return result;
-}
+};
 
-async function doLogin() {
+window.AdminApp.auth.doLogin = async function doLogin() {
     const pass = document.getElementById('passInput').value;
     if (!pass) return;
 
@@ -166,11 +167,11 @@ async function doLogin() {
         btn.innerHTML = 'Akses Sistem';
         btn.disabled = false;
     }
-}
+};
 
-function logout() {
-    const token = getAdminSessionToken();
-    clearAdminSession();
+window.AdminApp.auth.logout = function logout() {
+    const token = window.AdminApp.auth.getAdminSessionToken();
+    window.AdminApp.auth.clearAdminSession();
 
     if (!token) {
         location.reload();
@@ -182,9 +183,9 @@ function logout() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'logoutAdmin', sessionToken: token })
     }).finally(() => location.reload());
-}
+};
 
-function toggleSidebar(show) {
+window.AdminApp.ui.toggleSidebar = function toggleSidebar(show) {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
     if (!sidebar || !overlay) return;
@@ -196,10 +197,10 @@ function toggleSidebar(show) {
         sidebar.classList.add('-translate-x-[120%]');
         overlay.classList.add('hidden');
     }
-}
+};
 
-function switchTab(tabId, el) {
-    if (window.innerWidth < 1024) toggleSidebar(false);
+window.AdminApp.ui.switchTab = function switchTab(tabId, el) {
+    if (window.innerWidth < 1024) window.AdminApp.ui.toggleSidebar(false);
 
     document.querySelectorAll('.tab-content').forEach((tab) => tab.classList.add('hidden'));
     document.getElementById(tabId).classList.remove('hidden');
@@ -212,12 +213,24 @@ function switchTab(tabId, el) {
         window.AdminApp.cms.loadCMSData();
         window.AdminApp.cms.loadLayananList();
     }
-}
+};
 
-async function loadAllData() {
-    showLoader(true);
+window.AdminApp.showLoader = function showLoader(show) {
+    const loader = document.getElementById('loader');
+    if (!loader) return;
+    loader.classList.toggle('hidden', !show);
+};
+
+window.AdminApp.ui.showLoader = window.AdminApp.showLoader;
+
+window.AdminApp.ui.closeModal = function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+};
+
+window.AdminApp.loadAllData = async function loadAllData() {
+    window.AdminApp.showLoader(true);
     try {
-        const result = await adminGet('getSemuaBooking');
+        const result = await window.AdminApp.auth.adminGet('getSemuaBooking');
         if (result.status === 'success') {
             window.AdminState.bookings.all = result.data;
             window.AdminState.bookings.currentPage = 1;
@@ -226,38 +239,11 @@ async function loadAllData() {
     } catch (e) {
         console.error(e);
     } finally {
-        showLoader(false);
+        window.AdminApp.showLoader(false);
     }
-}
+};
 
-function showLoader(show) {
-    const loader = document.getElementById('loader');
-    if (!loader) return;
-    loader.classList.toggle('hidden', !show);
-}
-
-function closeModal(id) {
-    document.getElementById(id).classList.add('hidden');
-}
-
-Object.assign(window.AdminApp.auth, {
-    getAdminSessionToken,
-    clearAdminSession,
-    isAuthError,
-    handleAdminAuthFailure,
-    adminGet,
-    adminPost,
-    doLogin,
-    logout
-});
-
-Object.assign(window.AdminApp.ui, {
-    toggleSidebar,
-    switchTab,
-    showLoader,
-    closeModal
-});
-
-Object.assign(window.AdminApp, {
-    loadAllData
-});
+window.escapeHtml = window.AdminApp.utils.escapeHtml;
+window.escapeAttr = window.AdminApp.utils.escapeAttr;
+window.escapeJsSingle = window.AdminApp.utils.escapeJsSingle;
+window.normalizeThumbUrl = window.AdminApp.utils.normalizeThumbUrl;

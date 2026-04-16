@@ -4,7 +4,7 @@
  * ================================================
  */
 
-function getVisibleBookings() {
+window.AdminApp.bookings.getVisibleBookings = function getVisibleBookings() {
     const role = localStorage.getItem('adminRole');
     const myName = localStorage.getItem('adminNama');
 
@@ -12,9 +12,9 @@ function getVisibleBookings() {
         if (role === 'terapis') return booking.terapis === myName;
         return true;
     });
-}
+};
 
-function renderTables() {
+window.AdminApp.bookings.renderTables = function renderTables() {
     const visibleData = window.AdminApp.bookings.getVisibleBookings();
 
     window.AdminState.bookings.filtered = window.AdminApp.bookings.getReservationFilteredData(visibleData);
@@ -47,9 +47,9 @@ function renderTables() {
             </td>
         </tr>
     `).join('');
-}
+};
 
-function handleSearch(val) {
+window.AdminApp.bookings.handleSearch = function handleSearch(val) {
     window.AdminState.bookings.searchQuery = (val || '').toLowerCase().trim();
     window.AdminState.bookings.currentPage = 1;
 
@@ -58,9 +58,9 @@ function handleSearch(val) {
         window.AdminState.bookings.filtered = window.AdminApp.bookings.getReservationFilteredData(window.AdminApp.bookings.getVisibleBookings());
         window.AdminApp.bookings.renderReservationsTable();
     }, 180);
-}
+};
 
-function getReservationFilteredData(bookings) {
+window.AdminApp.bookings.getReservationFilteredData = function getReservationFilteredData(bookings) {
     if (!window.AdminState.bookings.searchQuery) return bookings;
 
     return bookings.filter((booking) => {
@@ -76,17 +76,17 @@ function getReservationFilteredData(bookings) {
 
         return haystack.includes(window.AdminState.bookings.searchQuery);
     });
-}
+};
 
-function getReservationBadgeClass(status) {
+window.AdminApp.bookings.getReservationBadgeClass = function getReservationBadgeClass(status) {
     let badgeClass = 'bg-slate-50 text-slate-400 border-slate-100';
     if (status === 'DITERIMA') badgeClass = 'bg-blue-50 text-blue-600 border-blue-200';
     else if (status === 'SELESAI') badgeClass = 'bg-emerald-50 text-emerald-600 border-emerald-200';
     else if ((status || '').includes('Batal')) badgeClass = 'bg-red-50 text-red-600 border-red-200';
     return badgeClass;
-}
+};
 
-function renderReservationsTable() {
+window.AdminApp.bookings.renderReservationsTable = function renderReservationsTable() {
     const resBody = document.getElementById('tbReservasiBody');
     if (!resBody) return;
 
@@ -142,9 +142,9 @@ function renderReservationsTable() {
         startIndex + 1,
         Math.min(startIndex + pageItems.length, totalItems)
     );
-}
+};
 
-function renderReservationPagination(totalItems, totalPages, startItem, endItem) {
+window.AdminApp.bookings.renderReservationPagination = function renderReservationPagination(totalItems, totalPages, startItem, endItem) {
     const container = document.getElementById('reservasiPagination');
     if (!container) return;
 
@@ -169,28 +169,28 @@ function renderReservationPagination(totalItems, totalPages, startItem, endItem)
             </button>
         </div>
     `;
-}
+};
 
-function changeReservationPage(direction) {
+window.AdminApp.bookings.changeReservationPage = function changeReservationPage(direction) {
     const totalPages = Math.max(1, Math.ceil(window.AdminState.bookings.filtered.length / window.AdminConfig.reservationPageSize));
     const nextPage = window.AdminState.bookings.currentPage + direction;
     if (nextPage < 1 || nextPage > totalPages) return;
 
     window.AdminState.bookings.currentPage = nextPage;
     window.AdminApp.bookings.renderReservationsTable();
-}
+};
 
-function openModalStatus(row, current) {
+window.AdminApp.bookings.openModalStatus = function openModalStatus(row, current) {
     document.getElementById('editRowIndex').value = row;
     document.getElementById('editStatus').value = current;
     document.getElementById('modalStatus').classList.remove('hidden');
-}
+};
 
-function closeModalStatus() {
+window.AdminApp.bookings.closeModalStatus = function closeModalStatus() {
     document.getElementById('modalStatus').classList.add('hidden');
-}
+};
 
-async function saveStatus() {
+window.AdminApp.bookings.saveStatus = async function saveStatus() {
     const row = document.getElementById('editRowIndex').value;
     const stat = document.getElementById('editStatus').value;
     const btn = document.getElementById('btnSaveStatus');
@@ -213,21 +213,21 @@ async function saveStatus() {
         btn.innerHTML = originalText;
         btn.disabled = false;
     }
-}
+};
 
-function openEMR(row, nama, keluhan, tindakan) {
+window.AdminApp.bookings.openEMR = function openEMR(row, nama, keluhan, tindakan) {
     document.getElementById('emrRowIndex').value = row;
     document.getElementById('emrNamaPasien').textContent = nama;
     document.getElementById('emrKeluhan').value = keluhan;
     document.getElementById('emrTindakan').value = tindakan;
     document.getElementById('modalEMR').classList.remove('hidden');
-}
+};
 
-function closeEMR() {
+window.AdminApp.bookings.closeEMR = function closeEMR() {
     document.getElementById('modalEMR').classList.add('hidden');
-}
+};
 
-async function saveEMR() {
+window.AdminApp.bookings.saveEMR = async function saveEMR() {
     const row = document.getElementById('emrRowIndex').value;
     const keluhan = document.getElementById('emrKeluhan').value;
     const tindakan = document.getElementById('emrTindakan').value;
@@ -258,21 +258,4 @@ async function saveEMR() {
         btn.innerHTML = originalText;
         btn.disabled = false;
     }
-}
-
-Object.assign(window.AdminApp.bookings, {
-    getVisibleBookings,
-    renderTables,
-    handleSearch,
-    getReservationFilteredData,
-    getReservationBadgeClass,
-    renderReservationsTable,
-    renderReservationPagination,
-    changeReservationPage,
-    openModalStatus,
-    closeModalStatus,
-    saveStatus,
-    openEMR,
-    closeEMR,
-    saveEMR
-});
+};
