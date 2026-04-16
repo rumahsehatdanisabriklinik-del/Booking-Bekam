@@ -11,7 +11,7 @@ async function loadArtikelListAdmin() {
 
         if (result.status === 'success') {
             window.AdminState.content.artikel = result.data || [];
-            renderArtikelList();
+            window.AdminApp.content.renderArtikelList();
         } else {
             alert(`Gagal memuat artikel: ${result.message}`);
         }
@@ -126,8 +126,8 @@ async function saveArtikelFromModal() {
         const result = await adminPost({ action: 'saveArtikel', artikelData: data });
         if (result.status === 'success') {
             alert('Artikel berhasil disimpan.');
-            closeModal('modalEditorArtikel');
-            loadArtikelListAdmin();
+            window.AdminApp.ui.closeModal('modalEditorArtikel');
+            window.AdminApp.content.loadArtikelListAdmin();
         } else {
             alert(result.message);
         }
@@ -142,7 +142,7 @@ async function saveArtikelFromModal() {
 async function deleteArtikelRecord(id, idx) {
     if (!id) {
         window.AdminState.content.artikel.splice(idx, 1);
-        renderArtikelList();
+        window.AdminApp.content.renderArtikelList();
         return;
     }
 
@@ -151,7 +151,7 @@ async function deleteArtikelRecord(id, idx) {
     try {
         const result = await adminPost({ action: 'deleteArtikel', artikelId: id });
         if (result.status === 'success') {
-            loadArtikelListAdmin();
+            window.AdminApp.content.loadArtikelListAdmin();
         } else {
             alert(result.message);
         }
@@ -169,7 +169,7 @@ async function loadGaleriListAdmin() {
 
         if (result.status === 'success') {
             window.AdminState.content.galeri = result.data || [];
-            renderGaleriList();
+            window.AdminApp.content.renderGaleriList();
         } else {
             alert('Gagal memuat galeri.');
         }
@@ -237,10 +237,10 @@ async function uploadGaleriImageModal(input) {
     const file = input.files[0];
     if (!file) return;
 
-    const url = await uploadToDrive(file);
-    document.getElementById('gal_url_modal').value = url;
-    updateGalPreview(url);
-    alert('Foto berhasil dipasang.');
+        const url = await uploadToDrive(file);
+        document.getElementById('gal_url_modal').value = url;
+        window.AdminApp.content.updateGalPreview(url);
+        alert('Foto berhasil dipasang.');
 }
 
 async function saveGaleriFromModal() {
@@ -267,8 +267,8 @@ async function saveGaleriFromModal() {
 
         const result = await adminPost({ action: 'saveGaleri', galeriData: newPayload });
         if (result.status === 'success') {
-            closeModal('modalEditorGaleri');
-            loadGaleriListAdmin();
+            window.AdminApp.ui.closeModal('modalEditorGaleri');
+            window.AdminApp.content.loadGaleriListAdmin();
         } else {
             alert(result.message);
         }
@@ -288,7 +288,7 @@ async function deleteGaleriRecord(id, idx) {
 
     try {
         const result = await adminPost({ action: 'saveGaleri', galeriData: newPayload });
-        if (result.status === 'success') loadGaleriListAdmin();
+        if (result.status === 'success') window.AdminApp.content.loadGaleriListAdmin();
     } catch (e) {
         alert('Gagal hapus.');
     }
@@ -319,3 +319,21 @@ async function createDocFromModal() {
         btn.disabled = false;
     }
 }
+
+Object.assign(window.AdminApp.content, {
+    loadArtikelListAdmin,
+    renderArtikelList,
+    openEditArtikel,
+    updateArtPreview,
+    uploadArtikelImageModal,
+    saveArtikelFromModal,
+    deleteArtikelRecord,
+    loadGaleriListAdmin,
+    renderGaleriList,
+    openEditGaleri,
+    updateGalPreview,
+    uploadGaleriImageModal,
+    saveGaleriFromModal,
+    deleteGaleriRecord,
+    createDocFromModal
+});

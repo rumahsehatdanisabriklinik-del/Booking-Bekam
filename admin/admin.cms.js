@@ -67,7 +67,7 @@ async function loadCMSData() {
         if (result.status === 'success') {
             const data = result.data || {};
             window.AdminState.cms.settingsCache = data;
-            renderClinicCheckinQr(window.AdminState.cms.settingsCache.cms_checkin_secret_code || '');
+            window.AdminApp.cms.renderClinicCheckinQr(window.AdminState.cms.settingsCache.cms_checkin_secret_code || '');
 
             Object.keys(data).forEach((key) => {
                 const el = document.getElementById(key);
@@ -116,7 +116,7 @@ async function loadLayananList() {
 
         if (result.status === 'success') {
             window.AdminState.cms.layanan = result.data || [];
-            renderLayananList();
+            window.AdminApp.cms.renderLayananList();
         }
     } catch (e) {}
 }
@@ -177,13 +177,13 @@ function addLayananRow() {
         hari_aktif: '',
         terapis_khusus: ''
     });
-    renderLayananList();
+    window.AdminApp.cms.renderLayananList();
 }
 
 function deleteLayananRow(idx) {
     if (!confirm('Hapus layanan ini?')) return;
     window.AdminState.cms.layanan.splice(idx, 1);
-    renderLayananList();
+    window.AdminApp.cms.renderLayananList();
 }
 
 async function saveLayanan() {
@@ -209,7 +209,7 @@ async function saveLayanan() {
         const result = await adminPost({ action: 'saveLayananList', layananData: dataToSave });
         if (result.status === 'success') {
             alert('Daftar layanan berhasil diperbarui.');
-            loadLayananList();
+            window.AdminApp.cms.loadLayananList();
         } else {
             alert(`Gagal simpan layanan: ${result.message}`);
         }
@@ -220,3 +220,17 @@ async function saveLayanan() {
         btn.disabled = false;
     }
 }
+
+Object.assign(window.AdminApp.cms, {
+    getClinicCheckinPayload,
+    renderClinicCheckinQr,
+    copyClinicQrCode,
+    printClinicQrPoster,
+    loadCMSData,
+    saveCMS,
+    loadLayananList,
+    renderLayananList,
+    addLayananRow,
+    deleteLayananRow,
+    saveLayanan
+});

@@ -18,7 +18,7 @@ function renderTables() {
     const visibleData = getVisibleBookings();
 
     window.AdminState.bookings.filtered = getReservationFilteredData(visibleData);
-    renderReservationsTable();
+    window.AdminApp.bookings.renderReservationsTable();
 
     const ulasanBody = document.getElementById('tbUlasanBody');
     ulasanBody.innerHTML = visibleData.filter((booking) => booking.rating).map((booking) => {
@@ -56,7 +56,7 @@ function handleSearch(val) {
     if (window.AdminState.bookings.searchDebounce) clearTimeout(window.AdminState.bookings.searchDebounce);
     window.AdminState.bookings.searchDebounce = setTimeout(() => {
         window.AdminState.bookings.filtered = getReservationFilteredData(getVisibleBookings());
-        renderReservationsTable();
+        window.AdminApp.bookings.renderReservationsTable();
     }, 180);
 }
 
@@ -105,7 +105,7 @@ function renderReservationsTable() {
                 </td>
             </tr>
         `;
-        renderReservationPagination(totalItems, totalPages, 0, 0);
+        window.AdminApp.bookings.renderReservationPagination(totalItems, totalPages, 0, 0);
         return;
     }
 
@@ -136,7 +136,7 @@ function renderReservationsTable() {
         </tr>
     `).join('');
 
-    renderReservationPagination(
+    window.AdminApp.bookings.renderReservationPagination(
         totalItems,
         totalPages,
         startIndex + 1,
@@ -177,7 +177,7 @@ function changeReservationPage(direction) {
     if (nextPage < 1 || nextPage > totalPages) return;
 
     window.AdminState.bookings.currentPage = nextPage;
-    renderReservationsTable();
+    window.AdminApp.bookings.renderReservationsTable();
 }
 
 function openModalStatus(row, current) {
@@ -202,8 +202,8 @@ async function saveStatus() {
     try {
         const result = await adminPost({ action: 'adminUpdateStatus', row, status: stat });
         if (result.status === 'success') {
-            closeModalStatus();
-            loadAllData();
+            window.AdminApp.bookings.closeModalStatus();
+            window.AdminApp.loadAllData();
         } else {
             alert(`Gagal update status: ${result.message}`);
         }
@@ -247,8 +247,8 @@ async function saveEMR() {
         });
 
         if (result.status === 'success') {
-            closeEMR();
-            loadAllData();
+            window.AdminApp.bookings.closeEMR();
+            window.AdminApp.loadAllData();
         } else {
             alert(`Gagal simpan EMR: ${result.message}`);
         }
@@ -259,3 +259,20 @@ async function saveEMR() {
         btn.disabled = false;
     }
 }
+
+Object.assign(window.AdminApp.bookings, {
+    getVisibleBookings,
+    renderTables,
+    handleSearch,
+    getReservationFilteredData,
+    getReservationBadgeClass,
+    renderReservationsTable,
+    renderReservationPagination,
+    changeReservationPage,
+    openModalStatus,
+    closeModalStatus,
+    saveStatus,
+    openEMR,
+    closeEMR,
+    saveEMR
+});

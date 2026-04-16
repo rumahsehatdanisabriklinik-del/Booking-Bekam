@@ -101,3 +101,11 @@ async function runFullMigration() {
         "Untuk sinkronisasi booking harian, gunakan tombol 'Sinkron Booking ke Neon'."
     );
 }
+
+Object.assign(window.AdminApp.system, {
+    uploadHeroImage,
+    uploadToDrive,
+    runDatabaseInit,
+    runSinkronCepat,
+    runFullMigration
+});

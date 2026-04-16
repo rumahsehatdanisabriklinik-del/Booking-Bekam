@@ -13,9 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('dashboardScreen').classList.remove('hidden');
         document.getElementById('adminNameTxt').textContent = localStorage.getItem('adminNama') || 'Admin';
-        loadAllData();
-        loadCMSData();
-        loadLayananList();
+        window.AdminApp.loadAllData();
+        window.AdminApp.cms.loadCMSData();
+        window.AdminApp.cms.loadLayananList();
     } else {
         localStorage.removeItem('adminPin');
     }

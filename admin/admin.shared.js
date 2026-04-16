@@ -27,6 +27,15 @@ window.AdminState = window.AdminState || {
     }
 };
 
+window.AdminApp = window.AdminApp || {
+    auth: {},
+    ui: {},
+    bookings: {},
+    cms: {},
+    content: {},
+    system: {}
+};
+
 function getAdminSessionToken() {
     return localStorage.getItem(window.AdminConfig.sessionKey) || '';
 }
@@ -196,11 +205,11 @@ function switchTab(tabId, el) {
     document.querySelectorAll('.nav-item').forEach((navItem) => navItem.classList.remove('active'));
     el.classList.add('active');
 
-    if (tabId === 'tab-artikel') loadArtikelListAdmin();
-    if (tabId === 'tab-galeri') loadGaleriListAdmin();
+    if (tabId === 'tab-artikel') window.AdminApp.content.loadArtikelListAdmin();
+    if (tabId === 'tab-galeri') window.AdminApp.content.loadGaleriListAdmin();
     if (tabId === 'tab-cms') {
-        loadCMSData();
-        loadLayananList();
+        window.AdminApp.cms.loadCMSData();
+        window.AdminApp.cms.loadLayananList();
     }
 }
 
@@ -211,7 +220,7 @@ async function loadAllData() {
         if (result.status === 'success') {
             window.AdminState.bookings.all = result.data;
             window.AdminState.bookings.currentPage = 1;
-            renderTables();
+            window.AdminApp.bookings.renderTables();
         }
     } catch (e) {
         console.error(e);
@@ -229,3 +238,25 @@ function showLoader(show) {
 function closeModal(id) {
     document.getElementById(id).classList.add('hidden');
 }
+
+Object.assign(window.AdminApp.auth, {
+    getAdminSessionToken,
+    clearAdminSession,
+    isAuthError,
+    handleAdminAuthFailure,
+    adminGet,
+    adminPost,
+    doLogin,
+    logout
+});
+
+Object.assign(window.AdminApp.ui, {
+    toggleSidebar,
+    switchTab,
+    showLoader,
+    closeModal
+});
+
+Object.assign(window.AdminApp, {
+    loadAllData
+});
