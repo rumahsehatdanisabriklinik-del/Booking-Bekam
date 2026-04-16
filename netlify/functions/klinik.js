@@ -1,3 +1,21 @@
+const crypto = require('crypto');
+
+function canonicalizeParams(params) {
+    const data = params || {};
+    const ignored = { token: true, ts: true, nonce: true, sig: true };
+    const keys = Object.keys(data).filter((k) => !ignored[k]).sort();
+    return keys.map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(String(data[key] ?? ''))}`).join('&');
+}
+
+function buildRequestSignature(secret, method, params, bodyString) {
+    const ts = Date.now().toString();
+    const nonce = crypto.randomBytes(8).toString('hex');
+    const canonicalQuery = canonicalizeParams(params);
+    const base = [ts, nonce, String(method || 'GET').toUpperCase(), canonicalQuery, bodyString || ''].join('\n');
+    const sig = crypto.createHmac('sha256', secret).update(base).digest('hex');
+    return { ts, nonce, sig };
+}
+
 exports.handler = async function(event, context) {
     // A. Handle CORS Preflight (OPTIONS)
     if (event.httpMethod === "OPTIONS") {
@@ -26,18 +44,25 @@ exports.handler = async function(event, context) {
         };
     }
 
-    // 2. Rakit URL Rahasia (Injeksi Token secara tertutup di server)
-    let fetchUrl = `${GAS_URL}?token=${APP_TOKEN}`;
-
-    // 3. Teruskan Parameter Query dari GitHub (misal: ?action=getInitData)
+    const forwardedParams = {};
     if (event.queryStringParameters) {
         for (const key in event.queryStringParameters) {
-            // Cegah ada token palsu yang dikirim oleh pihak luar
-            if (key !== "token") {
-                fetchUrl += `&${key}=${encodeURIComponent(event.queryStringParameters[key])}`;
-            }
+            if (["token", "ts", "nonce", "sig"].includes(key)) continue;
+            forwardedParams[key] = event.queryStringParameters[key];
         }
     }
+
+    const bodyString = (event.httpMethod === "POST" && event.body) ? event.body : "";
+    const signature = buildRequestSignature(APP_TOKEN, event.httpMethod, forwardedParams, bodyString);
+
+    // 2. Rakit URL Rahasia dengan signature (tanpa token statis di query)
+    let fetchUrl = `${GAS_URL}`;
+    const query = new URLSearchParams();
+    Object.keys(forwardedParams).forEach((key) => query.set(key, forwardedParams[key]));
+    query.set('ts', signature.ts);
+    query.set('nonce', signature.nonce);
+    query.set('sig', signature.sig);
+    fetchUrl += (fetchUrl.includes('?') ? '&' : '?') + query.toString();
 
     const fetchOptions = {
         method: event.httpMethod,
@@ -45,7 +70,7 @@ exports.handler = async function(event, context) {
 
     // Apabila ini perintah POST (seperti Menyimpan Booking)
     if (event.httpMethod === "POST" && event.body) {
-        fetchOptions.body = event.body;
+        fetchOptions.body = bodyString;
         // Opsional Header (Beberapa GAS membutuhkan tipe JSON)
         fetchOptions.headers = {
             "Content-Type": "application/json"

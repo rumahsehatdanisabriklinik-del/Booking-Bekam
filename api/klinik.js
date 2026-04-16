@@ -1,5 +1,21 @@
 // Vercel Serverless Function Proxy for Google Apps Script
 // api/klinik.js
+import crypto from 'node:crypto';
+
+function canonicalizeParams(params = {}) {
+    const ignored = new Set(['token', 'ts', 'nonce', 'sig']);
+    const keys = Object.keys(params).filter((k) => !ignored.has(k)).sort();
+    return keys.map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(String(params[key] ?? ''))}`).join('&');
+}
+
+function buildRequestSignature(secret, method, params, bodyString) {
+    const ts = Date.now().toString();
+    const nonce = crypto.randomBytes(8).toString('hex');
+    const canonicalQuery = canonicalizeParams(params);
+    const base = [ts, nonce, method.toUpperCase(), canonicalQuery, bodyString || ''].join('\n');
+    const sig = crypto.createHmac('sha256', secret).update(base).digest('hex');
+    return { ts, nonce, sig };
+}
 
 export default async function handler(req, res) {
     // 1. Set CORS Headers (Sangat Penting agar domain frontend bisa baca API)
@@ -17,7 +33,7 @@ export default async function handler(req, res) {
         return
     }
 
-    // 2. Ambil Kredensial dari Cloud Dashboard (Vercel Project Settings)
+    // 2. Ambil secret dari Cloud Dashboard (Vercel Project Settings)
     const GAS_URL = process.env.GAS_URL;
     const APP_TOKEN = process.env.APP_TOKEN;
 
@@ -30,16 +46,29 @@ export default async function handler(req, res) {
     }
 
     try {
-        // 3. Rakit URL Rahasia (Selalu sertakan Token secara internal)
-        const url = new URL(GAS_URL);
-        url.searchParams.append('token', APP_TOKEN);
-
-        // Teruskan Query Parameters dari Frontend (misal action=getInitData)
-        Object.keys(req.query).forEach(key => {
-            if (key !== 'token') {
-                url.searchParams.append(key, req.query[key]);
-            }
+        const forwardedParams = {};
+        Object.keys(req.query || {}).forEach((key) => {
+            if (['token', 'sig', 'ts', 'nonce'].includes(key)) return;
+            const value = req.query[key];
+            forwardedParams[key] = Array.isArray(value) ? value[0] : value;
         });
+
+        let bodyString = '';
+        if (req.method === 'POST') {
+            bodyString = typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {});
+        }
+
+        const signature = buildRequestSignature(APP_TOKEN, req.method, forwardedParams, bodyString);
+
+        // 3. Rakit URL Rahasia dengan signature (tanpa token statis di query)
+        const url = new URL(GAS_URL);
+
+        Object.keys(forwardedParams).forEach((key) => {
+            url.searchParams.append(key, forwardedParams[key]);
+        });
+        url.searchParams.append('ts', signature.ts);
+        url.searchParams.append('nonce', signature.nonce);
+        url.searchParams.append('sig', signature.sig);
 
         const fetchOptions = {
             method: req.method,
@@ -47,7 +76,7 @@ export default async function handler(req, res) {
 
         // 4. Handle Body untuk request POST (Menyimpan Booking / Update Status)
         if (req.method === 'POST') {
-            fetchOptions.body = JSON.stringify(req.body);
+            fetchOptions.body = bodyString;
             fetchOptions.headers = {
                 'Content-Type': 'application/json'
             };
