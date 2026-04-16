@@ -4,11 +4,11 @@
  * ================================================
  */
 
-function getClinicCheckinPayload(secretCode) {
+window.AdminApp.cms.getClinicCheckinPayload = function getClinicCheckinPayload(secretCode) {
     return `RSDS-CLINIC|${secretCode}`;
-}
+};
 
-function renderClinicCheckinQr(secretCode) {
+window.AdminApp.cms.renderClinicCheckinQr = function renderClinicCheckinQr(secretCode) {
     const img = document.getElementById('clinicQrImage');
     const text = document.getElementById('clinicQrCodeText');
     const printImg = document.getElementById('printClinicQrImage');
@@ -31,9 +31,9 @@ function renderClinicCheckinQr(secretCode) {
 
     if (printImg) printImg.src = qrUrl;
     if (printText) printText.textContent = payload;
-}
+};
 
-async function copyClinicQrCode() {
+window.AdminApp.cms.copyClinicQrCode = async function copyClinicQrCode() {
     const secretCode = window.AdminState.cms.settingsCache.cms_checkin_secret_code || '';
     if (!secretCode) {
         alert('Kode QR check-in belum tersedia.');
@@ -46,9 +46,9 @@ async function copyClinicQrCode() {
     } catch (e) {
         alert('Gagal menyalin kode QR.');
     }
-}
+};
 
-function printClinicQrPoster() {
+window.AdminApp.cms.printClinicQrPoster = function printClinicQrPoster() {
     const secretCode = window.AdminState.cms.settingsCache.cms_checkin_secret_code || '';
     if (!secretCode) {
         alert('Kode QR check-in belum tersedia.');
@@ -56,9 +56,9 @@ function printClinicQrPoster() {
     }
 
     window.print();
-}
+};
 
-async function loadCMSData() {
+window.AdminApp.cms.loadCMSData = async function loadCMSData() {
     try {
         const connector = window.GAS_URL.includes('?') ? '&' : '?';
         const res = await fetch(`${window.GAS_URL}${connector}action=getLandingSettings`);
@@ -77,9 +77,9 @@ async function loadCMSData() {
     } catch (e) {
         console.error('Gagal load CMS:', e);
     }
-}
+};
 
-async function saveCMS() {
+window.AdminApp.cms.saveCMS = async function saveCMS() {
     const btn = document.getElementById('btnSaveCMS');
     const orig = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Sinkronkan...';
@@ -106,9 +106,9 @@ async function saveCMS() {
         btn.innerHTML = orig;
         btn.disabled = false;
     }
-}
+};
 
-async function loadLayananList() {
+window.AdminApp.cms.loadLayananList = async function loadLayananList() {
     try {
         const connector = window.GAS_URL.includes('?') ? '&' : '?';
         const res = await fetch(`${window.GAS_URL}${connector}action=getLayananList`);
@@ -119,9 +119,9 @@ async function loadLayananList() {
             window.AdminApp.cms.renderLayananList();
         }
     } catch (e) {}
-}
+};
 
-function renderLayananList() {
+window.AdminApp.cms.renderLayananList = function renderLayananList() {
     const container = document.getElementById('layananList');
     container.innerHTML = window.AdminState.cms.layanan.map((layanan, idx) => `
         <div class="bg-white/60 border border-white rounded-[1.5rem] p-5 shadow-sm relative group">
@@ -163,9 +163,9 @@ function renderLayananList() {
             </div>
         </div>
     `).join('');
-}
+};
 
-function addLayananRow() {
+window.AdminApp.cms.addLayananRow = function addLayananRow() {
     window.AdminState.cms.layanan.push({
         nama: '',
         deskripsi: '',
@@ -178,15 +178,15 @@ function addLayananRow() {
         terapis_khusus: ''
     });
     window.AdminApp.cms.renderLayananList();
-}
+};
 
-function deleteLayananRow(idx) {
+window.AdminApp.cms.deleteLayananRow = function deleteLayananRow(idx) {
     if (!confirm('Hapus layanan ini?')) return;
     window.AdminState.cms.layanan.splice(idx, 1);
     window.AdminApp.cms.renderLayananList();
-}
+};
 
-async function saveLayanan() {
+window.AdminApp.cms.saveLayanan = async function saveLayanan() {
     const btn = document.getElementById('btnSaveLayanan');
     const orig = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Menyimpan...';
@@ -219,18 +219,4 @@ async function saveLayanan() {
         btn.innerHTML = orig;
         btn.disabled = false;
     }
-}
-
-Object.assign(window.AdminApp.cms, {
-    getClinicCheckinPayload,
-    renderClinicCheckinQr,
-    copyClinicQrCode,
-    printClinicQrPoster,
-    loadCMSData,
-    saveCMS,
-    loadLayananList,
-    renderLayananList,
-    addLayananRow,
-    deleteLayananRow,
-    saveLayanan
-});
+};

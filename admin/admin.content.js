@@ -4,7 +4,7 @@
  * ================================================
  */
 
-async function loadArtikelListAdmin() {
+window.AdminApp.content.loadArtikelListAdmin = async function loadArtikelListAdmin() {
     try {
         document.getElementById('artikelList').innerHTML = '<p class="text-slate-400 font-bold text-sm text-center py-8"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat artikel...</p>';
         const result = await window.AdminApp.auth.adminGet('getArtikelListAdmin');
@@ -18,9 +18,9 @@ async function loadArtikelListAdmin() {
     } catch (e) {
         alert('Error koneksi saat memuat artikel.');
     }
-}
+};
 
-function renderArtikelList() {
+window.AdminApp.content.renderArtikelList = function renderArtikelList() {
     const container = document.getElementById('artikelList');
     if (window.AdminState.content.artikel.length === 0) {
         container.innerHTML = `<div class="col-span-full border-2 border-dashed border-slate-200 rounded-[2.5rem] p-12 text-center text-slate-400">
@@ -49,9 +49,9 @@ function renderArtikelList() {
             </div>
         </div>`;
     }).join('');
-}
+};
 
-function openEditArtikel(idx) {
+window.AdminApp.content.openEditArtikel = function openEditArtikel(idx) {
     const modal = document.getElementById('modalEditorArtikel');
     const isNew = idx === null;
     const data = isNew
@@ -70,9 +70,9 @@ function openEditArtikel(idx) {
 
     window.AdminApp.content.updateArtPreview(data.foto);
     modal.classList.remove('hidden');
-}
+};
 
-function updateArtPreview(url) {
+window.AdminApp.content.updateArtPreview = function updateArtPreview(url) {
     const img = document.getElementById('art_preview_modal');
     if (url) {
         img.src = normalizeThumbUrl(url);
@@ -80,9 +80,9 @@ function updateArtPreview(url) {
     } else {
         img.classList.add('hidden');
     }
-}
+};
 
-async function uploadArtikelImageModal(input) {
+window.AdminApp.content.uploadArtikelImageModal = async function uploadArtikelImageModal(input) {
     const file = input.files[0];
     if (!file) return;
 
@@ -100,9 +100,9 @@ async function uploadArtikelImageModal(input) {
     } finally {
         btn.innerHTML = orig;
     }
-}
+};
 
-async function saveArtikelFromModal() {
+window.AdminApp.content.saveArtikelFromModal = async function saveArtikelFromModal() {
     const btn = document.getElementById('btnSaveArtModal');
     const orig = btn.innerHTML;
 
@@ -137,9 +137,9 @@ async function saveArtikelFromModal() {
         btn.innerHTML = orig;
         btn.disabled = false;
     }
-}
+};
 
-async function deleteArtikelRecord(id, idx) {
+window.AdminApp.content.deleteArtikelRecord = async function deleteArtikelRecord(id, idx) {
     if (!id) {
         window.AdminState.content.artikel.splice(idx, 1);
         window.AdminApp.content.renderArtikelList();
@@ -158,9 +158,9 @@ async function deleteArtikelRecord(id, idx) {
     } catch (e) {
         alert('Gagal hapus.');
     }
-}
+};
 
-async function loadGaleriListAdmin() {
+window.AdminApp.content.loadGaleriListAdmin = async function loadGaleriListAdmin() {
     try {
         document.getElementById('galeriList').innerHTML = '<p class="text-slate-400 font-bold text-sm text-center py-8"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat galeri...</p>';
         const connector = window.GAS_URL.includes('?') ? '&' : '?';
@@ -174,9 +174,9 @@ async function loadGaleriListAdmin() {
             alert('Gagal memuat galeri.');
         }
     } catch (e) {}
-}
+};
 
-function renderGaleriList() {
+window.AdminApp.content.renderGaleriList = function renderGaleriList() {
     const container = document.getElementById('galeriList');
     if (window.AdminState.content.galeri.length === 0) {
         container.innerHTML = `<div class="col-span-full border-2 border-dashed border-slate-200 rounded-[2.5rem] p-12 text-center text-slate-400">
@@ -203,9 +203,9 @@ function renderGaleriList() {
             </div>
         </div>`;
     }).join('');
-}
+};
 
-function openEditGaleri(idx) {
+window.AdminApp.content.openEditGaleri = function openEditGaleri(idx) {
     const modal = document.getElementById('modalEditorGaleri');
     const isNew = idx === null;
     const data = isNew
@@ -221,9 +221,9 @@ function openEditGaleri(idx) {
 
     window.AdminApp.content.updateGalPreview(data.url_foto);
     modal.classList.remove('hidden');
-}
+};
 
-function updateGalPreview(url) {
+window.AdminApp.content.updateGalPreview = function updateGalPreview(url) {
     const img = document.getElementById('gal_preview_modal');
     if (url) {
         img.src = normalizeThumbUrl(url);
@@ -231,19 +231,19 @@ function updateGalPreview(url) {
     } else {
         img.classList.add('hidden');
     }
-}
+};
 
-async function uploadGaleriImageModal(input) {
+window.AdminApp.content.uploadGaleriImageModal = async function uploadGaleriImageModal(input) {
     const file = input.files[0];
     if (!file) return;
 
-        const url = await window.AdminApp.system.uploadToDrive(file);
-        document.getElementById('gal_url_modal').value = url;
-        window.AdminApp.content.updateGalPreview(url);
-        alert('Foto berhasil dipasang.');
-}
+    const url = await window.AdminApp.system.uploadToDrive(file);
+    document.getElementById('gal_url_modal').value = url;
+    window.AdminApp.content.updateGalPreview(url);
+    alert('Foto berhasil dipasang.');
+};
 
-async function saveGaleriFromModal() {
+window.AdminApp.content.saveGaleriFromModal = async function saveGaleriFromModal() {
     const btn = document.getElementById('btnSaveGalModal');
     const orig = btn.innerHTML;
 
@@ -278,9 +278,9 @@ async function saveGaleriFromModal() {
         btn.innerHTML = orig;
         btn.disabled = false;
     }
-}
+};
 
-async function deleteGaleriRecord(id, idx) {
+window.AdminApp.content.deleteGaleriRecord = async function deleteGaleriRecord(id, idx) {
     if (!confirm('Hapus foto ini dari galeri?')) return;
 
     const newPayload = [...window.AdminState.content.galeri];
@@ -292,9 +292,9 @@ async function deleteGaleriRecord(id, idx) {
     } catch (e) {
         alert('Gagal hapus.');
     }
-}
+};
 
-async function createDocFromModal() {
+window.AdminApp.content.createDocFromModal = async function createDocFromModal() {
     const judul = document.getElementById('art_judul_modal').value;
     if (!judul) return alert('Isi Judul Artikel terlebih dahulu!');
 
@@ -318,22 +318,4 @@ async function createDocFromModal() {
         btn.innerHTML = orig;
         btn.disabled = false;
     }
-}
-
-Object.assign(window.AdminApp.content, {
-    loadArtikelListAdmin,
-    renderArtikelList,
-    openEditArtikel,
-    updateArtPreview,
-    uploadArtikelImageModal,
-    saveArtikelFromModal,
-    deleteArtikelRecord,
-    loadGaleriListAdmin,
-    renderGaleriList,
-    openEditGaleri,
-    updateGalPreview,
-    uploadGaleriImageModal,
-    saveGaleriFromModal,
-    deleteGaleriRecord,
-    createDocFromModal
-});
+};
