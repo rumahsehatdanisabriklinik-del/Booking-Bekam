@@ -8,7 +8,7 @@ function getVisibleBookings() {
     const role = localStorage.getItem('adminRole');
     const myName = localStorage.getItem('adminNama');
 
-    return allBookings.filter((booking) => {
+    return window.AdminState.bookings.all.filter((booking) => {
         if (role === 'terapis') return booking.terapis === myName;
         return true;
     });
@@ -17,7 +17,7 @@ function getVisibleBookings() {
 function renderTables() {
     const visibleData = getVisibleBookings();
 
-    filteredBookings = getReservationFilteredData(visibleData);
+    window.AdminState.bookings.filtered = getReservationFilteredData(visibleData);
     renderReservationsTable();
 
     const ulasanBody = document.getElementById('tbUlasanBody');
@@ -50,18 +50,18 @@ function renderTables() {
 }
 
 function handleSearch(val) {
-    reservationSearchQuery = (val || '').toLowerCase().trim();
-    currentReservationPage = 1;
+    window.AdminState.bookings.searchQuery = (val || '').toLowerCase().trim();
+    window.AdminState.bookings.currentPage = 1;
 
-    if (reservationSearchDebounce) clearTimeout(reservationSearchDebounce);
-    reservationSearchDebounce = setTimeout(() => {
-        filteredBookings = getReservationFilteredData(getVisibleBookings());
+    if (window.AdminState.bookings.searchDebounce) clearTimeout(window.AdminState.bookings.searchDebounce);
+    window.AdminState.bookings.searchDebounce = setTimeout(() => {
+        window.AdminState.bookings.filtered = getReservationFilteredData(getVisibleBookings());
         renderReservationsTable();
     }, 180);
 }
 
 function getReservationFilteredData(bookings) {
-    if (!reservationSearchQuery) return bookings;
+    if (!window.AdminState.bookings.searchQuery) return bookings;
 
     return bookings.filter((booking) => {
         const haystack = [
@@ -74,7 +74,7 @@ function getReservationFilteredData(bookings) {
             booking.status
         ].join(' ').toLowerCase();
 
-        return haystack.includes(reservationSearchQuery);
+        return haystack.includes(window.AdminState.bookings.searchQuery);
     });
 }
 
@@ -90,12 +90,12 @@ function renderReservationsTable() {
     const resBody = document.getElementById('tbReservasiBody');
     if (!resBody) return;
 
-    const totalItems = filteredBookings.length;
-    const totalPages = Math.max(1, Math.ceil(totalItems / RESERVATION_PAGE_SIZE));
-    currentReservationPage = Math.min(currentReservationPage, totalPages);
+    const totalItems = window.AdminState.bookings.filtered.length;
+    const totalPages = Math.max(1, Math.ceil(totalItems / window.AdminConfig.reservationPageSize));
+    window.AdminState.bookings.currentPage = Math.min(window.AdminState.bookings.currentPage, totalPages);
 
-    const startIndex = (currentReservationPage - 1) * RESERVATION_PAGE_SIZE;
-    const pageItems = filteredBookings.slice(startIndex, startIndex + RESERVATION_PAGE_SIZE);
+    const startIndex = (window.AdminState.bookings.currentPage - 1) * window.AdminConfig.reservationPageSize;
+    const pageItems = window.AdminState.bookings.filtered.slice(startIndex, startIndex + window.AdminConfig.reservationPageSize);
 
     if (pageItems.length === 0) {
         resBody.innerHTML = `
@@ -158,13 +158,13 @@ function renderReservationPagination(totalItems, totalPages, startItem, endItem)
             Menampilkan ${startItem}-${endItem} dari ${totalItems} reservasi
         </div>
         <div class="flex items-center gap-2">
-            <button onclick="changeReservationPage(-1)" class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-500 text-xs font-black ${currentReservationPage <= 1 ? 'opacity-50 cursor-not-allowed' : 'hover:border-emerald-300 hover:text-emerald-600'}" ${currentReservationPage <= 1 ? 'disabled' : ''}>
+            <button onclick="changeReservationPage(-1)" class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-500 text-xs font-black ${window.AdminState.bookings.currentPage <= 1 ? 'opacity-50 cursor-not-allowed' : 'hover:border-emerald-300 hover:text-emerald-600'}" ${window.AdminState.bookings.currentPage <= 1 ? 'disabled' : ''}>
                 Sebelumnya
             </button>
             <div class="px-3 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-black">
-                Hal. ${currentReservationPage}/${totalPages}
+                Hal. ${window.AdminState.bookings.currentPage}/${totalPages}
             </div>
-            <button onclick="changeReservationPage(1)" class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-500 text-xs font-black ${currentReservationPage >= totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:border-emerald-300 hover:text-emerald-600'}" ${currentReservationPage >= totalPages ? 'disabled' : ''}>
+            <button onclick="changeReservationPage(1)" class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-500 text-xs font-black ${window.AdminState.bookings.currentPage >= totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:border-emerald-300 hover:text-emerald-600'}" ${window.AdminState.bookings.currentPage >= totalPages ? 'disabled' : ''}>
                 Berikutnya
             </button>
         </div>
@@ -172,11 +172,11 @@ function renderReservationPagination(totalItems, totalPages, startItem, endItem)
 }
 
 function changeReservationPage(direction) {
-    const totalPages = Math.max(1, Math.ceil(filteredBookings.length / RESERVATION_PAGE_SIZE));
-    const nextPage = currentReservationPage + direction;
+    const totalPages = Math.max(1, Math.ceil(window.AdminState.bookings.filtered.length / window.AdminConfig.reservationPageSize));
+    const nextPage = window.AdminState.bookings.currentPage + direction;
     if (nextPage < 1 || nextPage > totalPages) return;
 
-    currentReservationPage = nextPage;
+    window.AdminState.bookings.currentPage = nextPage;
     renderReservationsTable();
 }
 

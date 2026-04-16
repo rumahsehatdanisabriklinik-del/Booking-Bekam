@@ -10,7 +10,7 @@ async function loadArtikelListAdmin() {
         const result = await adminGet('getArtikelListAdmin');
 
         if (result.status === 'success') {
-            artikelData = result.data || [];
+            window.AdminState.content.artikel = result.data || [];
             renderArtikelList();
         } else {
             alert(`Gagal memuat artikel: ${result.message}`);
@@ -22,7 +22,7 @@ async function loadArtikelListAdmin() {
 
 function renderArtikelList() {
     const container = document.getElementById('artikelList');
-    if (artikelData.length === 0) {
+    if (window.AdminState.content.artikel.length === 0) {
         container.innerHTML = `<div class="col-span-full border-2 border-dashed border-slate-200 rounded-[2.5rem] p-12 text-center text-slate-400">
             <i class="fas fa-newspaper text-5xl mb-4 opacity-20"></i>
             <p class="font-bold">Belum ada artikel. Mulai menulis sekarang!</p>
@@ -30,7 +30,7 @@ function renderArtikelList() {
         return;
     }
 
-    container.innerHTML = artikelData.map((artikel, idx) => {
+    container.innerHTML = window.AdminState.content.artikel.map((artikel, idx) => {
         const thumb = normalizeThumbUrl(artikel.foto);
         const safeStatus = String(artikel.status || 'draft');
         return `
@@ -56,7 +56,7 @@ function openEditArtikel(idx) {
     const isNew = idx === null;
     const data = isNew
         ? { id: '', judul: '', ringkasan: '', isi: '', foto: '', kategori: 'Umum', status: 'draft' }
-        : artikelData[idx];
+        : window.AdminState.content.artikel[idx];
 
     document.getElementById('art_idx_modal').value = isNew ? 'new' : idx;
     document.getElementById('art_id_modal').value = data.id || '';
@@ -141,7 +141,7 @@ async function saveArtikelFromModal() {
 
 async function deleteArtikelRecord(id, idx) {
     if (!id) {
-        artikelData.splice(idx, 1);
+        window.AdminState.content.artikel.splice(idx, 1);
         renderArtikelList();
         return;
     }
@@ -168,7 +168,7 @@ async function loadGaleriListAdmin() {
         const result = await res.json();
 
         if (result.status === 'success') {
-            galeriData = result.data || [];
+            window.AdminState.content.galeri = result.data || [];
             renderGaleriList();
         } else {
             alert('Gagal memuat galeri.');
@@ -178,7 +178,7 @@ async function loadGaleriListAdmin() {
 
 function renderGaleriList() {
     const container = document.getElementById('galeriList');
-    if (galeriData.length === 0) {
+    if (window.AdminState.content.galeri.length === 0) {
         container.innerHTML = `<div class="col-span-full border-2 border-dashed border-slate-200 rounded-[2.5rem] p-12 text-center text-slate-400">
             <i class="fas fa-images text-5xl mb-4 opacity-20"></i>
             <p class="font-bold">Galeri masih kosong. Tambahkan momen terbaik Anda.</p>
@@ -186,7 +186,7 @@ function renderGaleriList() {
         return;
     }
 
-    container.innerHTML = galeriData.map((galeri, idx) => {
+    container.innerHTML = window.AdminState.content.galeri.map((galeri, idx) => {
         const thumb = normalizeThumbUrl(galeri.url_foto);
         return `
         <div class="group bg-white/70 backdrop-blur-md border border-white rounded-[2rem] p-3 shadow-sm hover:shadow-xl transition-all relative overflow-hidden flex flex-col">
@@ -210,7 +210,7 @@ function openEditGaleri(idx) {
     const isNew = idx === null;
     const data = isNew
         ? { id: '', judul: '', url_foto: '', kategori: 'Fasilitas', urutan: 999, keterangan: '' }
-        : galeriData[idx];
+        : window.AdminState.content.galeri[idx];
 
     document.getElementById('gal_idx_modal').value = isNew ? 'new' : idx;
     document.getElementById('gal_judul_modal').value = data.judul || '';
@@ -248,7 +248,7 @@ async function saveGaleriFromModal() {
     const orig = btn.innerHTML;
 
     const item = {
-        id: galeriData[document.getElementById('gal_idx_modal').value]?.id || '',
+        id: window.AdminState.content.galeri[document.getElementById('gal_idx_modal').value]?.id || '',
         judul: document.getElementById('gal_judul_modal').value,
         url_foto: document.getElementById('gal_url_modal').value,
         kategori: document.getElementById('gal_kat_modal').value,
@@ -261,7 +261,7 @@ async function saveGaleriFromModal() {
 
     try {
         const idx = document.getElementById('gal_idx_modal').value;
-        const newPayload = [...galeriData];
+        const newPayload = [...window.AdminState.content.galeri];
         if (idx === 'new') newPayload.push(item);
         else newPayload[idx] = item;
 
@@ -283,7 +283,7 @@ async function saveGaleriFromModal() {
 async function deleteGaleriRecord(id, idx) {
     if (!confirm('Hapus foto ini dari galeri?')) return;
 
-    const newPayload = [...galeriData];
+    const newPayload = [...window.AdminState.content.galeri];
     newPayload.splice(idx, 1);
 
     try {

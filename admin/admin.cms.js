@@ -34,7 +34,7 @@ function renderClinicCheckinQr(secretCode) {
 }
 
 async function copyClinicQrCode() {
-    const secretCode = cmsSettingsCache.cms_checkin_secret_code || '';
+    const secretCode = window.AdminState.cms.settingsCache.cms_checkin_secret_code || '';
     if (!secretCode) {
         alert('Kode QR check-in belum tersedia.');
         return;
@@ -49,7 +49,7 @@ async function copyClinicQrCode() {
 }
 
 function printClinicQrPoster() {
-    const secretCode = cmsSettingsCache.cms_checkin_secret_code || '';
+    const secretCode = window.AdminState.cms.settingsCache.cms_checkin_secret_code || '';
     if (!secretCode) {
         alert('Kode QR check-in belum tersedia.');
         return;
@@ -66,8 +66,8 @@ async function loadCMSData() {
 
         if (result.status === 'success') {
             const data = result.data || {};
-            cmsSettingsCache = data;
-            renderClinicCheckinQr(cmsSettingsCache.cms_checkin_secret_code || '');
+            window.AdminState.cms.settingsCache = data;
+            renderClinicCheckinQr(window.AdminState.cms.settingsCache.cms_checkin_secret_code || '');
 
             Object.keys(data).forEach((key) => {
                 const el = document.getElementById(key);
@@ -115,7 +115,7 @@ async function loadLayananList() {
         const result = await res.json();
 
         if (result.status === 'success') {
-            currentLayanan = result.data || [];
+            window.AdminState.cms.layanan = result.data || [];
             renderLayananList();
         }
     } catch (e) {}
@@ -123,7 +123,7 @@ async function loadLayananList() {
 
 function renderLayananList() {
     const container = document.getElementById('layananList');
-    container.innerHTML = currentLayanan.map((layanan, idx) => `
+    container.innerHTML = window.AdminState.cms.layanan.map((layanan, idx) => `
         <div class="bg-white/60 border border-white rounded-[1.5rem] p-5 shadow-sm relative group">
             <button onclick="deleteLayananRow(${idx})" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">
                 <i class="fas fa-trash-alt text-xs"></i>
@@ -166,7 +166,7 @@ function renderLayananList() {
 }
 
 function addLayananRow() {
-    currentLayanan.push({
+    window.AdminState.cms.layanan.push({
         nama: '',
         deskripsi: '',
         detail: '',
@@ -182,7 +182,7 @@ function addLayananRow() {
 
 function deleteLayananRow(idx) {
     if (!confirm('Hapus layanan ini?')) return;
-    currentLayanan.splice(idx, 1);
+    window.AdminState.cms.layanan.splice(idx, 1);
     renderLayananList();
 }
 
@@ -192,7 +192,7 @@ async function saveLayanan() {
     btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Menyimpan...';
     btn.disabled = true;
 
-    const dataToSave = currentLayanan.map((_, idx) => ({
+    const dataToSave = window.AdminState.cms.layanan.map((_, idx) => ({
         nama: document.getElementById(`lay_nama_${idx}`).value,
         icon: document.getElementById(`lay_icon_${idx}`).value,
         deskripsi: document.getElementById(`lay_desc_${idx}`).value,

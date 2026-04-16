@@ -4,22 +4,31 @@
  * ================================================
  */
 
-let allBookings = [];
-let filteredBookings = [];
-let cmsSettingsCache = {};
-let currentLayanan = [];
-let artikelData = [];
-let galeriData = [];
+window.AdminConfig = window.AdminConfig || {
+    sessionKey: 'adminSessionToken',
+    reservationPageSize: 25
+};
 
-const ADMIN_SESSION_KEY = 'adminSessionToken';
-const RESERVATION_PAGE_SIZE = 25;
-
-let currentReservationPage = 1;
-let reservationSearchQuery = '';
-let reservationSearchDebounce = null;
+window.AdminState = window.AdminState || {
+    bookings: {
+        all: [],
+        filtered: [],
+        currentPage: 1,
+        searchQuery: '',
+        searchDebounce: null
+    },
+    cms: {
+        settingsCache: {},
+        layanan: []
+    },
+    content: {
+        artikel: [],
+        galeri: []
+    }
+};
 
 function getAdminSessionToken() {
-    return localStorage.getItem(ADMIN_SESSION_KEY) || '';
+    return localStorage.getItem(window.AdminConfig.sessionKey) || '';
 }
 
 function escapeHtml(value) {
@@ -64,7 +73,7 @@ function normalizeThumbUrl(url) {
 }
 
 function clearAdminSession() {
-    localStorage.removeItem(ADMIN_SESSION_KEY);
+    localStorage.removeItem(window.AdminConfig.sessionKey);
     localStorage.removeItem('adminPin');
     localStorage.removeItem('adminRole');
     localStorage.removeItem('adminNama');
@@ -134,7 +143,7 @@ async function doLogin() {
         }).then((response) => response.json());
 
         if (result.status === 'success' && result.sessionToken) {
-            localStorage.setItem(ADMIN_SESSION_KEY, result.sessionToken);
+            localStorage.setItem(window.AdminConfig.sessionKey, result.sessionToken);
             localStorage.setItem('adminRole', result.role || 'admin');
             localStorage.setItem('adminNama', result.nama || 'Admin');
             location.reload();
@@ -200,8 +209,8 @@ async function loadAllData() {
     try {
         const result = await adminGet('getSemuaBooking');
         if (result.status === 'success') {
-            allBookings = result.data;
-            currentReservationPage = 1;
+            window.AdminState.bookings.all = result.data;
+            window.AdminState.bookings.currentPage = 1;
             renderTables();
         }
     } catch (e) {
