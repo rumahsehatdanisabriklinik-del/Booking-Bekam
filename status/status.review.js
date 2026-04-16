@@ -55,7 +55,6 @@ async function sendReview() {
     btn.classList.add('opacity-80', 'cursor-not-allowed');
 
     try {
-        const connector = window.GAS_URL.includes('?') ? '&' : '?';
         const body = {
             action: "submitReview",
             row: currentReviewRow,
@@ -64,7 +63,7 @@ async function sendReview() {
             hp: document.getElementById('orderIdInput').value.trim()
         };
 
-        const response = await fetch(`${window.GAS_URL}${connector}action=submitReview`, {
+        const response = await fetch(buildApiUrl('submitReview'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)

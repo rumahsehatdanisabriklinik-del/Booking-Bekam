@@ -213,8 +213,7 @@ async function checkAvailability() {
         availabilityRequestKey = requestKey;
         availabilityAbortController = new AbortController();
         currentSignal = availabilityAbortController.signal;
-        const connector = window.GAS_URL.includes('?') ? '&' : '?';
-        const res = await fetch(`${window.GAS_URL}${connector}action=cekWaktu&tanggal=${tgl}&terapis=${encodeURIComponent(selectedTerapisName)}`, {
+        const res = await fetch(buildApiUrl('cekWaktu', { tanggal: tgl, terapis: selectedTerapisName }), {
             signal: currentSignal
         });
         const result = await res.json();

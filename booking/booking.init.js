@@ -33,8 +33,7 @@ async function initBooking() {
             document.getElementById('section-nama-terapis').classList.remove('hidden');
         }
 
-        const connector = window.GAS_URL.includes('?') ? '&' : '?';
-        const res = await fetch(`${window.GAS_URL}${connector}action=getInitData`);
+        const res = await fetch(buildApiUrl('getInitData'));
         if (!res.ok) throw new Error("Gagal menghubungi Server (Proxy). Status: " + res.status);
 
         const result = await res.json();

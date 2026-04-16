@@ -1,5 +1,4 @@
 async function callGeminiAPI(promptText) {
-    const connector = window.GAS_URL.includes('?') ? '&' : '?';
     const payload = {
         action: "generateAITips",
         prompt: promptText
@@ -10,7 +9,7 @@ async function callGeminiAPI(promptText) {
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
-            const response = await fetch(`${window.GAS_URL}${connector}action=generateAITips`, {
+            const response = await fetch(buildApiUrl('generateAITips'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)

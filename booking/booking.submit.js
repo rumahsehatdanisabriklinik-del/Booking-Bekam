@@ -68,8 +68,7 @@ async function handleBookingSubmit(e) {
     };
 
     try {
-        const connector = window.GAS_URL.includes('?') ? '&' : '?';
-        const response = await fetch(`${window.GAS_URL}${connector}action=simpanBookingData`, {
+        const response = await fetch(buildApiUrl('simpanBookingData'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(backendData)

@@ -1,28 +1,4 @@
-// Shared UI helpers and in-memory booking state.
-function showCustomToast(msg, type = 'error') {
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-
-    const icon = type === 'success' ? '<i class="fas fa-check-circle text-emerald-500 text-lg"></i>' : '<i class="fas fa-exclamation-circle text-red-500 text-lg"></i>';
-    const bgClass = type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-red-50 border-red-200 text-red-900';
-
-    toast.className = `flex items-center gap-3 px-5 py-4 rounded-2xl border-2 shadow-xl shadow-slate-200/50 transform translate-x-[120%] transition-transform duration-500 ease-out font-bold text-sm pointer-events-auto ${bgClass}`;
-    toast.innerHTML = `${icon} <span>${msg}</span>`;
-
-    container.appendChild(toast);
-
-    requestAnimationFrame(() => {
-        toast.classList.remove('translate-x-[120%]');
-        toast.classList.add('translate-x-0');
-    });
-
-    setTimeout(() => {
-        toast.classList.remove('translate-x-0');
-        toast.classList.add('translate-x-[120%]');
-        setTimeout(() => toast.remove(), 500);
-    }, 4000);
-}
-
+// Shared booking state and page-specific helpers.
 function scrollToElement(id) {
     setTimeout(() => {
         const el = document.getElementById(id);

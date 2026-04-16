@@ -131,8 +131,7 @@ async function processPatientCheckin(clinicCode) {
     updateCheckinStatus('Memproses check-in ke server...');
 
     try {
-        const connector = window.GAS_URL.includes('?') ? '&' : '?';
-        const response = await fetch(`${window.GAS_URL}${connector}action=selfCheckIn`, {
+        const response = await fetch(buildApiUrl('selfCheckIn'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

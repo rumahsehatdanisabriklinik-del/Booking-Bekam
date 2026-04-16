@@ -19,8 +19,7 @@ async function checkStatus() {
     try {
         if (typeof window.GAS_URL === 'undefined') throw new Error("Server URL belum diatur.");
 
-        const connector = window.GAS_URL.includes('?') ? '&' : '?';
-        const response = await fetch(`${window.GAS_URL}${connector}action=cekStatusUser&hp=${inputId}`, {
+        const response = await fetch(buildApiUrl('cekStatusUser', { hp: inputId }), {
             signal: fetchAborter.signal
         });
         const result = await response.json();
@@ -193,10 +192,9 @@ async function batalBooking(row) {
     loader.classList.remove('hidden');
 
     try {
-        const connector = window.GAS_URL.includes('?') ? '&' : '?';
         const body = { action: "batalByUser", row: row, hp: hp };
 
-        const response = await fetch(`${window.GAS_URL}${connector}action=batalByUser`, {
+        const response = await fetch(buildApiUrl('batalByUser'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
