@@ -1,32 +1,11 @@
 async function callGeminiAPI(promptText) {
-    const payload = {
-        action: "generateAITips",
-        prompt: promptText
-    };
-
-    const maxRetries = 3;
-    const baseDelay = 1000;
-
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-        try {
-            const response = await fetch(buildApiUrl('generateAITips'), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-            const result = await response.json();
-            if (result.status === "success") {
-                return result.data.text;
-            }
-            throw new Error("Gagal mengambil tips: " + result.message);
-        } catch (error) {
-            if (attempt === maxRetries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, baseDelay * Math.pow(2, attempt)));
-        }
-    }
+    const result = await apiPostJson('generateAITips', { prompt: promptText }, {
+        timeoutMs: 20000,
+        retries: 2,
+        retryDelayMs: 600
+    });
+    if (result.status === "success") return result.data.text;
+    throw new Error("Gagal mengambil tips: " + result.message);
 }
 
 async function generateAITips() {
@@ -54,11 +33,11 @@ async function generateAITips() {
 
     try {
         const aiResponse = await callGeminiAPI(prompt);
-        const styledResponse = aiResponse
+        const styledResponse = String(aiResponse || '')
             .replace(/<ul>/g, '<ul class="list-disc pl-5 space-y-2 marker:text-indigo-400">')
             .replace(/<strong>/g, '<strong class="text-indigo-900">');
 
-        resultContent.innerHTML = styledResponse;
+        resultContent.innerHTML = sanitizeAssistantHtml(styledResponse);
     } catch (error) {
         resultContent.innerHTML = `<span class="text-red-500 text-sm flex items-center gap-2 bg-red-50 p-3 rounded-lg border border-red-100"><i class="fas fa-exclamation-triangle"></i> Maaf, saat ini Asisten AI sedang sibuk atau mengalami gangguan koneksi. Mohon coba beberapa saat lagi ya.</span>`;
     } finally {

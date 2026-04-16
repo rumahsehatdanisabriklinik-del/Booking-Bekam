@@ -227,15 +227,6 @@
             document.getElementById('mobileMenu').classList.add('translate-x-full');
         });
 
-        function buildActionUrl(params) {
-            if (typeof window.buildApiUrl === 'function') {
-                return window.buildApiUrl(window.GAS_URL, params);
-            }
-            const connector = window.GAS_URL.includes('?') ? '&' : '?';
-            const query = new URLSearchParams(params).toString();
-            return `${window.GAS_URL}${connector}${query}`;
-        }
-
         function normalizeImageUrl(url) {
             if (typeof window.normalizeDriveImageUrl === 'function') {
                 return window.normalizeDriveImageUrl(url);
@@ -270,8 +261,7 @@
         async function syncHeaderFooter() {
             if (typeof window.GAS_URL === 'undefined') return;
             try {
-                const response = await fetch(buildActionUrl({ action: 'getLandingSettings' }));
-                const result = await response.json();
+                const result = await apiGetJson('getLandingSettings', null, { timeoutMs: 12000, retries: 1 });
                 if (result.status === "success") {
                     const d = result.data;
                     if(d.cms_nama_klinik) {
@@ -301,8 +291,7 @@
 
         async function loadGaleri() {
             try {
-                const res = await fetch(buildActionUrl({ action: 'getGaleriList' }));
-                const result = await res.json();
+                const result = await apiGetJson('getGaleriList', null, { timeoutMs: 12000, retries: 1 });
                 
                 document.getElementById('loading').classList.add('hidden');
                 

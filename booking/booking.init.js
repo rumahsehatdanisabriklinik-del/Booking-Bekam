@@ -33,10 +33,7 @@ async function initBooking() {
             document.getElementById('section-nama-terapis').classList.remove('hidden');
         }
 
-        const res = await fetch(buildApiUrl('getInitData'));
-        if (!res.ok) throw new Error("Gagal menghubungi Server (Proxy). Status: " + res.status);
-
-        const result = await res.json();
+        const result = await apiGetJson('getInitData', null, { timeoutMs: 15000, retries: 1 });
         if (result.status === "success") {
             sessionStorage.setItem('initBookingData', JSON.stringify(result.data));
             applyInitData(result.data.terapis, result.data.layanan);

@@ -567,15 +567,6 @@
             }
         }
 
-        function buildActionUrl(params) {
-            if (typeof window.buildApiUrl === 'function') {
-                return window.buildApiUrl(window.GAS_URL, params);
-            }
-            const connector = window.GAS_URL.includes('?') ? '&' : '?';
-            const query = new URLSearchParams(params).toString();
-            return `${window.GAS_URL}${connector}${query}`;
-        }
-
         function normalizeImageUrl(url) {
             if (typeof window.normalizeDriveImageUrl === 'function') {
                 return window.normalizeDriveImageUrl(url);
@@ -739,8 +730,7 @@
             }
 
             try {
-                const response = await fetch(buildActionUrl({ action: 'getLandingSettings' }));
-                const result = await response.json();
+                const result = await apiGetJson('getLandingSettings', null, { timeoutMs: 12000, retries: 1 });
                 if (result.status === "success") {
                     localStorage.setItem('cmsDataVal', JSON.stringify(result.data));
                     applyCMSContent(result.data);
@@ -859,8 +849,7 @@
             }
 
             try {
-                const res = await fetch(buildActionUrl({ action: 'getLayananList' }));
-                const result = await res.json();
+                const result = await apiGetJson('getLayananList', null, { timeoutMs: 12000, retries: 1 });
                 
                 if (result.status === 'success' && result.data) {
                     localStorage.setItem('layananDataVal', JSON.stringify(result.data));
@@ -933,14 +922,10 @@
             div.className = `chat-bubble ${role === 'user' ? 'user' : 'ai'} animate-fade-up`;
             
             if (role === 'assistant' || role === 'ai') {
-                try {
-                    // Gunakan marked.js untuk konversi markdown ke HTML cantik
-                    div.innerHTML = marked.parse(content);
-                } catch(e) {
-                    div.innerHTML = content;
-                }
+                const capped = String(content || '').slice(0, 3500);
+                div.innerHTML = renderSafeAssistantMarkdown(capped);
             } else {
-                div.innerHTML = content;
+                div.textContent = String(content || '');
             }
             
             container.appendChild(div);
@@ -954,13 +939,11 @@
             const payload = { action: "generateAITips", history: history };
 
             try {
-                const response = await fetch(buildActionUrl({ action: 'generateAITips' }), {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                const result = await apiPostJson('generateAITips', { history: payload.history }, {
+                    timeoutMs: 20000,
+                    retries: 1,
+                    retryDelayMs: 500
                 });
-                if (!response.ok) throw new Error("Jaringan bermasalah");
-                const result = await response.json();
                 if (result.status === "success") return result.data.text;
                 throw new Error(result.message);
             } catch (error) {

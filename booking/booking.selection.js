@@ -213,10 +213,10 @@ async function checkAvailability() {
         availabilityRequestKey = requestKey;
         availabilityAbortController = new AbortController();
         currentSignal = availabilityAbortController.signal;
-        const res = await fetch(buildApiUrl('cekWaktu', { tanggal: tgl, terapis: selectedTerapisName }), {
-            signal: currentSignal
-        });
-        const result = await res.json();
+        const result = await apiRequestJson(
+            buildApiUrl('cekWaktu', { tanggal: tgl, terapis: selectedTerapisName }),
+            { signal: currentSignal, timeoutMs: 12000, retries: 0 }
+        );
 
         if (availabilityRequestKey !== requestKey) return;
 

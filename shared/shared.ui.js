@@ -47,6 +47,104 @@ function buildApiUrl(action, params) {
     return query ? `${base}&${query}` : base;
 }
 
+function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function createApiError(message, status, details) {
+    const err = new Error(message || 'Permintaan gagal');
+    if (status) err.status = status;
+    if (details !== undefined) err.details = details;
+    return err;
+}
+
+async function apiRequestJson(url, options) {
+    const settings = options || {};
+    const method = (settings.method || 'GET').toUpperCase();
+    const timeoutMs = Number.isFinite(settings.timeoutMs) ? settings.timeoutMs : 15000;
+    const retries = Number.isFinite(settings.retries) ? settings.retries : 1;
+    const retryDelayMs = Number.isFinite(settings.retryDelayMs) ? settings.retryDelayMs : 400;
+
+    for (let attempt = 0; attempt <= retries; attempt++) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        const externalSignal = settings.signal;
+        let unlinkExternalAbort = null;
+
+        if (externalSignal) {
+            if (externalSignal.aborted) {
+                clearTimeout(timer);
+                throw externalSignal.reason || createApiError('Permintaan dibatalkan.', 499);
+            }
+            const forwardAbort = () => controller.abort();
+            externalSignal.addEventListener('abort', forwardAbort, { once: true });
+            unlinkExternalAbort = () => externalSignal.removeEventListener('abort', forwardAbort);
+        }
+        try {
+            const response = await fetch(url, {
+                method,
+                headers: settings.headers || {},
+                body: settings.body,
+                signal: controller.signal
+            });
+
+            const text = await response.text();
+            let parsed = null;
+            if (text) {
+                try {
+                    parsed = JSON.parse(text);
+                } catch (parseErr) {
+                    throw createApiError('Respon server tidak valid (bukan JSON).', response.status, text);
+                }
+            }
+
+            if (!response.ok) {
+                const message = parsed?.message || `Server error (${response.status})`;
+                throw createApiError(message, response.status, parsed);
+            }
+
+            return parsed;
+        } catch (error) {
+            const isAbort = error?.name === 'AbortError';
+            const isNetwork = error instanceof TypeError;
+            if (isAbort && externalSignal && externalSignal.aborted) {
+                throw error;
+            }
+            const canRetry = attempt < retries && (isAbort || isNetwork || (error?.status >= 500));
+            if (canRetry) {
+                await delay(retryDelayMs * (attempt + 1));
+                continue;
+            }
+
+            if (isAbort) {
+                throw createApiError('Permintaan ke server timeout. Silakan coba lagi.', 408);
+            }
+            throw error;
+        } finally {
+            if (unlinkExternalAbort) unlinkExternalAbort();
+            clearTimeout(timer);
+        }
+    }
+
+    throw createApiError('Permintaan gagal diproses.');
+}
+
+function apiGetJson(action, params, options) {
+    return apiRequestJson(buildApiUrl(action, params), options);
+}
+
+function apiPostJson(action, payload, options) {
+    const bodyPayload = payload || {};
+    return apiRequestJson(buildApiUrl(action), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, ...bodyPayload }),
+        timeoutMs: options?.timeoutMs,
+        retries: options?.retries,
+        retryDelayMs: options?.retryDelayMs
+    });
+}
+
 function normalizeDriveImageUrl(logoUrl) {
     if (!logoUrl || !logoUrl.includes('drive.google.com/uc')) return logoUrl;
     try {
@@ -55,6 +153,62 @@ function normalizeDriveImageUrl(logoUrl) {
     } catch (e) {
         return logoUrl;
     }
+}
+
+function sanitizeAssistantHtml(inputHtml) {
+    const safeHtml = String(inputHtml || '');
+    if (!safeHtml) return '';
+
+    const template = document.createElement('template');
+    template.innerHTML = safeHtml;
+
+    const blockedTags = new Set(['script', 'iframe', 'object', 'embed', 'style', 'link', 'meta']);
+    const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_ELEMENT);
+    const toRemove = [];
+
+    while (walker.nextNode()) {
+        const el = walker.currentNode;
+        const tagName = (el.tagName || '').toLowerCase();
+
+        if (blockedTags.has(tagName)) {
+            toRemove.push(el);
+            continue;
+        }
+
+        const attrs = Array.from(el.attributes || []);
+        attrs.forEach((attr) => {
+            const name = attr.name.toLowerCase();
+            const value = String(attr.value || '').trim().toLowerCase();
+            if (name.startsWith('on')) {
+                el.removeAttribute(attr.name);
+                return;
+            }
+            if ((name === 'href' || name === 'src') && value.startsWith('javascript:')) {
+                el.removeAttribute(attr.name);
+                return;
+            }
+            if (name === 'style') {
+                el.removeAttribute(attr.name);
+            }
+        });
+    }
+
+    toRemove.forEach((el) => el.remove());
+    return template.innerHTML;
+}
+
+function renderSafeAssistantMarkdown(markdownText) {
+    const text = String(markdownText || '');
+    try {
+        if (typeof marked !== 'undefined' && typeof marked.parse === 'function') {
+            return sanitizeAssistantHtml(marked.parse(text));
+        }
+    } catch (e) {}
+    const escaped = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    return escaped.replace(/\n/g, '<br>');
 }
 
 async function syncLandingBranding(options) {
@@ -72,8 +226,7 @@ async function syncLandingBranding(options) {
     const titleSuffix = settings.titleSuffix || '';
 
     try {
-        const response = await fetch(buildApiUrl('getLandingSettings'));
-        const result = await response.json();
+        const result = await apiGetJson('getLandingSettings', null, { timeoutMs: 12000, retries: 1 });
         if (result.status !== 'success') return null;
 
         const data = result.data || {};

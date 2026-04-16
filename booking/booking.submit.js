@@ -68,12 +68,16 @@ async function handleBookingSubmit(e) {
     };
 
     try {
-        const response = await fetch(buildApiUrl('simpanBookingData'), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(backendData)
-        });
-        const result = await response.json();
+        const result = await apiPostJson('simpanBookingData', {
+            nama: backendData.nama,
+            nohp: backendData.nohp,
+            tanggal: backendData.tanggal,
+            terapis: backendData.terapis,
+            waktu: backendData.waktu,
+            jenisKelamin: backendData.jenisKelamin,
+            sesiBekam: backendData.sesiBekam,
+            keluhan: backendData.keluhan
+        }, { timeoutMs: 20000, retries: 1, retryDelayMs: 500 });
 
         if (result.status === "success") {
             document.getElementById('succ-nama').textContent = formData.nama;

@@ -131,16 +131,14 @@ async function processPatientCheckin(clinicCode) {
     updateCheckinStatus('Memproses check-in ke server...');
 
     try {
-        const response = await fetch(buildApiUrl('selfCheckIn'), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'selfCheckIn',
-                payload: currentCheckInPayload,
-                clinicCode: clinicCode
-            })
+        const result = await apiPostJson('selfCheckIn', {
+            payload: currentCheckInPayload,
+            clinicCode: clinicCode
+        }, {
+            timeoutMs: 15000,
+            retries: 1,
+            retryDelayMs: 500
         });
-        const result = await response.json();
 
         if (result.status === 'success') {
             stopCheckinScanner();

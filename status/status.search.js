@@ -19,10 +19,10 @@ async function checkStatus() {
     try {
         if (typeof window.GAS_URL === 'undefined') throw new Error("Server URL belum diatur.");
 
-        const response = await fetch(buildApiUrl('cekStatusUser', { hp: inputId }), {
-            signal: fetchAborter.signal
-        });
-        const result = await response.json();
+        const result = await apiRequestJson(
+            buildApiUrl('cekStatusUser', { hp: inputId }),
+            { signal: fetchAborter.signal, timeoutMs: 15000, retries: 0 }
+        );
 
         if (result.status === "success" && result.data.length > 0) {
             result.data.forEach((booking, index) => {
@@ -192,14 +192,11 @@ async function batalBooking(row) {
     loader.classList.remove('hidden');
 
     try {
-        const body = { action: "batalByUser", row: row, hp: hp };
-
-        const response = await fetch(buildApiUrl('batalByUser'), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
+        const result = await apiPostJson('batalByUser', { row: row, hp: hp }, {
+            timeoutMs: 15000,
+            retries: 1,
+            retryDelayMs: 500
         });
-        const result = await response.json();
 
         if (result.status === "success") {
             showCustomToast("Jadwal Anda telah berhasil dibatalkan.", "success");

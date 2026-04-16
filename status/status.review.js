@@ -56,19 +56,17 @@ async function sendReview() {
 
     try {
         const body = {
-            action: "submitReview",
             row: currentReviewRow,
             rating: currentRating,
             ulasan: document.getElementById('reviewText').value,
             hp: document.getElementById('orderIdInput').value.trim()
         };
 
-        const response = await fetch(buildApiUrl('submitReview'), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
+        const result = await apiPostJson('submitReview', body, {
+            timeoutMs: 15000,
+            retries: 1,
+            retryDelayMs: 500
         });
-        const result = await response.json();
 
         if (result.status === "success") {
             showCustomToast("Alhamdulillah! Terima kasih atas ulasan Anda.", "success");
