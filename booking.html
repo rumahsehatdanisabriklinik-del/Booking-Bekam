@@ -171,7 +171,7 @@
                     </h3>
                     <div class="grid grid-cols-2 gap-4">
                         <label class="w-full">
-                            <input type="radio" name="gender_terapis" value="Pria" class="radio-hidden" onchange="onGenderSelected()">
+                            <input type="radio" name="gender_terapis" value="Pria" class="radio-hidden">
                             <div class="pill-label !flex-row !justify-start !p-4 !gap-4">
                                 <div class="icon-wrapper w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center text-lg transition-transform"><i class="fas fa-mars"></i></div>
                                 <div class="text-left">
@@ -181,7 +181,7 @@
                             </div>
                         </label>
                         <label class="w-full">
-                            <input type="radio" name="gender_terapis" value="Wanita" class="radio-hidden" onchange="onGenderSelected()">
+                            <input type="radio" name="gender_terapis" value="Wanita" class="radio-hidden">
                             <div class="pill-label !flex-row !justify-start !p-4 !gap-4">
                                 <div class="icon-wrapper w-10 h-10 bg-pink-50 text-pink-500 rounded-xl flex items-center justify-center text-lg transition-transform"><i class="fas fa-venus"></i></div>
                                 <div class="text-left">
@@ -347,7 +347,7 @@
                     <h3 class="text-lg font-black text-slate-900 mb-2">Asisten Kesehatan AI</h3>
                     <p class="text-sm text-slate-600 mb-6 font-medium">Dapatkan panduan persiapan terapi yang dipersonalisasi khusus untuk keluhan Anda sebelum datang ke klinik.</p>
                     
-                    <button id="btnAiTips" onclick="generateAITips()" class="w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black py-3.5 px-6 rounded-xl shadow-lg shadow-indigo-500/30 transition-all flex items-center justify-center gap-2 active:scale-95 group">
+                    <button id="btnAiTips" data-action="generate-ai-tips" class="w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black py-3.5 px-6 rounded-xl shadow-lg shadow-indigo-500/30 transition-all flex items-center justify-center gap-2 active:scale-95 group">
                         <i class="fas fa-sparkles text-indigo-200"></i>
                         <span>Buat Tips Persiapan Terapi ✨</span>
                     </button>

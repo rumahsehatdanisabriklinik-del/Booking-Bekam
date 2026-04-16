@@ -134,7 +134,7 @@ function renderLayanan() {
             list.innerHTML = `
                 <div class="col-span-full p-6 bg-slate-50 text-slate-500 rounded-[1.5rem] text-[11px] font-bold text-center border-2 border-dashed border-slate-200">
                     Maaf, Terapis <b class="text-slate-800">${selectedTerapisName}</b> tidak terdaftar untuk layanan manapun di Sheet.<br>
-                    <button type="button" onclick="this.nextElementSibling.classList.toggle('hidden')" class="mt-2 text-emerald-600 underline hover:text-emerald-700 transition-colors">Klik untuk Lihat Detail Debug</button>
+                    <button type="button" data-action="toggle-debug-detail" class="mt-2 text-emerald-600 underline hover:text-emerald-700 transition-colors">Klik untuk Lihat Detail Debug</button>
                     <div class="hidden mt-4 p-4 bg-white border rounded-xl font-mono text-[9px] text-left break-all shadow-inner">
                         <b>Data dari Sheet:</b><br>${debugInfo}<br><br>
                         <b>Target:</b> [${cleanTarget}]

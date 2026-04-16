@@ -16,6 +16,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="config.js"></script>
+    <script src="shared/shared.ui.js"></script>
     
     <script>
         tailwind.config = {
@@ -151,7 +152,7 @@
 
     <!-- Lightbox Modal -->
     <div id="lightbox" class="fixed inset-0 z-[60] bg-slate-950/95 backdrop-blur-md hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
-        <button onclick="closeLightbox()" class="absolute top-8 right-8 w-12 h-12 bg-white/10 hover:bg-emerald-500 text-white rounded-full flex items-center justify-center backdrop-blur-md transition-all z-20 hover:scale-110 shadow-2xl">
+        <button data-action="close-lightbox" class="absolute top-8 right-8 w-12 h-12 bg-white/10 hover:bg-emerald-500 text-white rounded-full flex items-center justify-center backdrop-blur-md transition-all z-20 hover:scale-110 shadow-2xl">
             <i class="fas fa-times text-xl"></i>
         </button>
         <div class="relative w-full max-w-6xl h-full sm:h-[90vh] p-4 sm:p-12 flex flex-col items-center justify-center pt-24 sm:pt-12" id="lightboxContent">
@@ -226,12 +227,50 @@
             document.getElementById('mobileMenu').classList.add('translate-x-full');
         });
 
+        function buildActionUrl(params) {
+            if (typeof window.buildApiUrl === 'function') {
+                return window.buildApiUrl(window.GAS_URL, params);
+            }
+            const connector = window.GAS_URL.includes('?') ? '&' : '?';
+            const query = new URLSearchParams(params).toString();
+            return `${window.GAS_URL}${connector}${query}`;
+        }
+
+        function normalizeImageUrl(url) {
+            if (typeof window.normalizeDriveImageUrl === 'function') {
+                return window.normalizeDriveImageUrl(url);
+            }
+            if (!url || typeof url !== 'string') return url;
+            if (!url.includes('drive.google.com/uc')) return url;
+            try {
+                const match = url.match(/id=([a-zA-Z0-9_-]+)/);
+                if (match?.[1]) return `https://lh3.googleusercontent.com/d/${match[1]}`;
+            } catch (e) {}
+            return url;
+        }
+
+        function bindGalleryUIEvents() {
+            document.addEventListener('click', (event) => {
+                const target = event.target.closest('[data-action]');
+                if (!target) return;
+
+                const action = target.dataset.action;
+                if (action === 'close-lightbox') {
+                    closeLightbox();
+                    return;
+                }
+                if (action === 'open-lightbox') {
+                    const idx = Number(target.dataset.index);
+                    if (!Number.isNaN(idx)) openLightbox(idx);
+                }
+            });
+        }
+
         // CMS Sync Logic (Synced with index.html)
         async function syncHeaderFooter() {
             if (typeof window.GAS_URL === 'undefined') return;
             try {
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const response = await fetch(`${window.GAS_URL}${connector}action=getLandingSettings`);
+                const response = await fetch(buildActionUrl({ action: 'getLandingSettings' }));
                 const result = await response.json();
                 if (result.status === "success") {
                     const d = result.data;
@@ -247,10 +286,7 @@
                     if(d.cms_facebook) document.getElementById('cms-facebook').href = d.cms_facebook;
                     
                     if(d.cms_logo_image && d.cms_logo_image.trim() !== "") {
-                        let logoUrl = d.cms_logo_image;
-                        if(logoUrl.includes('drive.google.com/uc')) {
-                            try { const fileId = logoUrl.split('id=')[1].split('&')[0]; logoUrl = `https://lh3.googleusercontent.com/d/${fileId}`; } catch(e) {}
-                        }
+                        const logoUrl = normalizeImageUrl(d.cms_logo_image);
                         const navLogo = document.getElementById('cms-logo-nav-container');
                         if(navLogo) navLogo.innerHTML = `<img src="${logoUrl}" class="w-full h-full object-contain rounded-xl shadow-sm">`;
                         const footLogo = document.getElementById('cms-logo-footer-container');
@@ -265,8 +301,7 @@
 
         async function loadGaleri() {
             try {
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const res = await fetch(`${window.GAS_URL}${connector}action=getGaleriList`);
+                const res = await fetch(buildActionUrl({ action: 'getGaleriList' }));
                 const result = await res.json();
                 
                 document.getElementById('loading').classList.add('hidden');
@@ -298,18 +333,14 @@
             grid.classList.remove('hidden');
 
             grid.innerHTML = filtered.map((p, i) => {
-                let fotoUrl = p.url_foto;
-                if (!fotoUrl) fotoUrl = 'https://via.placeholder.com/800x600?text=No+Image';
-                if (fotoUrl.includes('drive.google.com/uc')) {
-                    try { const id = fotoUrl.split('id=')[1].split('&')[0]; fotoUrl = `https://lh3.googleusercontent.com/d/${id}`; } catch(e){}
-                }
+                const fotoUrl = normalizeImageUrl(p.url_foto || 'https://via.placeholder.com/800x600?text=No+Image');
 
                 // Random height class for masonry varied look
                 const heights = ['h-64', 'h-80', 'h-96'];
                 const boxHeight = heights[i % heights.length];
 
                 return `
-                <div class="masonry-item group cursor-pointer animate-fade-up" style="animation-delay: ${i*0.05}s" onclick="openLightbox(${allPhotos.indexOf(p)})">
+                <div class="masonry-item group cursor-pointer animate-fade-up" style="animation-delay: ${i*0.05}s" data-action="open-lightbox" data-index="${i}">
                     <div class="relative w-full ${boxHeight} rounded-[2.5rem] overflow-hidden bg-slate-200 shadow-sm group-hover:shadow-xl transition-all duration-500">
                         <img src="${fotoUrl}" alt="${p.judul}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-out">
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-8">
@@ -327,12 +358,7 @@
             const p = filtered[idx];
             if (!p) return;
 
-            let fotoUrl = p.url_foto;
-            if (fotoUrl && fotoUrl.includes('drive.google.com/uc')) {
-                try { const id = fotoUrl.split('id=')[1].split('&')[0]; fotoUrl = `https://lh3.googleusercontent.com/d/${id}`; } catch(e){}
-            } else if (!fotoUrl) {
-                fotoUrl = 'https://via.placeholder.com/800x600?text=No+Image';
-            }
+            const fotoUrl = normalizeImageUrl(p.url_foto || 'https://via.placeholder.com/800x600?text=No+Image');
 
             document.getElementById('lightboxImg').src = fotoUrl;
             document.getElementById('lightboxTitle').textContent = p.judul;
@@ -397,6 +423,7 @@
 
         // Init
         document.addEventListener('DOMContentLoaded', () => {
+            bindGalleryUIEvents();
             syncHeaderFooter();
             loadGaleri();
         });

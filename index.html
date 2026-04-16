@@ -161,7 +161,7 @@
                     <a href="booking.html" class="hidden sm:flex items-center gap-2 bg-gradient-to-br from-emerald-500 to-teal-600 text-white px-6 sm:px-7 py-2.5 sm:py-3 rounded-full font-bold text-sm shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/40 transition-all hover:-translate-y-0.5">
                         Buat Janji <i class="fas fa-calendar-check text-xs"></i>
                     </a>
-                    <button onclick="toggleMobileMenu()" id="btnHamburger" class="lg:hidden w-10 h-10 rounded-xl bg-slate-100/80 flex items-center justify-center text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 transition-all focus:outline-none">
+                    <button data-action="toggle-mobile-menu" id="btnHamburger" class="lg:hidden w-10 h-10 rounded-xl bg-slate-100/80 flex items-center justify-center text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 transition-all focus:outline-none">
                         <i class="fas fa-bars" id="hamburgerIcon"></i>
                     </button>
                 </div>
@@ -172,12 +172,12 @@
         <div id="mobileMenu" class="lg:hidden max-w-7xl mx-auto px-4 mt-2 hidden origin-top transition-all duration-300">
             <div class="glass-dark rounded-2xl p-6 shadow-2xl animate-fade-up">
                 <div class="flex flex-col gap-2 font-bold text-sm uppercase tracking-widest">
-                    <a href="#services" onclick="toggleMobileMenu()" class="block text-slate-600 hover:text-emerald-600 hover:bg-emerald-50/50 rounded-xl transition-all p-3">Layanan</a>
+                    <a href="#services" data-action="toggle-mobile-menu" class="block text-slate-600 hover:text-emerald-600 hover:bg-emerald-50/50 rounded-xl transition-all p-3">Layanan</a>
                     <a href="artikel.html" class="block text-slate-600 hover:text-emerald-600 hover:bg-emerald-50/50 rounded-xl transition-all p-3">Artikel</a>
                     <a href="galeri.html" class="block text-slate-600 hover:text-emerald-600 hover:bg-emerald-50/50 rounded-xl transition-all p-3">Galeri</a>
                     <a href="status.html" class="block text-slate-600 hover:text-emerald-600 hover:bg-emerald-50/50 rounded-xl transition-all p-3">Lacak Pesanan</a>
                     <a href="admin.html" class="block text-slate-600 hover:text-emerald-600 hover:bg-emerald-50/50 rounded-xl transition-all p-3"><i class="fas fa-lock mr-2 text-xs"></i>Portal Admin</a>
-                    <a href="booking.html" onclick="toggleMobileMenu()" class="flex items-center justify-center gap-2 bg-gradient-to-br from-emerald-500 to-teal-600 text-white px-7 py-3.5 rounded-xl font-bold text-sm shadow-lg mt-4 active:scale-95 transition-all">
+                    <a href="booking.html" data-action="toggle-mobile-menu" class="flex items-center justify-center gap-2 bg-gradient-to-br from-emerald-500 to-teal-600 text-white px-7 py-3.5 rounded-xl font-bold text-sm shadow-lg mt-4 active:scale-95 transition-all">
                         Buat Janji <i class="fas fa-calendar-check text-xs"></i>
                     </a>
                 </div>
@@ -438,7 +438,7 @@
     <!-- PREMIUM AI FLOATING CHATBOT -->
     <div class="fixed bottom-6 right-6 z-[999]">
         <!-- Chat FAB -->
-        <button id="chatbot-fab" onclick="toggleChatbot()" class="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl hover:scale-110 active:scale-95 transition-transform duration-300 relative group pulse-emerald">
+        <button id="chatbot-fab" data-action="toggle-chatbot" class="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl hover:scale-110 active:scale-95 transition-transform duration-300 relative group pulse-emerald">
             <i class="fas fa-robot group-hover:rotate-12 transition-transform"></i>
             <span class="absolute -top-1 -right-1 flex h-4 w-4">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
@@ -462,7 +462,7 @@
                         </div>
                     </div>
                 </div>
-                <button onclick="toggleChatbot()" class="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors">
+                <button data-action="toggle-chatbot" class="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors">
                     <i class="fas fa-times text-lg"></i>
                 </button>
             </div>
@@ -476,15 +476,15 @@
 
             <!-- Suggestion Chips -->
             <div id="chat-suggestions" class="px-4 py-2 flex gap-2 overflow-x-auto no-scrollbar bg-white/50 backdrop-blur-sm border-t border-slate-50">
-                <button onclick="sendQuickMessage('Manfaat Bekam Sunnah')" class="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full border border-emerald-100 hover:bg-emerald-100 transition-all active:scale-95 whitespace-nowrap">✨ Manfaat Bekam</button>
-                <button onclick="sendQuickMessage('Tanggal Sunnah Terdekat')" class="px-3 py-1.5 bg-teal-50 text-teal-700 text-[10px] font-bold rounded-full border border-teal-100 hover:bg-teal-100 transition-all active:scale-95 whitespace-nowrap">📅 Jadwal Sunnah</button>
-                <button onclick="sendQuickMessage('Apa itu Ruqyah Syariyyah?')" class="px-3 py-1.5 bg-cyan-50 text-cyan-700 text-[10px] font-bold rounded-full border border-cyan-100 hover:bg-cyan-100 transition-all active:scale-95 whitespace-nowrap">🛡️ Tentang Ruqyah</button>
-                <button onclick="sendQuickMessage('Lokasi & Jam Buka')" class="px-3 py-1.5 bg-slate-50 text-slate-700 text-[10px] font-bold rounded-full border border-slate-100 hover:bg-slate-100 transition-all active:scale-95 whitespace-nowrap">📍 Lokasi</button>
+                <button data-action="send-quick-message" data-message="Manfaat Bekam Sunnah" class="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full border border-emerald-100 hover:bg-emerald-100 transition-all active:scale-95 whitespace-nowrap">✨ Manfaat Bekam</button>
+                <button data-action="send-quick-message" data-message="Tanggal Sunnah Terdekat" class="px-3 py-1.5 bg-teal-50 text-teal-700 text-[10px] font-bold rounded-full border border-teal-100 hover:bg-teal-100 transition-all active:scale-95 whitespace-nowrap">📅 Jadwal Sunnah</button>
+                <button data-action="send-quick-message" data-message="Apa itu Ruqyah Syariyyah?" class="px-3 py-1.5 bg-cyan-50 text-cyan-700 text-[10px] font-bold rounded-full border border-cyan-100 hover:bg-cyan-100 transition-all active:scale-95 whitespace-nowrap">🛡️ Tentang Ruqyah</button>
+                <button data-action="send-quick-message" data-message="Lokasi & Jam Buka" class="px-3 py-1.5 bg-slate-50 text-slate-700 text-[10px] font-bold rounded-full border border-slate-100 hover:bg-slate-100 transition-all active:scale-95 whitespace-nowrap">📍 Lokasi</button>
             </div>
 
             <!-- Footer / Input -->
             <div class="p-4 bg-white border-t border-slate-100">
-                <form id="chat-form" onsubmit="handleChatSubmit(event)" class="relative flex items-center gap-2">
+                <form id="chat-form" class="relative flex items-center gap-2">
                     <input type="text" id="chat-input" placeholder="Tulis pesan Anda..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-4 pr-12 text-sm font-medium text-slate-700 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all shadow-inner">
                     <button type="submit" class="absolute right-2 w-9 h-9 bg-emerald-600 text-white rounded-xl flex items-center justify-center hover:bg-emerald-700 transition-colors shadow-md shadow-emerald-600/20 active:scale-90">
                         <i class="fas fa-paper-plane text-xs"></i>
@@ -498,6 +498,7 @@
     <!-- Scripts -->
     <!-- Jika file config.js di sistem Anda memuat variabel GAS_URL -->
     <script src="config.js"></script>
+    <script src="shared/shared.ui.js"></script>
     
     <script>
         // 1. Set Current Year in Footer
@@ -566,6 +567,65 @@
             }
         }
 
+        function buildActionUrl(params) {
+            if (typeof window.buildApiUrl === 'function') {
+                return window.buildApiUrl(window.GAS_URL, params);
+            }
+            const connector = window.GAS_URL.includes('?') ? '&' : '?';
+            const query = new URLSearchParams(params).toString();
+            return `${window.GAS_URL}${connector}${query}`;
+        }
+
+        function normalizeImageUrl(url) {
+            if (typeof window.normalizeDriveImageUrl === 'function') {
+                return window.normalizeDriveImageUrl(url);
+            }
+            if (!url || typeof url !== 'string') return url;
+            if (!url.includes('drive.google.com/uc')) return url;
+            try {
+                const match = url.match(/id=([a-zA-Z0-9_-]+)/);
+                if (match && match[1]) return `https://lh3.googleusercontent.com/d/${match[1]}`;
+            } catch (e) {}
+            return url;
+        }
+
+        function bindLandingUIEvents() {
+            document.addEventListener('click', (event) => {
+                const target = event.target.closest('[data-action]');
+                if (!target) return;
+
+                const action = target.dataset.action;
+                if (action === 'toggle-mobile-menu') {
+                    toggleMobileMenu();
+                    return;
+                }
+                if (action === 'toggle-chatbot') {
+                    toggleChatbot();
+                    return;
+                }
+                if (action === 'send-quick-message') {
+                    const msg = target.dataset.message || '';
+                    if (msg) sendQuickMessage(msg);
+                }
+            });
+
+            const chatForm = document.getElementById('chat-form');
+            if (chatForm) {
+                chatForm.addEventListener('submit', handleChatSubmit);
+            }
+
+            const servicesGrid = document.getElementById('services-grid');
+            if (servicesGrid) {
+                servicesGrid.addEventListener('error', (event) => {
+                    const img = event.target;
+                    if (!(img instanceof HTMLImageElement)) return;
+                    const fallbackSrc = img.dataset.fallbackSrc;
+                    if (!fallbackSrc || img.src === fallbackSrc) return;
+                    img.src = fallbackSrc;
+                }, true);
+            }
+        }
+
         // 5. CMS Content Loader dengan Fallback Aman
         async function loadLandingContent() {
             if (typeof window.GAS_URL === 'undefined') {
@@ -604,15 +664,7 @@
                     if(d.cms_hero_image) {
                         const el = document.getElementById('cms-hero-image');
                         if(el) {
-                            let imgUrl = d.cms_hero_image;
-                            // Auto-fix jika masih link Drive format lama
-                            if(imgUrl.includes('drive.google.com/uc')) {
-                                try {
-                                    const fileId = imgUrl.split('id=')[1].split('&')[0];
-                                    imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
-                                } catch(e) {}
-                            }
-                            el.src = imgUrl;
+                            el.src = normalizeImageUrl(d.cms_hero_image);
                         }
                     }
                     if(d.cms_alamat) {
@@ -649,13 +701,7 @@
 
                     // Logo Replacement
                     if(d.cms_logo_image && d.cms_logo_image.trim() !== "") {
-                        let logoUrl = d.cms_logo_image;
-                        if(logoUrl.includes('drive.google.com/uc')) {
-                            try {
-                                const fileId = logoUrl.split('id=')[1].split('&')[0];
-                                logoUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
-                            } catch(e) {}
-                        }
+                        const logoUrl = normalizeImageUrl(d.cms_logo_image);
                         const navLogo = document.getElementById('cms-logo-nav-container');
                         if(navLogo) {
                             navLogo.innerHTML = `<img src="${logoUrl}" class="w-full h-full object-contain overflow-hidden rounded-xl sm:rounded-2xl" alt="Logo">`;
@@ -693,8 +739,7 @@
             }
 
             try {
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const response = await fetch(`${window.GAS_URL}${connector}action=getLandingSettings`);
+                const response = await fetch(buildActionUrl({ action: 'getLandingSettings' }));
                 const result = await response.json();
                 if (result.status === "success") {
                     localStorage.setItem('cmsDataVal', JSON.stringify(result.data));
@@ -737,6 +782,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
+            bindLandingUIEvents();
             // Jalankan kedua fungsi fetch secara paralel dan tunggu sampai selesai
             await Promise.all([
                 loadLandingContent(),
@@ -775,15 +821,9 @@
 
                         let mediaEl = '';
                         if (l.foto && typeof l.foto === 'string' && l.foto.trim() !== '') {
-                            let fotoUrl = l.foto;
-                            if (fotoUrl.includes('drive.google.com/uc')) {
-                                try { 
-                                    const match = fotoUrl.match(/id=([a-zA-Z0-9_-]+)/);
-                                    if(match) fotoUrl = `https://lh3.googleusercontent.com/d/${match[1]}`; 
-                                } catch(e) {}
-                            }
+                            const fotoUrl = normalizeImageUrl(l.foto);
                             mediaEl = `<div class="w-full h-40 rounded-2xl overflow-hidden mb-6 sm:mb-8 shadow-inner">
-                                <img src="${fotoUrl}" alt="${l.nama || 'Layanan'}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=400&auto=format&fit=crop'">
+                                <img src="${fotoUrl}" alt="${l.nama || 'Layanan'}" data-fallback-src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                             </div>`;
                         } else {
                             mediaEl = `<div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-gradient-to-br ${c.bg} ${c.text} flex items-center justify-center text-2xl sm:text-3xl mb-6 sm:mb-8 shadow-inner group-hover:scale-110 transition-transform duration-300">
@@ -819,8 +859,7 @@
             }
 
             try {
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const res = await fetch(`${window.GAS_URL}${connector}action=getLayananList`);
+                const res = await fetch(buildActionUrl({ action: 'getLayananList' }));
                 const result = await res.json();
                 
                 if (result.status === 'success' && result.data) {
@@ -912,11 +951,10 @@
             if (typeof window.GAS_URL === 'undefined' || !window.GAS_URL) {
                 throw new Error("Konfigurasi API URL belum tersedia");
             }
-            const connector = window.GAS_URL.includes('?') ? '&' : '?';
             const payload = { action: "generateAITips", history: history };
 
             try {
-                const response = await fetch(`${window.GAS_URL}${connector}action=generateAITips`, {
+                const response = await fetch(buildActionUrl({ action: 'generateAITips' }), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)

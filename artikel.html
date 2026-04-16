@@ -16,6 +16,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Config -->
     <script src="config.js"></script>
+    <script src="shared/shared.ui.js"></script>
     
     <script>
         tailwind.config = {
@@ -158,7 +159,7 @@
     <!-- DETAIL VIEW -->
     <div id="detailView" class="hidden min-h-screen pb-24">
         <div class="max-w-4xl mx-auto px-6 pt-8">
-            <button onclick="window.location.hash=''" class="group bg-white text-slate-600 px-7 py-3.5 rounded-full font-black text-xs uppercase tracking-widest shadow-sm hover:shadow-md transition-all flex items-center gap-3 mb-8 border border-white">
+            <button data-action="clear-hash" class="group bg-white text-slate-600 px-7 py-3.5 rounded-full font-black text-xs uppercase tracking-widest shadow-sm hover:shadow-md transition-all flex items-center gap-3 mb-8 border border-white">
                 <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke Daftar
             </button>
             
@@ -186,7 +187,7 @@
                             </div>
                         </div>
                         <div class="flex gap-3">
-                            <button onclick="window.print()" class="flex items-center gap-3 px-6 py-3 rounded-full bg-slate-50 text-slate-600 font-black text-[10px] uppercase tracking-widest hover:bg-emerald-50 hover:text-emerald-600 transition-all border border-slate-100">
+                            <button data-action="print-article" class="flex items-center gap-3 px-6 py-3 rounded-full bg-slate-50 text-slate-600 font-black text-[10px] uppercase tracking-widest hover:bg-emerald-50 hover:text-emerald-600 transition-all border border-slate-100">
                                 <i class="fas fa-print"></i> Cetak Artikel
                             </button>
                         </div>
@@ -271,12 +272,49 @@
             document.getElementById('mobileMenu').classList.add('translate-x-full');
         });
 
+        function buildActionUrl(params) {
+            if (typeof window.buildApiUrl === 'function') {
+                return window.buildApiUrl(window.GAS_URL, params);
+            }
+            const connector = window.GAS_URL.includes('?') ? '&' : '?';
+            const query = new URLSearchParams(params).toString();
+            return `${window.GAS_URL}${connector}${query}`;
+        }
+
+        function normalizeImageUrl(url) {
+            if (typeof window.normalizeDriveImageUrl === 'function') {
+                return window.normalizeDriveImageUrl(url);
+            }
+            if (!url || typeof url !== 'string') return url;
+            if (!url.includes('drive.google.com/uc')) return url;
+            try {
+                const match = url.match(/id=([a-zA-Z0-9_-]+)/);
+                if (match?.[1]) return `https://lh3.googleusercontent.com/d/${match[1]}`;
+            } catch (e) {}
+            return url;
+        }
+
+        function bindArticleUIEvents() {
+            document.addEventListener('click', (event) => {
+                const target = event.target.closest('[data-action]');
+                if (!target) return;
+
+                const action = target.dataset.action;
+                if (action === 'clear-hash') {
+                    window.location.hash = '';
+                    return;
+                }
+                if (action === 'print-article') {
+                    window.print();
+                }
+            });
+        }
+
         // CMS Sync Logic (Synced with index.html)
         async function syncHeaderFooter() {
             if (typeof window.GAS_URL === 'undefined') return;
             try {
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const response = await fetch(`${window.GAS_URL}${connector}action=getLandingSettings`);
+                const response = await fetch(buildActionUrl({ action: 'getLandingSettings' }));
                 const result = await response.json();
                 if (result.status === "success") {
                     const d = result.data;
@@ -292,10 +330,7 @@
                     if(d.cms_facebook) document.getElementById('cms-facebook').href = d.cms_facebook;
                     
                     if(d.cms_logo_image && d.cms_logo_image.trim() !== "") {
-                        let logoUrl = d.cms_logo_image;
-                        if(logoUrl.includes('drive.google.com/uc')) {
-                            try { const fileId = logoUrl.split('id=')[1].split('&')[0]; logoUrl = `https://lh3.googleusercontent.com/d/${fileId}`; } catch(e) {}
-                        }
+                        const logoUrl = normalizeImageUrl(d.cms_logo_image);
                         const navLogo = document.getElementById('cms-logo-nav-container');
                         if(navLogo) navLogo.innerHTML = `<img src="${logoUrl}" class="w-full h-full object-contain rounded-xl shadow-sm">`;
                         const footLogo = document.getElementById('cms-logo-footer-container');
@@ -319,8 +354,7 @@
 
         async function loadArticles() {
             try {
-                const connector = window.GAS_URL.includes('?') ? '&' : '?';
-                const res = await fetch(`${window.GAS_URL}${connector}action=getArtikelList`);
+                const res = await fetch(buildActionUrl({ action: 'getArtikelList' }));
                 const result = await res.json();
                 document.getElementById('loading').classList.add('hidden');
                 if (result.status === 'success' && result.data.length > 0) {
@@ -351,10 +385,7 @@
             empty.classList.add('hidden');
             grid.classList.remove('hidden');
             grid.innerHTML = filtered.map((a, i) => {
-                let fotoUrl = a.foto || 'https://images.unsplash.com/photo-1505751172107-5d3d7a845366?w=800';
-                if (fotoUrl.includes('drive.google.com/uc')) {
-                    try { const id = fotoUrl.split('id=')[1].split('&')[0]; fotoUrl = `https://lh3.googleusercontent.com/d/${id}`; } catch(e){}
-                }
+                const fotoUrl = normalizeImageUrl(a.foto || 'https://images.unsplash.com/photo-1505751172107-5d3d7a845366?w=800');
                 const slug = slugify(a.judul);
                 return `
                 <a href="#${slug}" class="group flex flex-col glass rounded-[2.5rem] overflow-hidden hover:-translate-y-3 hover:shadow-2xl transition-all duration-500 border-white/60">
@@ -396,10 +427,7 @@
             if (!isi.includes('<p>')) isi = '<p>' + isi.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>') + '</p>';
             document.getElementById('detailBody').innerHTML = isi;
             const heroImg = document.getElementById('detailHeroImg');
-            let fotoUrl = a.foto || 'https://images.unsplash.com/photo-1505751172107-5d3d7a845366?w=1200';
-            if (fotoUrl.includes('drive.google.com/uc')) {
-                try { const id = fotoUrl.split('id=')[1].split('&')[0]; fotoUrl = `https://lh3.googleusercontent.com/d/${id}`; } catch(e){}
-            }
+            const fotoUrl = normalizeImageUrl(a.foto || 'https://images.unsplash.com/photo-1505751172107-5d3d7a845366?w=1200');
             heroImg.style.backgroundImage = `url('${fotoUrl}')`;
         }
 
@@ -430,6 +458,7 @@
 
         window.addEventListener('hashchange', handleRouting);
         document.addEventListener('DOMContentLoaded', () => {
+            bindArticleUIEvents();
             syncHeaderFooter();
             loadArticles();
         });
