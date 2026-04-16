@@ -35,12 +35,18 @@ function scrollToElement(id) {
 }
 
 // --- Sanitasi Input Instan ---
-document.getElementById('whatsapp').addEventListener('input', function() {
-    this.value = this.value.replace(/\D/g, ''); // Hanya terima angka
-});
-document.getElementById('usia').addEventListener('input', function() {
-    this.value = this.value.replace(/\D/g, ''); // Hanya terima angka
-});
+const whatsappInput = document.getElementById('whatsapp');
+if (whatsappInput) {
+    whatsappInput.addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, ''); // Hanya terima angka
+    });
+}
+const usiaInput = document.getElementById('usia');
+if (usiaInput) {
+    usiaInput.addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, ''); // Hanya terima angka
+    });
+}
 
 // ====================================================================
 // --- Integrasi Backend & Logika Inti ---
@@ -50,11 +56,110 @@ let allLayanan = [];
 let selectedTerapisName = "";
 let selectedGender = "";
 let selectedLayanan = null;
+let layananByNama = new Map();
+let layananByTerapisName = new Map();
+let layananTanpaPerempuan = [];
+let namaTerapisKhususSet = new Set();
+let specialLabelsByTerapis = new Map();
+let availabilityAbortController = null;
+let availabilityRequestKey = "";
 
 // Global object to hold booking data for AI Assistant
 window.lastBookingData = null;
 
 const submitBtn = document.getElementById('submitBtn');
+
+function normalizeName(value) {
+    return (value || "").toString().trim().toLowerCase();
+}
+
+function buildBookingIndexes() {
+    layananByNama = new Map();
+    layananByTerapisName = new Map();
+    layananTanpaPerempuan = [];
+    namaTerapisKhususSet = new Set();
+    specialLabelsByTerapis = new Map();
+
+    const namaTerapisPerempuan = new Set(
+        allTerapis
+            .filter(t => t.gender === "Perempuan")
+            .map(t => normalizeName(t.nama))
+    );
+
+    const layananUmum = [];
+    const layananKhususByTerapis = new Map();
+
+    allLayanan.forEach(layanan => {
+        layananByNama.set(normalizeName(layanan.nama), layanan);
+
+        const daftarTerapisKhusus = Array.isArray(layanan.terapisKhusus) ? layanan.terapisKhusus : [];
+        if (daftarTerapisKhusus.length === 0) {
+            layananUmum.push(layanan);
+            return;
+        }
+
+        const tanpaTerapisPerempuan = !daftarTerapisKhusus.some(nama =>
+            namaTerapisPerempuan.has(normalizeName(nama))
+        );
+
+        if (tanpaTerapisPerempuan) {
+            layananTanpaPerempuan.push(layanan);
+        }
+
+        daftarTerapisKhusus.forEach(namaTerapis => {
+            const cleanNama = normalizeName(namaTerapis);
+            if (!cleanNama) return;
+
+            let layananList = layananKhususByTerapis.get(cleanNama);
+            if (!layananList) {
+                layananList = [];
+                layananKhususByTerapis.set(cleanNama, layananList);
+            }
+            layananList.push(layanan);
+
+            if (tanpaTerapisPerempuan) {
+                namaTerapisKhususSet.add(cleanNama);
+                let labelList = specialLabelsByTerapis.get(cleanNama);
+                if (!labelList) {
+                    labelList = [];
+                    specialLabelsByTerapis.set(cleanNama, labelList);
+                }
+                labelList.push(layanan.nama);
+            }
+        });
+    });
+
+    allTerapis.forEach(terapis => {
+        const cleanNama = normalizeName(terapis.nama);
+        const khusus = layananKhususByTerapis.get(cleanNama) || [];
+        layananByTerapisName.set(cleanNama, layananUmum.concat(khusus));
+    });
+}
+
+function handleBookingFormChange(event) {
+    const target = event.target;
+    if (!target) return;
+
+    if (target.matches('input[name="gender_terapis"]')) {
+        onGenderSelected();
+        return;
+    }
+
+    if (target.matches('input[name="pilih_nama_terapis"]')) {
+        selectSpecificTerapis(target.value);
+        return;
+    }
+
+    if (target.matches('input[name="layanan"]')) {
+        onLayananSelectedSafe(target.value);
+        return;
+    }
+
+    if (target.matches('input[name="waktu"]')) {
+        scrollToElement('step-3');
+        return;
+    }
+}
 
 async function initBooking() {
     const listTerapisUI = document.getElementById('list-terapis-nama');
@@ -72,6 +177,7 @@ async function initBooking() {
         const applyInitData = (terapisData, layananData) => {
             allTerapis = terapisData;
             allLayanan = layananData || [];
+            buildBookingIndexes();
             document.getElementById('global-loader').classList.add('hide');
             listTerapisUI.innerHTML = '<div class="col-span-full text-emerald-500 text-[10px] font-black uppercase tracking-widest p-2 rounded-lg bg-emerald-50 text-center animate-pulse"><i class="fas fa-check-circle"></i> Database Siap</div>';
             setTimeout(() => { 
@@ -115,10 +221,11 @@ async function initBooking() {
     }
 }
 document.addEventListener('DOMContentLoaded', initBooking);
+document.addEventListener('change', handleBookingFormChange);
 
 function onLayananSelectedSafe(encodedName) {
     const namaLayanan = decodeURIComponent(escape(atob(encodedName)));
-    selectedLayanan = allLayanan.find(l => l.nama.trim() === namaLayanan.trim());
+    selectedLayanan = layananByNama.get(normalizeName(namaLayanan)) || null;
     console.log("Layanan dipilih (Safe):", selectedLayanan);
     if (document.getElementById('tanggal').value) {
         checkAvailability();
@@ -142,23 +249,12 @@ function filterTerapisName() {
     const genderLabel = (selectedGender === "Pria") ? "Laki-laki" : "Perempuan";
     const container = document.getElementById('section-nama-terapis');
     const list = document.getElementById('list-terapis-nama');
-    
-    // Deteksi layanan "khusus" (yang tidak punya terapis perempuan) secara dinamis
-    const namaTerapisPerempuan = new Set(
-        allTerapis.filter(t => t.gender === "Perempuan").map(t => t.nama.trim().toLowerCase())
-    );
-    const layananTanpaPerempuan = allLayanan.filter(l => {
-        if (!l.terapisKhusus || l.terapisKhusus.length === 0) return false;
-        return !l.terapisKhusus.some(n => namaTerapisPerempuan.has(n.trim().toLowerCase()));
-    });
-    const namaTerapisKhususSet = new Set();
-    layananTanpaPerempuan.forEach(l => l.terapisKhusus.forEach(n => namaTerapisKhususSet.add(n.trim().toLowerCase())));
 
     // Terapis lintas gender: (1) gender === 'lintas' dari inject backend, ATAU
     // (2) namanya ada di layanan khusus (tanpa terapis perempuan)
     const addedExtraNames = new Set();
     const terapisKhususExtra = allTerapis.filter(t => {
-        const cleanNama = t.nama.trim().toLowerCase();
+        const cleanNama = normalizeName(t.nama);
         
         // 1. JANGAN masukkan jika sudah masuk ke list extra ini sendiri (cegah DOBLE saat inject)
         if (addedExtraNames.has(cleanNama)) return false;
@@ -172,35 +268,32 @@ function filterTerapisName() {
     });
 
     // Sesuaikan matches: JANGAN masukkan nama yang sudah ada di list Khusus/Extra
-    const extraNamaSet = new Set(terapisKhususExtra.map(t => t.nama.trim().toLowerCase()));
-    let matches = allTerapis.filter(t => t.gender === genderLabel && !extraNamaSet.has(t.nama.trim().toLowerCase()));
+    const extraNamaSet = new Set(terapisKhususExtra.map(t => normalizeName(t.nama)));
+    const matches = allTerapis.filter(t => t.gender === genderLabel && !extraNamaSet.has(normalizeName(t.nama)));
 
     list.innerHTML = "";
 
     // Kumpulkan nama layanan khusus per terapis untuk label
     const getLabelLayananKhusus = (namaTerapis) => {
-        const cleanNama = namaTerapis.trim().toLowerCase();
-        return layananTanpaPerempuan
-            .filter(l => l.terapisKhusus.some(n => n.trim().toLowerCase() === cleanNama))
-            .map(l => l.nama)
-            .join(", ");
+        return (specialLabelsByTerapis.get(normalizeName(namaTerapis)) || []).join(", ");
     };
 
     list.innerHTML = "";
+    const fragment = document.createDocumentFragment();
 
     const renderTerapisCard = (t, index, isKhusus = false) => {
         const div = document.createElement('label');
         div.className = "w-full animate-fade-up";
         div.style.animationDelay = `${index * 50}ms`;
         
-        const cleanNama = t.nama.trim().toLowerCase();
+        const cleanNama = normalizeName(t.nama);
         const hasSpecialty = isKhusus || namaTerapisKhususSet.has(cleanNama);
         
         const labelKhusus = hasSpecialty
             ? `<span class="text-[9px] font-black uppercase tracking-widest text-teal-600 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-full">${getLabelLayananKhusus(t.nama)}</span>`
             : '';
         div.innerHTML = `
-            <input type="radio" name="pilih_nama_terapis" value="${t.nama}" class="radio-hidden" onchange="selectSpecificTerapis('${t.nama}')">
+            <input type="radio" name="pilih_nama_terapis" value="${t.nama}" class="radio-hidden">
             <div class="pill-label !py-4 !rounded-[1rem] !text-sm flex flex-row gap-3 !justify-start pl-5">
                 <div class="w-8 h-8 rounded-full ${hasSpecialty ? 'bg-teal-50 text-teal-500' : 'bg-emerald-50 text-emerald-500'} flex items-center justify-center icon-wrapper transition-colors"><i class="fas ${hasSpecialty ? 'fa-star-and-crescent' : 'fa-user-md'}"></i></div>
                 <div class="flex flex-col gap-0.5">
@@ -209,7 +302,7 @@ function filterTerapisName() {
                 </div>
             </div>
         `;
-        list.appendChild(div);
+        fragment.appendChild(div);
     };
 
     if (matches.length > 0 || terapisKhususExtra.length > 0) {
@@ -223,9 +316,10 @@ function filterTerapisName() {
             const sep = document.createElement('div');
             sep.className = "col-span-full flex items-center gap-3 my-1 animate-fade-up";
             sep.innerHTML = `<div class="flex-1 h-px bg-teal-100"></div><span class="text-[9px] font-black uppercase tracking-widest text-teal-500">Layanan Khusus</span><div class="flex-1 h-px bg-teal-100"></div>`;
-            list.appendChild(sep);
+            fragment.appendChild(sep);
             terapisKhususExtra.forEach((t, i) => renderTerapisCard(t, matches.length + i, true));
         }
+        list.appendChild(fragment);
     } else {
         container.classList.remove('hidden');
         list.innerHTML = `<div class="col-span-full p-4 bg-amber-50 text-amber-700 rounded-xl text-xs font-bold border border-amber-100 flex items-center gap-3">
@@ -272,25 +366,16 @@ function renderLayanan() {
         }
 
         // Normalisasi nama terapis (hapus spasi depan/belakang dan ubah kecil)
-        const cleanTarget = selectedTerapisName.toLowerCase().trim();
+        const cleanTarget = normalizeName(selectedTerapisName);
 
-        // Ambil layanan yang bisa dilakukan terapis ini
-        const availableServices = allLayanan.filter(lay => {
-            // 1. Jika terapisKhusus kosong/tidak ada, tersedia untuk semua terapis
-            if (!lay.terapisKhusus || lay.terapisKhusus.length === 0) return true;
-            
-            // 2. Jika ada pembatasan, cek kecocokan nama secara ketat
-            const isMatch = lay.terapisKhusus.some(t => {
-                const cleanT = t.toLowerCase().trim();
-                return cleanT === cleanTarget;
-            });
-            
-            return isMatch;
-        });
+        // Ambil layanan yang bisa dilakukan terapis ini dari cache hasil normalisasi.
+        const availableServices = layananByTerapisName.get(cleanTarget) || [];
 
         if (availableServices.length === 0) {
             // Tampilkan Info Debug supaya USER bisa lapor ke AI
-            const debugInfo = allLayanan.map(l => `${l.nama}(${l.terapisKhusus.join(",")})`).join(" | ");
+            const debugInfo = allLayanan
+                .map(l => `${l.nama}(${Array.isArray(l.terapisKhusus) ? l.terapisKhusus.join(",") : ""})`)
+                .join(" | ");
             list.innerHTML = `
                 <div class="col-span-full p-6 bg-slate-50 text-slate-500 rounded-[1.5rem] text-[11px] font-bold text-center border-2 border-dashed border-slate-200">
                     Maaf, Terapis <b class="text-slate-800">${selectedTerapisName}</b> tidak terdaftar untuk layanan manapun di Sheet.<br>
@@ -303,6 +388,7 @@ function renderLayanan() {
             return;
         }
 
+        const fragment = document.createDocumentFragment();
         availableServices.forEach((lay, index) => {
             const card = document.createElement('label');
             card.className = "w-full cursor-pointer animate-fade-up";
@@ -311,7 +397,7 @@ function renderLayanan() {
             const safeName = btoa(unescape(encodeURIComponent(lay.nama)));
             
             card.innerHTML = `
-                <input type="radio" name="layanan" value="${safeName}" class="radio-hidden" onchange="onLayananSelectedSafe('${safeName}')">
+                <input type="radio" name="layanan" value="${safeName}" class="radio-hidden">
                 <div class="pill-label group relative overflow-hidden h-full !rounded-[1.25rem]">
                     <div class="icon-wrapper w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-xl mb-2 transition-transform duration-300">
                         <i class="fas ${iconClass}"></i>
@@ -320,8 +406,9 @@ function renderLayanan() {
                     ${lay.terlaris ? '<div class="absolute -top-1 -right-6 bg-amber-400 text-[9px] font-black py-1 px-6 rotate-45 text-white shadow-sm tracking-widest">TOP</div>' : ''}
                 </div>
             `;
-            list.appendChild(card);
+            fragment.appendChild(card);
         });
+        list.appendChild(fragment);
     }, 300); // Simulasi delay memuat skeleton
 }
 
@@ -330,6 +417,12 @@ async function checkAvailability() {
     if (!tgl || !selectedTerapisName) return;
 
     const gridWaktu = document.querySelector('#step-2 .grid');
+    let currentSignal = null;
+
+    if (availabilityAbortController) {
+        availabilityAbortController.abort();
+        availabilityAbortController = null;
+    }
 
     // Validasi Hari Aktif Layanan Sebelum Fetch
     if (selectedLayanan && selectedLayanan.hariAktif && selectedLayanan.hariAktif.length > 0) {
@@ -364,9 +457,17 @@ async function checkAvailability() {
     `;
 
     try {
+        const requestKey = `${tgl}__${selectedTerapisName}`;
+        availabilityRequestKey = requestKey;
+        availabilityAbortController = new AbortController();
+        currentSignal = availabilityAbortController.signal;
         const connector = window.GAS_URL.includes('?') ? '&' : '?';
-        const res = await fetch(`${window.GAS_URL}${connector}action=cekWaktu&tanggal=${tgl}&terapis=${encodeURIComponent(selectedTerapisName)}`);
+        const res = await fetch(`${window.GAS_URL}${connector}action=cekWaktu&tanggal=${tgl}&terapis=${encodeURIComponent(selectedTerapisName)}`, {
+            signal: currentSignal
+        });
         const result = await res.json();
+
+        if (availabilityRequestKey !== requestKey) return;
         
         if (result.status === "success") {
             if (result.data.length > 0) {
@@ -401,7 +502,7 @@ async function checkAvailability() {
                     label.className = "animate-fade-up";
                     label.style.animationDelay = `${idx * 40}ms`;
                     label.innerHTML = `
-                        <input type="radio" name="waktu" value="${jam}" class="radio-hidden" ${idx === 0 ? 'checked' : ''} onchange="scrollToElement('step-3')">
+                        <input type="radio" name="waktu" value="${jam}" class="radio-hidden" ${idx === 0 ? 'checked' : ''}>
                         <div class="pill-label !py-3 !rounded-xl !text-sm hover:!bg-emerald-50 hover:!border-emerald-300 transition-colors">
                             <span class="text-title flex items-center gap-2"><i class="far fa-clock opacity-50"></i> ${jam} WIB</span>
                         </div>
@@ -415,7 +516,12 @@ async function checkAvailability() {
             }
         }
     } catch (e) {
+        if (e.name === 'AbortError') return;
         gridWaktu.innerHTML = '<div class="col-span-full text-center py-6 bg-red-50 rounded-2xl border border-red-100 text-red-500 font-bold"><i class="fas fa-wifi mb-2 block text-xl"></i> Gagal memuat jadwal jaringan Anda.</div>';
+    } finally {
+        if (availabilityAbortController && availabilityAbortController.signal === currentSignal) {
+            availabilityAbortController = null;
+        }
     }
 }
 
