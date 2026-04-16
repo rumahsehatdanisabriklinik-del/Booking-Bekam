@@ -23,7 +23,7 @@ function renderClinicCheckinQr(secretCode) {
         return;
     }
 
-    const payload = getClinicCheckinPayload(secretCode);
+    const payload = window.AdminApp.cms.getClinicCheckinPayload(secretCode);
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=700x700&data=${encodeURIComponent(payload)}`;
 
     img.src = qrUrl;
@@ -41,7 +41,7 @@ async function copyClinicQrCode() {
     }
 
     try {
-        await navigator.clipboard.writeText(getClinicCheckinPayload(secretCode));
+        await navigator.clipboard.writeText(window.AdminApp.cms.getClinicCheckinPayload(secretCode));
         alert('Kode QR check-in berhasil disalin.');
     } catch (e) {
         alert('Gagal menyalin kode QR.');
@@ -94,7 +94,7 @@ async function saveCMS() {
     });
 
     try {
-        const result = await adminPost({ action: 'updateLandingSettings', updatedData });
+        const result = await window.AdminApp.auth.adminPost({ action: 'updateLandingSettings', updatedData });
         if (result.status === 'success') {
             alert('Web berhasil disinkronkan (cache dibersihkan).');
         } else {
@@ -206,7 +206,7 @@ async function saveLayanan() {
     }));
 
     try {
-        const result = await adminPost({ action: 'saveLayananList', layananData: dataToSave });
+        const result = await window.AdminApp.auth.adminPost({ action: 'saveLayananList', layananData: dataToSave });
         if (result.status === 'success') {
             alert('Daftar layanan berhasil diperbarui.');
             window.AdminApp.cms.loadLayananList();

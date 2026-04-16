@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const passInput = document.getElementById('passInput');
     if (passInput) passInput.placeholder = '........';
 
-    const sessionToken = getAdminSessionToken();
+    const sessionToken = window.AdminApp.auth.getAdminSessionToken();
     if (sessionToken) {
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('dashboardScreen').classList.remove('hidden');

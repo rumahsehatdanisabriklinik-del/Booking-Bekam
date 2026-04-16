@@ -7,7 +7,7 @@
 async function loadArtikelListAdmin() {
     try {
         document.getElementById('artikelList').innerHTML = '<p class="text-slate-400 font-bold text-sm text-center py-8"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat artikel...</p>';
-        const result = await adminGet('getArtikelListAdmin');
+        const result = await window.AdminApp.auth.adminGet('getArtikelListAdmin');
 
         if (result.status === 'success') {
             window.AdminState.content.artikel = result.data || [];
@@ -68,7 +68,7 @@ function openEditArtikel(idx) {
     document.getElementById('art_isi_modal').value = data.isi || '';
     document.getElementById('art_doc_id_modal').value = data.doc_id || '';
 
-    updateArtPreview(data.foto);
+    window.AdminApp.content.updateArtPreview(data.foto);
     modal.classList.remove('hidden');
 }
 
@@ -91,9 +91,9 @@ async function uploadArtikelImageModal(input) {
     btn.innerHTML = '<i class="fas fa-sync fa-spin"></i>';
 
     try {
-        const url = await uploadToDrive(file);
+        const url = await window.AdminApp.system.uploadToDrive(file);
         document.getElementById('art_foto_modal').value = url;
-        updateArtPreview(url);
+        window.AdminApp.content.updateArtPreview(url);
         alert('Foto berhasil diunggah.');
     } catch (e) {
         alert(e.message);
@@ -123,7 +123,7 @@ async function saveArtikelFromModal() {
     btn.disabled = true;
 
     try {
-        const result = await adminPost({ action: 'saveArtikel', artikelData: data });
+        const result = await window.AdminApp.auth.adminPost({ action: 'saveArtikel', artikelData: data });
         if (result.status === 'success') {
             alert('Artikel berhasil disimpan.');
             window.AdminApp.ui.closeModal('modalEditorArtikel');
@@ -149,7 +149,7 @@ async function deleteArtikelRecord(id, idx) {
     if (!confirm('Yakin hapus permanen? Foto di G-Drive tidak terhapus.')) return;
 
     try {
-        const result = await adminPost({ action: 'deleteArtikel', artikelId: id });
+        const result = await window.AdminApp.auth.adminPost({ action: 'deleteArtikel', artikelId: id });
         if (result.status === 'success') {
             window.AdminApp.content.loadArtikelListAdmin();
         } else {
@@ -219,7 +219,7 @@ function openEditGaleri(idx) {
     document.getElementById('gal_ket_modal').value = data.keterangan || '';
     document.getElementById('gal_url_modal').value = data.url_foto || '';
 
-    updateGalPreview(data.url_foto);
+    window.AdminApp.content.updateGalPreview(data.url_foto);
     modal.classList.remove('hidden');
 }
 
@@ -237,7 +237,7 @@ async function uploadGaleriImageModal(input) {
     const file = input.files[0];
     if (!file) return;
 
-        const url = await uploadToDrive(file);
+        const url = await window.AdminApp.system.uploadToDrive(file);
         document.getElementById('gal_url_modal').value = url;
         window.AdminApp.content.updateGalPreview(url);
         alert('Foto berhasil dipasang.');
@@ -265,7 +265,7 @@ async function saveGaleriFromModal() {
         if (idx === 'new') newPayload.push(item);
         else newPayload[idx] = item;
 
-        const result = await adminPost({ action: 'saveGaleri', galeriData: newPayload });
+        const result = await window.AdminApp.auth.adminPost({ action: 'saveGaleri', galeriData: newPayload });
         if (result.status === 'success') {
             window.AdminApp.ui.closeModal('modalEditorGaleri');
             window.AdminApp.content.loadGaleriListAdmin();
@@ -287,7 +287,7 @@ async function deleteGaleriRecord(id, idx) {
     newPayload.splice(idx, 1);
 
     try {
-        const result = await adminPost({ action: 'saveGaleri', galeriData: newPayload });
+        const result = await window.AdminApp.auth.adminPost({ action: 'saveGaleri', galeriData: newPayload });
         if (result.status === 'success') window.AdminApp.content.loadGaleriListAdmin();
     } catch (e) {
         alert('Gagal hapus.');
@@ -304,7 +304,7 @@ async function createDocFromModal() {
     btn.disabled = true;
 
     try {
-        const result = await adminPost({ action: 'createDoc', judul });
+        const result = await window.AdminApp.auth.adminPost({ action: 'createDoc', judul });
         if (result.status === 'success') {
             document.getElementById('art_doc_id_modal').value = result.data.docId;
             alert('Google Doc berhasil dibuat.');

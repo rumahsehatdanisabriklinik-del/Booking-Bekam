@@ -13,7 +13,7 @@ async function uploadHeroImage(input) {
     btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Sejenak...';
 
     try {
-        const url = await uploadToDrive(file);
+        const url = await window.AdminApp.system.uploadToDrive(file);
         document.getElementById('cms_hero_image').value = url;
         alert('Foto hero berhasil diupdate.');
     } catch (e) {
@@ -33,7 +33,7 @@ async function uploadToDrive(file) {
         const reader = new FileReader();
         reader.onload = async (event) => {
             try {
-                const result = await adminPost({
+                const result = await window.AdminApp.auth.adminPost({
                     action: 'uploadImage',
                     base64: event.target.result,
                     fileName: file.name,
@@ -61,7 +61,7 @@ async function runDatabaseInit() {
     btn.disabled = true;
 
     try {
-        const result = await adminPost({ action: 'initDb' });
+        const result = await window.AdminApp.auth.adminPost({ action: 'initDb' });
         alert(result.message);
     } catch (e) {
         alert('Error koneksi database.');
@@ -80,7 +80,7 @@ async function runSinkronCepat() {
     btn.disabled = true;
 
     try {
-        const result = await adminPost({ action: 'sinkronCepat' });
+        const result = await window.AdminApp.auth.adminPost({ action: 'sinkronCepat' });
         alert(result.message || 'Sinkronisasi selesai!');
     } catch (e) {
         alert('Error koneksi saat sinkronisasi.');

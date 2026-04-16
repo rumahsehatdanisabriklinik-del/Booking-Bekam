@@ -15,9 +15,9 @@ function getVisibleBookings() {
 }
 
 function renderTables() {
-    const visibleData = getVisibleBookings();
+    const visibleData = window.AdminApp.bookings.getVisibleBookings();
 
-    window.AdminState.bookings.filtered = getReservationFilteredData(visibleData);
+    window.AdminState.bookings.filtered = window.AdminApp.bookings.getReservationFilteredData(visibleData);
     window.AdminApp.bookings.renderReservationsTable();
 
     const ulasanBody = document.getElementById('tbUlasanBody');
@@ -55,7 +55,7 @@ function handleSearch(val) {
 
     if (window.AdminState.bookings.searchDebounce) clearTimeout(window.AdminState.bookings.searchDebounce);
     window.AdminState.bookings.searchDebounce = setTimeout(() => {
-        window.AdminState.bookings.filtered = getReservationFilteredData(getVisibleBookings());
+        window.AdminState.bookings.filtered = window.AdminApp.bookings.getReservationFilteredData(window.AdminApp.bookings.getVisibleBookings());
         window.AdminApp.bookings.renderReservationsTable();
     }, 180);
 }
@@ -124,7 +124,7 @@ function renderReservationsTable() {
                 <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">${escapeHtml(booking.waktu)} WIB</div>
             </td>
             <td>
-                <span class="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border ${getReservationBadgeClass(booking.status)}">
+                <span class="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border ${window.AdminApp.bookings.getReservationBadgeClass(booking.status)}">
                     ${escapeHtml(booking.status)}
                 </span>
             </td>
@@ -200,7 +200,7 @@ async function saveStatus() {
     btn.disabled = true;
 
     try {
-        const result = await adminPost({ action: 'adminUpdateStatus', row, status: stat });
+        const result = await window.AdminApp.auth.adminPost({ action: 'adminUpdateStatus', row, status: stat });
         if (result.status === 'success') {
             window.AdminApp.bookings.closeModalStatus();
             window.AdminApp.loadAllData();
@@ -238,7 +238,7 @@ async function saveEMR() {
     btn.disabled = true;
 
     try {
-        const result = await adminPost({
+        const result = await window.AdminApp.auth.adminPost({
             action: 'adminUpdateRekamMedis',
             row,
             tensi: '',
