@@ -18,6 +18,45 @@ function getAdminSessionToken() {
     return localStorage.getItem(ADMIN_SESSION_KEY) || '';
 }
 
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function escapeAttr(value) {
+    return escapeHtml(value);
+}
+
+function escapeJsSingle(value) {
+    return String(value ?? '')
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/\r/g, '\\r')
+        .replace(/\n/g, '\\n')
+        .replace(/</g, '\\x3C')
+        .replace(/>/g, '\\x3E');
+}
+
+function normalizeThumbUrl(url) {
+    let thumb = String(url || '').trim();
+    if (!thumb) return '';
+    if (thumb.includes('drive.google.com/uc')) {
+        try {
+            const id = thumb.split('id=')[1].split('&')[0];
+            thumb = `https://lh3.googleusercontent.com/d/${id}`;
+        } catch (e) {}
+    } else if (thumb.includes('id=')) {
+        try {
+            thumb = 'https://lh3.googleusercontent.com/d/' + thumb.split('id=')[1].split('&')[0];
+        } catch (e) {}
+    }
+    return thumb;
+}
+
 function clearAdminSession() {
     localStorage.removeItem(ADMIN_SESSION_KEY);
     localStorage.removeItem('adminPin');
@@ -1045,4 +1084,200 @@ async function runFullMigration() {
         "3. Klik ▶ Run\n\n" +
         "Untuk sinkronisasi booking harian, gunakan tombol 'Sinkron Booking ke Neon'."
     );
+}
+
+// Sanitized render overrides
+function renderTables() {
+    const role = localStorage.getItem('adminRole');
+    const myName = localStorage.getItem('adminNama');
+
+    const visibleData = allBookings.filter(b => {
+        if (role === 'terapis') return b.terapis === myName;
+        return true;
+    });
+
+    filteredBookings = getReservationFilteredData(visibleData);
+    renderReservationsTable();
+
+    const ulasanBody = document.getElementById('tbUlasanBody');
+    ulasanBody.innerHTML = visibleData.filter(b => b.rating).map(b => {
+        const stars = '?'.repeat(parseInt(b.rating, 10) || 0);
+        return `
+            <tr>
+                <td class="font-bold text-slate-800">${escapeHtml(b.nama)}</td>
+                <td class="text-xs font-bold text-slate-500">${escapeHtml(b.layanan)}</td>
+                <td class="text-xs">${escapeHtml(stars)}</td>
+                <td class="text-xs font-medium text-slate-600 max-w-xs italic">${escapeHtml(b.ulasan || '-')}</td>
+            </tr>
+        `;
+    }).join('');
+
+    const emrBody = document.getElementById('tbEMRBody');
+    emrBody.innerHTML = visibleData.map(b => `
+        <tr>
+            <td class="text-xs font-mono text-slate-500">#${escapeHtml(b.row)}</td>
+            <td class="font-bold text-slate-800">${escapeHtml(b.nama)}</td>
+            <td class="text-xs font-medium text-slate-600 max-w-xs truncate">${escapeHtml(b.keluhan || '-')}</td>
+            <td class="text-xs font-medium text-slate-600 max-w-xs truncate">${escapeHtml(b.tindakan || '-')}</td>
+            <td class="text-center">
+                <button onclick="openEMR(${Number(b.row) || 0}, '${escapeJsSingle(b.nama)}', '${escapeJsSingle(b.keluhan || '')}', '${escapeJsSingle(b.tindakan || '')}')" class="bg-emerald-50 text-emerald-600 font-bold text-[10px] px-4 py-2 rounded-xl hover:bg-emerald-600 hover:text-white transition-all uppercase tracking-widest">
+                    Edit EMR
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function renderReservationsTable() {
+    const resBody = document.getElementById('tbReservasiBody');
+    if (!resBody) return;
+
+    const totalItems = filteredBookings.length;
+    const totalPages = Math.max(1, Math.ceil(totalItems / RESERVATION_PAGE_SIZE));
+    currentReservationPage = Math.min(currentReservationPage, totalPages);
+    const startIndex = (currentReservationPage - 1) * RESERVATION_PAGE_SIZE;
+    const pageItems = filteredBookings.slice(startIndex, startIndex + RESERVATION_PAGE_SIZE);
+
+    if (pageItems.length === 0) {
+        resBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-slate-400 font-bold py-10">
+                    Tidak ada data reservasi yang cocok.
+                </td>
+            </tr>
+        `;
+        renderReservationPagination(totalItems, totalPages, 0, 0);
+        return;
+    }
+
+    resBody.innerHTML = pageItems.map(b => `
+        <tr>
+            <td>
+                <div class="font-bold text-slate-800">${escapeHtml(b.nama)}</div>
+                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mt-1"><i class="fab fa-whatsapp text-emerald-500"></i> ${escapeHtml(b.hp)}</div>
+            </td>
+            <td>
+                <div class="font-bold text-emerald-700">${escapeHtml(b.layanan)}</div>
+                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mt-1"><i class="fas fa-user-md"></i> ${escapeHtml(b.terapis)}</div>
+            </td>
+            <td>
+                <div class="font-bold text-slate-700">${escapeHtml(new Date(b.tanggal).toLocaleDateString('id-ID', {day:'numeric', month:'short'}))}</div>
+                <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">${escapeHtml(b.waktu)} WIB</div>
+            </td>
+            <td>
+                <span class="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border ${getReservationBadgeClass(b.status)}">
+                    ${escapeHtml(b.status)}
+                </span>
+            </td>
+            <td class="text-center">
+                <button onclick="openModalStatus(${Number(b.row) || 0}, '${escapeJsSingle(b.status)}')" class="bg-white border border-slate-200 hover:border-emerald-400 hover:text-emerald-600 w-9 h-9 rounded-xl flex items-center justify-center transition-colors shadow-sm mx-auto">
+                    <i class="fas fa-edit text-xs"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+
+    renderReservationPagination(totalItems, totalPages, startIndex + 1, Math.min(startIndex + pageItems.length, totalItems));
+}
+
+function renderLayananList() {
+    const container = document.getElementById('layananList');
+    container.innerHTML = currentLayanan.map((l, idx) => `
+        <div class="bg-white/60 border border-white rounded-[1.5rem] p-5 shadow-sm relative group">
+            <button onclick="deleteLayananRow(${idx})" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">
+                <i class="fas fa-trash-alt text-xs"></i>
+            </button>
+            <div class="grid md:grid-cols-12 gap-6">
+                <div class="md:col-span-4 space-y-3">
+                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nama, Icon & Warna</label>
+                    <input type="text" class="cms-input !py-3" id="lay_nama_${idx}" value="${escapeAttr(l.nama)}" placeholder="Cth: Bekam Sunnah">
+                    <div class="flex gap-2">
+                        <input type="text" class="cms-input !py-3 flex-1" id="lay_icon_${idx}" value="${escapeAttr(l.icon)}" placeholder="Cth: fas fa-leaf">
+                        <select id="lay_warna_${idx}" class="cms-input !py-3 !text-xs w-24">
+                            ${['emerald','teal','cyan','blue','violet','amber'].map(w => `<option value="${w}" ${l.warna === w ? 'selected' : ''}>${w}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-4 pt-1">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="lay_terlaris_${idx}" ${l.terlaris ? 'checked' : ''} class="w-4 h-4 accent-emerald-500">
+                            <span class="text-[10px] font-bold text-slate-600">Terlaris</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="lay_lintas_${idx}" ${l.lintas_gender ? 'checked' : ''} class="w-4 h-4 accent-teal-500">
+                            <span class="text-[10px] font-bold text-slate-600">Lintas Gender</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="md:col-span-4 space-y-3">
+                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Aturan Booking (Jadwal & Terapis)</label>
+                    <input type="text" class="cms-input !py-3 !text-[10px]" id="lay_hari_${idx}" value="${escapeAttr(l.hari_aktif || '')}" placeholder="Hari Aktif (0-6, Pisah Koma)">
+                    <input type="text" class="cms-input !py-3 !text-[10px]" id="lay_terapis_${idx}" value="${escapeAttr(l.terapis_khusus || '')}" placeholder="Terapis Khusus (Pisah Koma)">
+                    <input type="text" class="cms-input !py-3 !text-[10px]" id="lay_foto_${idx}" value="${escapeAttr(l.foto || '')}" placeholder="Link Foto (Opsional)">
+                </div>
+                <div class="md:col-span-4 space-y-3">
+                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Deskripsi & Detail Web</label>
+                    <textarea class="cms-input !py-3 !text-xs" id="lay_desc_${idx}" rows="2" placeholder="Penjelasan singkat">${escapeHtml(l.deskripsi)}</textarea>
+                    <textarea class="cms-input !py-3 !text-xs" id="lay_detail_${idx}" rows="2" placeholder="Item detail (pisah koma)">${escapeHtml(l.detail)}</textarea>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderArtikelList() {
+    const container = document.getElementById('artikelList');
+    if (artikelData.length === 0) {
+        container.innerHTML = `<div class="col-span-full border-2 border-dashed border-slate-200 rounded-[2.5rem] p-12 text-center text-slate-400">
+            <i class="fas fa-newspaper text-5xl mb-4 opacity-20"></i>
+            <p class="font-bold">Belum ada artikel. Mulai menulis sekarang!</p>
+        </div>`;
+        return;
+    }
+    container.innerHTML = artikelData.map((a, idx) => {
+        const thumb = normalizeThumbUrl(a.foto);
+        const safeStatus = String(a.status || 'draft');
+        return `
+        <div class="group bg-white/70 backdrop-blur-md border border-white rounded-[2rem] p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all relative overflow-hidden">
+            <div class="h-32 bg-slate-100 rounded-[1.5rem] overflow-hidden mb-4 relative">
+                ${thumb ? `<img src="${escapeAttr(thumb)}" class="w-full h-full object-cover">` : `<div class="w-full h-full flex items-center justify-center text-slate-300"><i class="fas fa-image text-3xl"></i></div>`}
+                <div class="absolute top-2 left-2 px-2 py-1 bg-white/90 backdrop-blur-md rounded-lg text-[8px] font-black uppercase tracking-widest text-indigo-600">${escapeHtml(a.kategori || 'Umum')}</div>
+            </div>
+            <h3 class="font-bold text-slate-800 text-sm line-clamp-2 leading-tight mb-4 pr-10">${escapeHtml(a.judul || '(Tanpa Judul)')}</h3>
+            <div class="flex items-center justify-between">
+                <span class="text-[9px] font-black uppercase tracking-widest ${safeStatus === 'published' ? 'text-emerald-500' : 'text-amber-500'}">${escapeHtml(a.status || 'Draft')}</span>
+                <div class="flex gap-2 relative z-10">
+                    <button onclick="openEditArtikel(${idx})" class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white flex items-center justify-center transition-all shadow-sm"><i class="fas fa-pencil-alt text-xs"></i></button>
+                    <button onclick="deleteArtikelRecord('${escapeJsSingle(a.id)}', ${idx})" class="w-9 h-9 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all shadow-sm"><i class="fas fa-trash-alt text-xs"></i></button>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function renderGaleriList() {
+    const container = document.getElementById('galeriList');
+    if (galeriData.length === 0) {
+        container.innerHTML = `<div class="col-span-full border-2 border-dashed border-slate-200 rounded-[2.5rem] p-12 text-center text-slate-400">
+            <i class="fas fa-images text-5xl mb-4 opacity-20"></i>
+            <p class="font-bold">Galeri masih kosong. Tambahkan momen terbaik Anda.</p>
+        </div>`;
+        return;
+    }
+    container.innerHTML = galeriData.map((g, idx) => {
+        const thumb = normalizeThumbUrl(g.url_foto);
+        return `
+        <div class="group bg-white/70 backdrop-blur-md border border-white rounded-[2rem] p-3 shadow-sm hover:shadow-xl transition-all relative overflow-hidden flex flex-col">
+            <div class="aspect-square bg-slate-100 rounded-[1.5rem] overflow-hidden mb-3 relative shadow-inner">
+                ${thumb ? `<img src="${escapeAttr(thumb)}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">` : `<div class="w-full h-full flex items-center justify-center text-slate-300"><i class="fas fa-image text-3xl"></i></div>`}
+                <div class="absolute top-2 left-2 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-lg text-[7px] font-black uppercase tracking-widest text-slate-500">${escapeHtml(g.kategori || 'Galeri')}</div>
+            </div>
+            <div class="px-2 pb-2">
+                <h4 class="font-bold text-slate-800 text-[10px] truncate mb-2">${escapeHtml(g.judul || '(Tanpa Nama)')}</h4>
+                <div class="flex gap-2 justify-end">
+                    <button onclick="openEditGaleri(${idx})" class="w-7 h-7 rounded-lg bg-violet-50 text-violet-600 hover:bg-violet-600 hover:text-white flex items-center justify-center transition-all"><i class="fas fa-pencil-alt text-[10px]"></i></button>
+                    <button onclick="deleteGaleriRecord('${escapeJsSingle(g.id)}', ${idx})" class="w-7 h-7 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all"><i class="fas fa-trash-alt text-[10px]"></i></button>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
 }
