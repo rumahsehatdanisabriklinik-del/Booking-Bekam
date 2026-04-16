@@ -131,17 +131,17 @@ function renderSingleBooking(data, isLatest, delayIndex = 0) {
 
             ${stat === 'SELESAI' ? `
                 <div class="mt-6 pt-4 border-t border-slate-100">
-                    <button onclick="openReview(${data.row}, '${data.terapis}')" class="w-full py-3.5 rounded-xl bg-slate-900 hover:bg-emerald-600 text-white font-extrabold text-sm shadow-lg shadow-slate-900/20 hover:shadow-emerald-500/30 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 group">
+                    <button data-action="open-review" data-row="${data.row}" data-terapis="${data.terapis}" class="w-full py-3.5 rounded-xl bg-slate-900 hover:bg-emerald-600 text-white font-extrabold text-sm shadow-lg shadow-slate-900/20 hover:shadow-emerald-500/30 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 group">
                         <i class="fas fa-star text-amber-400 group-hover:rotate-[72deg] transition-transform duration-500"></i> Beri Ulasan Layanan
                     </button>
                 </div>
             ` : (stat === 'MENUNGGU' || stat === 'TERJADWAL' || stat === 'DITERIMA' ? `
                 <div class="mt-6 pt-4 border-t border-slate-100">
                     ${canCheckIn ? `
-                    <button onclick="openCheckinModalSafe(${data.row}, '${encodedPayload}', '${encodedSummary}')" class="w-full mb-3 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-lg shadow-emerald-500/30 transition-all flex items-center justify-center gap-2">
+                    <button data-action="open-checkin" data-row="${data.row}" data-payload="${encodedPayload}" data-summary="${encodedSummary}" class="w-full mb-3 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-lg shadow-emerald-500/30 transition-all flex items-center justify-center gap-2">
                         <i class="fas fa-qrcode"></i> Scan QR Check-In Klinik
                     </button>` : ''}
-                    <button onclick="batalBooking(${data.row})" class="w-full py-3.5 rounded-xl bg-white border-2 border-red-100 text-red-500 font-extrabold text-sm hover:bg-red-50 transition-all flex items-center justify-center gap-2">
+                    <button data-action="cancel-booking" data-row="${data.row}" class="w-full py-3.5 rounded-xl bg-white border-2 border-red-100 text-red-500 font-extrabold text-sm hover:bg-red-50 transition-all flex items-center justify-center gap-2">
                         <i class="fas fa-times-circle"></i> Batalkan Reservasi
                     </button>
                 </div>
@@ -153,7 +153,7 @@ function renderSingleBooking(data, isLatest, delayIndex = 0) {
 
     if (isLatest) {
         const btnReset = document.createElement('button');
-        btnReset.onclick = resetSearch;
+        btnReset.dataset.action = 'reset-search';
         btnReset.className = "mt-8 w-full py-4 rounded-xl bg-white border-2 border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition-colors flex justify-center items-center gap-2 group animate-fade-up";
         btnReset.style.animationDelay = `${(delayIndex + 1) * 150}ms`;
         btnReset.innerHTML = '<i class="fas fa-redo text-xs group-hover:-rotate-180 transition-transform duration-500"></i> Lacak Nomor Lainnya';
