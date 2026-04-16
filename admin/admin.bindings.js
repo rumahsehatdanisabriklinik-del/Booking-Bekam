@@ -4,12 +4,12 @@
  * ================================================
  */
 
-function findBookingByRow(row) {
+window.AdminApp.bindings.findBookingByRow = function findBookingByRow(row) {
     const rowNumber = Number(row) || 0;
     return window.AdminState.bookings.all.find((booking) => Number(booking.row) === rowNumber) || null;
-}
+};
 
-function handleAdminAction(actionEl) {
+window.AdminApp.bindings.handleAdminAction = function handleAdminAction(actionEl) {
     const action = actionEl.dataset.action;
     if (!action) return;
 
@@ -92,7 +92,7 @@ function handleAdminAction(actionEl) {
             window.AdminApp.bookings.changeReservationPage(Number(actionEl.dataset.direction) || 0);
             break;
         case 'open-emr': {
-            const booking = findBookingByRow(actionEl.dataset.row);
+            const booking = window.AdminApp.bindings.findBookingByRow(actionEl.dataset.row);
             if (!booking) return;
             window.AdminApp.bookings.openEMR(booking.row, booking.nama, booking.keluhan || '', booking.tindakan || '');
             break;
@@ -130,9 +130,9 @@ function handleAdminAction(actionEl) {
         default:
             break;
     }
-}
+};
 
-function handleAdminChange(changeEl) {
+window.AdminApp.bindings.handleAdminChange = function handleAdminChange(changeEl) {
     const action = changeEl.dataset.changeAction;
     if (!action) return;
 
@@ -149,9 +149,9 @@ function handleAdminChange(changeEl) {
         default:
             break;
     }
-}
+};
 
-function handleAdminInput(inputEl) {
+window.AdminApp.bindings.handleAdminInput = function handleAdminInput(inputEl) {
     const action = inputEl.dataset.inputAction;
     if (!action) return;
 
@@ -162,25 +162,25 @@ function handleAdminInput(inputEl) {
         default:
             break;
     }
-}
+};
 
-function bindAdminEvents() {
+window.AdminApp.bindings.bindAdminEvents = function bindAdminEvents() {
     document.addEventListener('click', (event) => {
         const actionEl = event.target.closest('[data-action]');
         if (!actionEl) return;
-        handleAdminAction(actionEl);
+        window.AdminApp.bindings.handleAdminAction(actionEl);
     });
 
     document.addEventListener('change', (event) => {
         const changeEl = event.target.closest('[data-change-action]');
         if (!changeEl) return;
-        handleAdminChange(changeEl);
+        window.AdminApp.bindings.handleAdminChange(changeEl);
     });
 
     document.addEventListener('input', (event) => {
         const inputEl = event.target.closest('[data-input-action]');
         if (!inputEl) return;
-        handleAdminInput(inputEl);
+        window.AdminApp.bindings.handleAdminInput(inputEl);
     });
 
     const passInput = document.getElementById('passInput');
@@ -192,7 +192,4 @@ function bindAdminEvents() {
             }
         });
     }
-}
-
-window.AdminApp = window.AdminApp || {};
-window.AdminApp.bindAdminEvents = bindAdminEvents;
+};

@@ -4,7 +4,7 @@
  * ================================================
  */
 
-async function uploadHeroImage(input) {
+window.AdminApp.system.uploadHeroImage = async function uploadHeroImage(input) {
     const file = input.files[0];
     if (!file) return;
 
@@ -21,9 +21,9 @@ async function uploadHeroImage(input) {
     } finally {
         btn.innerHTML = originalHTML;
     }
-}
+};
 
-async function uploadToDrive(file) {
+window.AdminApp.system.uploadToDrive = async function uploadToDrive(file) {
     return new Promise((resolve, reject) => {
         if (!window.GAS_URL) {
             reject(new Error('GAS_URL tidak ditemukan. Cek config.js'));
@@ -50,9 +50,9 @@ async function uploadToDrive(file) {
         reader.onerror = () => reject(new Error('Gagal membaca file lokal.'));
         reader.readAsDataURL(file);
     });
-}
+};
 
-async function runDatabaseInit() {
+window.AdminApp.system.runDatabaseInit = async function runDatabaseInit() {
     if (!confirm('Yakin ingin melakukan inisialisasi tabel di Neon?')) return;
 
     const btn = document.getElementById('btnDbInit');
@@ -69,9 +69,9 @@ async function runDatabaseInit() {
         btn.innerHTML = orig;
         btn.disabled = false;
     }
-}
+};
 
-async function runSinkronCepat() {
+window.AdminApp.system.runSinkronCepat = async function runSinkronCepat() {
     if (!confirm('Sinkronisasi semua booking dari Sheets ke Neon sekarang?\n\nProses ini aman dan tidak menghapus data.')) return;
 
     const btn = document.getElementById('btnSinkronCepat');
@@ -88,9 +88,9 @@ async function runSinkronCepat() {
         btn.innerHTML = orig;
         btn.disabled = false;
     }
-}
+};
 
-async function runFullMigration() {
+window.AdminApp.system.runFullMigration = async function runFullMigration() {
     alert(
         'PERHATIAN: Migrasi Lengkap tidak bisa dijalankan dari tombol ini.\n\n' +
         'Alasannya: Proses JDBC membutuhkan lebih dari 30 detik, melebihi batas waktu server.\n\n' +
@@ -100,12 +100,4 @@ async function runFullMigration() {
         '3. Klik Run\n\n' +
         "Untuk sinkronisasi booking harian, gunakan tombol 'Sinkron Booking ke Neon'."
     );
-}
-
-Object.assign(window.AdminApp.system, {
-    uploadHeroImage,
-    uploadToDrive,
-    runDatabaseInit,
-    runSinkronCepat,
-    runFullMigration
-});
+};

@@ -4,8 +4,8 @@
  * ================================================
  */
 
-document.addEventListener('DOMContentLoaded', () => {
-    window.AdminApp.bindAdminEvents();
+window.AdminApp.bootstrap = function bootstrapAdmin() {
+    window.AdminApp.bindings.bindAdminEvents();
 
     const passInput = document.getElementById('passInput');
     if (passInput) passInput.placeholder = '........';
@@ -21,4 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         localStorage.removeItem('adminPin');
     }
-});
+};
+
+document.addEventListener('DOMContentLoaded', window.AdminApp.bootstrap);

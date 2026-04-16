@@ -33,7 +33,8 @@ window.AdminApp = window.AdminApp || {
     bookings: {},
     cms: {},
     content: {},
-    system: {}
+    system: {},
+    bindings: {}
 };
 
 function getAdminSessionToken() {
