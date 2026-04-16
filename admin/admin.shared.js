@@ -228,7 +228,7 @@ window.AdminApp.ui.closeModal = function closeModal(id) {
 };
 
 window.AdminApp.loadAllData = async function loadAllData() {
-    window.AdminApp.showLoader(true);
+    window.AdminApp.ui.showLoader(true);
     try {
         const result = await window.AdminApp.auth.adminGet('getSemuaBooking');
         if (result.status === 'success') {
@@ -239,11 +239,6 @@ window.AdminApp.loadAllData = async function loadAllData() {
     } catch (e) {
         console.error(e);
     } finally {
-        window.AdminApp.showLoader(false);
+        window.AdminApp.ui.showLoader(false);
     }
 };
-
-window.escapeHtml = window.AdminApp.utils.escapeHtml;
-window.escapeAttr = window.AdminApp.utils.escapeAttr;
-window.escapeJsSingle = window.AdminApp.utils.escapeJsSingle;
-window.normalizeThumbUrl = window.AdminApp.utils.normalizeThumbUrl;

@@ -31,17 +31,17 @@ window.AdminApp.content.renderArtikelList = function renderArtikelList() {
     }
 
     container.innerHTML = window.AdminState.content.artikel.map((artikel, idx) => {
-        const thumb = normalizeThumbUrl(artikel.foto);
+        const thumb = window.AdminApp.utils.normalizeThumbUrl(artikel.foto);
         const safeStatus = String(artikel.status || 'draft');
         return `
         <div class="group bg-white/70 backdrop-blur-md border border-white rounded-[2rem] p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all relative overflow-hidden">
             <div class="h-32 bg-slate-100 rounded-[1.5rem] overflow-hidden mb-4 relative">
-                ${thumb ? `<img src="${escapeAttr(thumb)}" class="w-full h-full object-cover">` : `<div class="w-full h-full flex items-center justify-center text-slate-300"><i class="fas fa-image text-3xl"></i></div>`}
-                <div class="absolute top-2 left-2 px-2 py-1 bg-white/90 backdrop-blur-md rounded-lg text-[8px] font-black uppercase tracking-widest text-indigo-600">${escapeHtml(artikel.kategori || 'Umum')}</div>
+                ${thumb ? `<img src="${window.AdminApp.utils.escapeAttr(thumb)}" class="w-full h-full object-cover">` : `<div class="w-full h-full flex items-center justify-center text-slate-300"><i class="fas fa-image text-3xl"></i></div>`}
+                <div class="absolute top-2 left-2 px-2 py-1 bg-white/90 backdrop-blur-md rounded-lg text-[8px] font-black uppercase tracking-widest text-indigo-600">${window.AdminApp.utils.escapeHtml(artikel.kategori || 'Umum')}</div>
             </div>
-            <h3 class="font-bold text-slate-800 text-sm line-clamp-2 leading-tight mb-4 pr-10">${escapeHtml(artikel.judul || '(Tanpa Judul)')}</h3>
+            <h3 class="font-bold text-slate-800 text-sm line-clamp-2 leading-tight mb-4 pr-10">${window.AdminApp.utils.escapeHtml(artikel.judul || '(Tanpa Judul)')}</h3>
             <div class="flex items-center justify-between">
-                <span class="text-[9px] font-black uppercase tracking-widest ${safeStatus === 'published' ? 'text-emerald-500' : 'text-amber-500'}">${escapeHtml(artikel.status || 'Draft')}</span>
+                <span class="text-[9px] font-black uppercase tracking-widest ${safeStatus === 'published' ? 'text-emerald-500' : 'text-amber-500'}">${window.AdminApp.utils.escapeHtml(artikel.status || 'Draft')}</span>
                 <div class="flex gap-2 relative z-10">
                     <button data-action="edit-artikel" data-idx="${idx}" class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white flex items-center justify-center transition-all shadow-sm"><i class="fas fa-pencil-alt text-xs"></i></button>
                     <button data-action="delete-artikel" data-idx="${idx}" class="w-9 h-9 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all shadow-sm"><i class="fas fa-trash-alt text-xs"></i></button>
@@ -75,7 +75,7 @@ window.AdminApp.content.openEditArtikel = function openEditArtikel(idx) {
 window.AdminApp.content.updateArtPreview = function updateArtPreview(url) {
     const img = document.getElementById('art_preview_modal');
     if (url) {
-        img.src = normalizeThumbUrl(url);
+        img.src = window.AdminApp.utils.normalizeThumbUrl(url);
         img.classList.remove('hidden');
     } else {
         img.classList.add('hidden');
@@ -187,15 +187,15 @@ window.AdminApp.content.renderGaleriList = function renderGaleriList() {
     }
 
     container.innerHTML = window.AdminState.content.galeri.map((galeri, idx) => {
-        const thumb = normalizeThumbUrl(galeri.url_foto);
+        const thumb = window.AdminApp.utils.normalizeThumbUrl(galeri.url_foto);
         return `
         <div class="group bg-white/70 backdrop-blur-md border border-white rounded-[2rem] p-3 shadow-sm hover:shadow-xl transition-all relative overflow-hidden flex flex-col">
             <div class="aspect-square bg-slate-100 rounded-[1.5rem] overflow-hidden mb-3 relative shadow-inner">
-                ${thumb ? `<img src="${escapeAttr(thumb)}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">` : `<div class="w-full h-full flex items-center justify-center text-slate-300"><i class="fas fa-image text-3xl"></i></div>`}
-                <div class="absolute top-2 left-2 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-lg text-[7px] font-black uppercase tracking-widest text-slate-500">${escapeHtml(galeri.kategori || 'Galeri')}</div>
+                ${thumb ? `<img src="${window.AdminApp.utils.escapeAttr(thumb)}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">` : `<div class="w-full h-full flex items-center justify-center text-slate-300"><i class="fas fa-image text-3xl"></i></div>`}
+                <div class="absolute top-2 left-2 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-lg text-[7px] font-black uppercase tracking-widest text-slate-500">${window.AdminApp.utils.escapeHtml(galeri.kategori || 'Galeri')}</div>
             </div>
             <div class="px-2 pb-2">
-                <h4 class="font-bold text-slate-800 text-[10px] truncate mb-2">${escapeHtml(galeri.judul || '(Tanpa Nama)')}</h4>
+                <h4 class="font-bold text-slate-800 text-[10px] truncate mb-2">${window.AdminApp.utils.escapeHtml(galeri.judul || '(Tanpa Nama)')}</h4>
                 <div class="flex gap-2 justify-end">
                     <button data-action="edit-galeri" data-idx="${idx}" class="w-7 h-7 rounded-lg bg-violet-50 text-violet-600 hover:bg-violet-600 hover:text-white flex items-center justify-center transition-all"><i class="fas fa-pencil-alt text-[10px]"></i></button>
                     <button data-action="delete-galeri" data-idx="${idx}" class="w-7 h-7 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all"><i class="fas fa-trash-alt text-[10px]"></i></button>
@@ -226,7 +226,7 @@ window.AdminApp.content.openEditGaleri = function openEditGaleri(idx) {
 window.AdminApp.content.updateGalPreview = function updateGalPreview(url) {
     const img = document.getElementById('gal_preview_modal');
     if (url) {
-        img.src = normalizeThumbUrl(url);
+        img.src = window.AdminApp.utils.normalizeThumbUrl(url);
         img.classList.remove('hidden');
     } else {
         img.classList.add('hidden');

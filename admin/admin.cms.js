@@ -131,9 +131,9 @@ window.AdminApp.cms.renderLayananList = function renderLayananList() {
             <div class="grid md:grid-cols-12 gap-6">
                 <div class="md:col-span-4 space-y-3">
                     <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nama, Icon & Warna</label>
-                    <input type="text" class="cms-input !py-3" id="lay_nama_${idx}" value="${escapeAttr(layanan.nama)}" placeholder="Cth: Bekam Sunnah">
+                    <input type="text" class="cms-input !py-3" id="lay_nama_${idx}" value="${window.AdminApp.utils.escapeAttr(layanan.nama)}" placeholder="Cth: Bekam Sunnah">
                     <div class="flex gap-2">
-                        <input type="text" class="cms-input !py-3 flex-1" id="lay_icon_${idx}" value="${escapeAttr(layanan.icon)}" placeholder="Cth: fas fa-leaf">
+                        <input type="text" class="cms-input !py-3 flex-1" id="lay_icon_${idx}" value="${window.AdminApp.utils.escapeAttr(layanan.icon)}" placeholder="Cth: fas fa-leaf">
                         <select id="lay_warna_${idx}" class="cms-input !py-3 !text-xs w-24">
                             ${['emerald', 'teal', 'cyan', 'blue', 'violet', 'amber'].map((warna) => `<option value="${warna}" ${layanan.warna === warna ? 'selected' : ''}>${warna}</option>`).join('')}
                         </select>
@@ -151,14 +151,14 @@ window.AdminApp.cms.renderLayananList = function renderLayananList() {
                 </div>
                 <div class="md:col-span-4 space-y-3">
                     <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Aturan Booking (Jadwal & Terapis)</label>
-                    <input type="text" class="cms-input !py-3 !text-[10px]" id="lay_hari_${idx}" value="${escapeAttr(layanan.hari_aktif || '')}" placeholder="Hari Aktif (0-6, Pisah Koma)">
-                    <input type="text" class="cms-input !py-3 !text-[10px]" id="lay_terapis_${idx}" value="${escapeAttr(layanan.terapis_khusus || '')}" placeholder="Terapis Khusus (Pisah Koma)">
-                    <input type="text" class="cms-input !py-3 !text-[10px]" id="lay_foto_${idx}" value="${escapeAttr(layanan.foto || '')}" placeholder="Link Foto (Opsional)">
+                    <input type="text" class="cms-input !py-3 !text-[10px]" id="lay_hari_${idx}" value="${window.AdminApp.utils.escapeAttr(layanan.hari_aktif || '')}" placeholder="Hari Aktif (0-6, Pisah Koma)">
+                    <input type="text" class="cms-input !py-3 !text-[10px]" id="lay_terapis_${idx}" value="${window.AdminApp.utils.escapeAttr(layanan.terapis_khusus || '')}" placeholder="Terapis Khusus (Pisah Koma)">
+                    <input type="text" class="cms-input !py-3 !text-[10px]" id="lay_foto_${idx}" value="${window.AdminApp.utils.escapeAttr(layanan.foto || '')}" placeholder="Link Foto (Opsional)">
                 </div>
                 <div class="md:col-span-4 space-y-3">
                     <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Deskripsi & Detail Web</label>
-                    <textarea class="cms-input !py-3 !text-xs" id="lay_desc_${idx}" rows="2" placeholder="Penjelasan singkat">${escapeHtml(layanan.deskripsi)}</textarea>
-                    <textarea class="cms-input !py-3 !text-xs" id="lay_detail_${idx}" rows="2" placeholder="Item detail (pisah koma)">${escapeHtml(layanan.detail)}</textarea>
+                    <textarea class="cms-input !py-3 !text-xs" id="lay_desc_${idx}" rows="2" placeholder="Penjelasan singkat">${window.AdminApp.utils.escapeHtml(layanan.deskripsi)}</textarea>
+                    <textarea class="cms-input !py-3 !text-xs" id="lay_detail_${idx}" rows="2" placeholder="Item detail (pisah koma)">${window.AdminApp.utils.escapeHtml(layanan.detail)}</textarea>
                 </div>
             </div>
         </div>

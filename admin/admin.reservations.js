@@ -25,10 +25,10 @@ window.AdminApp.bookings.renderTables = function renderTables() {
         const stars = '&#9733;'.repeat(parseInt(booking.rating, 10) || 0);
         return `
             <tr>
-                <td class="font-bold text-slate-800">${escapeHtml(booking.nama)}</td>
-                <td class="text-xs font-bold text-slate-500">${escapeHtml(booking.layanan)}</td>
+                <td class="font-bold text-slate-800">${window.AdminApp.utils.escapeHtml(booking.nama)}</td>
+                <td class="text-xs font-bold text-slate-500">${window.AdminApp.utils.escapeHtml(booking.layanan)}</td>
                 <td class="text-xs">${stars}</td>
-                <td class="text-xs font-medium text-slate-600 max-w-xs italic">${escapeHtml(booking.ulasan || '-')}</td>
+                <td class="text-xs font-medium text-slate-600 max-w-xs italic">${window.AdminApp.utils.escapeHtml(booking.ulasan || '-')}</td>
             </tr>
         `;
     }).join('');
@@ -36,10 +36,10 @@ window.AdminApp.bookings.renderTables = function renderTables() {
     const emrBody = document.getElementById('tbEMRBody');
     emrBody.innerHTML = visibleData.map((booking) => `
         <tr>
-            <td class="text-xs font-mono text-slate-500">#${escapeHtml(booking.row)}</td>
-            <td class="font-bold text-slate-800">${escapeHtml(booking.nama)}</td>
-            <td class="text-xs font-medium text-slate-600 max-w-xs truncate">${escapeHtml(booking.keluhan || '-')}</td>
-            <td class="text-xs font-medium text-slate-600 max-w-xs truncate">${escapeHtml(booking.tindakan || '-')}</td>
+            <td class="text-xs font-mono text-slate-500">#${window.AdminApp.utils.escapeHtml(booking.row)}</td>
+            <td class="font-bold text-slate-800">${window.AdminApp.utils.escapeHtml(booking.nama)}</td>
+            <td class="text-xs font-medium text-slate-600 max-w-xs truncate">${window.AdminApp.utils.escapeHtml(booking.keluhan || '-')}</td>
+            <td class="text-xs font-medium text-slate-600 max-w-xs truncate">${window.AdminApp.utils.escapeHtml(booking.tindakan || '-')}</td>
             <td class="text-center">
                 <button data-action="open-emr" data-row="${Number(booking.row) || 0}" class="bg-emerald-50 text-emerald-600 font-bold text-[10px] px-4 py-2 rounded-xl hover:bg-emerald-600 hover:text-white transition-all uppercase tracking-widest">
                     Edit EMR
@@ -112,24 +112,24 @@ window.AdminApp.bookings.renderReservationsTable = function renderReservationsTa
     resBody.innerHTML = pageItems.map((booking) => `
         <tr>
             <td>
-                <div class="font-bold text-slate-800">${escapeHtml(booking.nama)}</div>
-                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mt-1"><i class="fab fa-whatsapp text-emerald-500"></i> ${escapeHtml(booking.hp)}</div>
+                <div class="font-bold text-slate-800">${window.AdminApp.utils.escapeHtml(booking.nama)}</div>
+                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mt-1"><i class="fab fa-whatsapp text-emerald-500"></i> ${window.AdminApp.utils.escapeHtml(booking.hp)}</div>
             </td>
             <td>
-                <div class="font-bold text-emerald-700">${escapeHtml(booking.layanan)}</div>
-                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mt-1"><i class="fas fa-user-md"></i> ${escapeHtml(booking.terapis)}</div>
+                <div class="font-bold text-emerald-700">${window.AdminApp.utils.escapeHtml(booking.layanan)}</div>
+                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mt-1"><i class="fas fa-user-md"></i> ${window.AdminApp.utils.escapeHtml(booking.terapis)}</div>
             </td>
             <td>
-                <div class="font-bold text-slate-700">${escapeHtml(new Date(booking.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }))}</div>
-                <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">${escapeHtml(booking.waktu)} WIB</div>
+                <div class="font-bold text-slate-700">${window.AdminApp.utils.escapeHtml(new Date(booking.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }))}</div>
+                <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">${window.AdminApp.utils.escapeHtml(booking.waktu)} WIB</div>
             </td>
             <td>
                 <span class="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border ${window.AdminApp.bookings.getReservationBadgeClass(booking.status)}">
-                    ${escapeHtml(booking.status)}
+                    ${window.AdminApp.utils.escapeHtml(booking.status)}
                 </span>
             </td>
             <td class="text-center">
-                <button data-action="open-status-modal" data-row="${Number(booking.row) || 0}" data-status="${escapeAttr(booking.status)}" class="bg-white border border-slate-200 hover:border-emerald-400 hover:text-emerald-600 w-9 h-9 rounded-xl flex items-center justify-center transition-colors shadow-sm mx-auto">
+                <button data-action="open-status-modal" data-row="${Number(booking.row) || 0}" data-status="${window.AdminApp.utils.escapeAttr(booking.status)}" class="bg-white border border-slate-200 hover:border-emerald-400 hover:text-emerald-600 w-9 h-9 rounded-xl flex items-center justify-center transition-colors shadow-sm mx-auto">
                     <i class="fas fa-edit text-xs"></i>
                 </button>
             </td>
