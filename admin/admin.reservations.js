@@ -14,13 +14,28 @@ window.AdminApp.bookings.getVisibleBookings = function getVisibleBookings() {
     });
 };
 
-window.AdminApp.bookings.renderTables = function renderTables() {
+window.AdminApp.bookings.getBookingByRow = function getBookingByRow(row) {
+    const rowNumber = Number(row) || 0;
+    return window.AdminState.bookings.byRow[rowNumber] || null;
+};
+
+window.AdminApp.bookings.refreshFilteredBookings = function refreshFilteredBookings() {
     const visibleData = window.AdminApp.bookings.getVisibleBookings();
-
     window.AdminState.bookings.filtered = window.AdminApp.bookings.getReservationFilteredData(visibleData);
-    window.AdminApp.bookings.renderReservationsTable();
+    return visibleData;
+};
 
+window.AdminApp.bookings.renderTables = function renderTables() {
+    const visibleData = window.AdminApp.bookings.refreshFilteredBookings();
+    window.AdminApp.bookings.renderReservationsTable();
+    window.AdminApp.bookings.renderUlasanTable(visibleData);
+    window.AdminApp.bookings.renderEMRTable(visibleData);
+};
+
+window.AdminApp.bookings.renderUlasanTable = function renderUlasanTable(visibleData = window.AdminApp.bookings.getVisibleBookings()) {
     const ulasanBody = document.getElementById('tbUlasanBody');
+    if (!ulasanBody) return;
+
     ulasanBody.innerHTML = visibleData.filter((booking) => booking.rating).map((booking) => {
         const stars = '&#9733;'.repeat(parseInt(booking.rating, 10) || 0);
         return `
@@ -32,8 +47,12 @@ window.AdminApp.bookings.renderTables = function renderTables() {
             </tr>
         `;
     }).join('');
+};
 
+window.AdminApp.bookings.renderEMRTable = function renderEMRTable(visibleData = window.AdminApp.bookings.getVisibleBookings()) {
     const emrBody = document.getElementById('tbEMRBody');
+    if (!emrBody) return;
+
     emrBody.innerHTML = visibleData.map((booking) => `
         <tr>
             <td class="text-xs font-mono text-slate-500">#${window.AdminApp.utils.escapeHtml(booking.row)}</td>
@@ -55,7 +74,7 @@ window.AdminApp.bookings.handleSearch = function handleSearch(val) {
 
     if (window.AdminState.bookings.searchDebounce) clearTimeout(window.AdminState.bookings.searchDebounce);
     window.AdminState.bookings.searchDebounce = setTimeout(() => {
-        window.AdminState.bookings.filtered = window.AdminApp.bookings.getReservationFilteredData(window.AdminApp.bookings.getVisibleBookings());
+        window.AdminApp.bookings.refreshFilteredBookings();
         window.AdminApp.bookings.renderReservationsTable();
     }, 180);
 };
@@ -202,8 +221,11 @@ window.AdminApp.bookings.saveStatus = async function saveStatus() {
     try {
         const result = await window.AdminApp.auth.adminPost({ action: 'adminUpdateStatus', row, status: stat });
         if (result.status === 'success') {
+            const booking = window.AdminApp.bookings.getBookingByRow(row);
+            if (booking) booking.status = stat;
+            window.AdminApp.bookings.refreshFilteredBookings();
+            window.AdminApp.bookings.renderReservationsTable();
             window.AdminApp.bookings.closeModalStatus();
-            window.AdminApp.loadAllData();
         } else {
             alert(`Gagal update status: ${result.message}`);
         }
@@ -247,8 +269,13 @@ window.AdminApp.bookings.saveEMR = async function saveEMR() {
         });
 
         if (result.status === 'success') {
+            const booking = window.AdminApp.bookings.getBookingByRow(row);
+            if (booking) {
+                booking.keluhan = keluhan;
+                booking.tindakan = tindakan;
+            }
+            window.AdminApp.bookings.renderEMRTable();
             window.AdminApp.bookings.closeEMR();
-            window.AdminApp.loadAllData();
         } else {
             alert(`Gagal simpan EMR: ${result.message}`);
         }
