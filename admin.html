@@ -214,9 +214,9 @@
             <div class="space-y-5 relative z-10 rounded-[2rem] border border-slate-100 bg-white/80 p-4 shadow-[0_16px_40px_rgba(15,23,42,0.06)]">
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-300"><i class="fas fa-shield-heart"></i></div>
-                    <input type="password" id="passInput" class="cms-input !pl-12 !py-4 font-mono tracking-widest text-center" placeholder="••••••••" onkeypress="if(event.key === 'Enter') doLogin()">
+                    <input type="password" id="passInput" class="cms-input !pl-12 !py-4 font-mono tracking-widest text-center" placeholder="••••••••">
                 </div>
-                <button id="btnLogin" onclick="doLogin()" class="w-full rounded-[1.4rem] bg-slate-950 py-4 text-sm font-extrabold text-white shadow-[0_20px_40px_rgba(15,23,42,0.22)] transition-all hover:-translate-y-0.5 hover:bg-emerald-600 hover:shadow-[0_24px_44px_rgba(16,185,129,0.35)] active:scale-[0.985]">
+                <button id="btnLogin" data-action="login" class="w-full rounded-[1.4rem] bg-slate-950 py-4 text-sm font-extrabold text-white shadow-[0_20px_40px_rgba(15,23,42,0.22)] transition-all hover:-translate-y-0.5 hover:bg-emerald-600 hover:shadow-[0_24px_44px_rgba(16,185,129,0.35)] active:scale-[0.985]">
                     Akses Sistem
                 </button>
             </div>
@@ -240,7 +240,7 @@
     <!-- ── DASHBOARD ── -->
     <div id="dashboardScreen" class="hidden w-full h-full flex animate-fade-in z-10 transition-all duration-300">
         
-        <div id="sidebarOverlay" onclick="toggleSidebar(false)" class="hidden fixed inset-0 bg-slate-900/50 z-30 transition-opacity lg:hidden"></div>
+        <div id="sidebarOverlay" data-action="sidebar-toggle" data-show="false" class="hidden fixed inset-0 bg-slate-900/50 z-30 transition-opacity lg:hidden"></div>
 
         <aside id="sidebar" class="fixed lg:relative inset-y-4 lg:inset-y-0 left-4 lg:left-0 z-50 w-64 sm:w-72 bg-white lg:glass-panel border lg:border-r border-slate-200 lg:border-white/50 flex flex-col h-[calc(100%-2rem)] lg:h-full shrink-0 shadow-2xl lg:shadow-none rounded-[2.5rem] lg:rounded-none transform -translate-x-[120%] lg:translate-x-0 transition-transform duration-500 ease-in-out">
             <div class="p-8 pb-4 flex items-center justify-between">
@@ -253,7 +253,7 @@
                         <span class="text-[9px] font-black text-emerald-600 uppercase tracking-widest" id="adminNameTxt">Admin</span>
                     </div>
                 </div>
-                <button onclick="toggleSidebar(false)" class="lg:hidden w-10 h-10 flex items-center justify-center bg-slate-100 text-slate-400 rounded-full hover:bg-red-50 hover:text-red-500 transition-colors">
+                <button data-action="sidebar-toggle" data-show="false" class="lg:hidden w-10 h-10 flex items-center justify-center bg-slate-100 text-slate-400 rounded-full hover:bg-red-50 hover:text-red-500 transition-colors">
                     <i class="fas fa-times text-lg"></i>
                 </button>
             </div>
@@ -264,37 +264,37 @@
             </div>
 
             <div class="px-6 py-2 flex-1 flex flex-col gap-2 overflow-y-auto">
-                <button class="nav-item active" onclick="switchTab('tab-reservasi', this)">
+                <button class="nav-item active" data-action="switch-tab" data-tab="tab-reservasi">
                     <div class="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-calendar-alt text-base"></i></div>
                     Data Reservasi
                 </button>
-                <button class="nav-item" id="nav-cms" onclick="switchTab('tab-cms', this)">
+                <button class="nav-item" id="nav-cms" data-action="switch-tab" data-tab="tab-cms">
                     <div class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center"><i class="fas fa-pen-ruler text-base"></i></div>
                     Edit Landing Page
                 </button>
-                <button class="nav-item" id="nav-artikel" onclick="switchTab('tab-artikel', this)">
+                <button class="nav-item" id="nav-artikel" data-action="switch-tab" data-tab="tab-artikel">
                     <div class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center"><i class="fas fa-newspaper text-base"></i></div>
                     Manajemen Artikel
                 </button>
-                <button class="nav-item" id="nav-galeri" onclick="switchTab('tab-galeri', this)">
+                <button class="nav-item" id="nav-galeri" data-action="switch-tab" data-tab="tab-galeri">
                     <div class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center"><i class="fas fa-images text-base"></i></div>
                     Kelola Galeri
                 </button>
-                <button class="nav-item" id="nav-ulasan" onclick="switchTab('tab-ulasan', this)">
+                <button class="nav-item" id="nav-ulasan" data-action="switch-tab" data-tab="tab-ulasan">
                     <div class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center"><i class="fas fa-star text-base"></i></div>
                     Ulasan Pasien
                 </button>
-                <button class="nav-item" id="nav-emr" onclick="switchTab('tab-emr', this)">
+                <button class="nav-item" id="nav-emr" data-action="switch-tab" data-tab="tab-emr">
                     <div class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center"><i class="fas fa-file-medical text-base"></i></div>
                     Rekam Medis (EMR)
                 </button>
-                <button class="nav-item" id="nav-database" onclick="switchTab('tab-database', this)">
+                <button class="nav-item" id="nav-database" data-action="switch-tab" data-tab="tab-database">
                     <div class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center"><i class="fas fa-database text-base"></i></div>
                     Database &amp; Migrasi
                 </button>
             </div>
             <div class="p-6 border-t border-white/50 mt-auto bg-slate-50/50">
-                <button onclick="logout()" class="w-full py-4 text-slate-500 font-bold text-sm bg-white border border-slate-200 rounded-[1.5rem] hover:bg-red-50 hover:text-red-600 hover:border-red-200 shadow-sm transition-all flex items-center justify-center gap-2">
+                <button data-action="logout" class="w-full py-4 text-slate-500 font-bold text-sm bg-white border border-slate-200 rounded-[1.5rem] hover:bg-red-50 hover:text-red-600 hover:border-red-200 shadow-sm transition-all flex items-center justify-center gap-2">
                     <i class="fas fa-sign-out-alt"></i> Keluar
                 </button>
             </div>
@@ -303,7 +303,7 @@
         <main class="flex-1 h-full overflow-y-auto p-4 sm:p-10 relative">
             <!-- Mobile Header -->
             <div class="lg:hidden flex items-center justify-between mb-4 p-3 bg-white shadow-md rounded-2xl border border-slate-100 z-30 relative">
-                <button onclick="toggleSidebar(true)" class="flex items-center gap-2 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-lg active:scale-95 transition-all">
+                <button data-action="sidebar-toggle" data-show="true" class="flex items-center gap-2 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-lg active:scale-95 transition-all">
                     <i class="fas fa-bars text-sm"></i>
                     <span class="text-[10px] font-black uppercase tracking-widest">Menu</span>
                 </button>
@@ -329,9 +329,9 @@
                     <div class="flex w-full sm:w-auto gap-2 items-center">
                         <div class="relative flex-1">
                             <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
-                            <input type="text" id="searchInput" oninput="handleSearch(this.value)" class="bg-white border-2 border-slate-100 rounded-xl pl-10 pr-4 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:border-emerald-500 w-full lg:w-64" placeholder="Cari Pasien...">
+                            <input type="text" id="searchInput" data-input-action="reservation-search" class="bg-white border-2 border-slate-100 rounded-xl pl-10 pr-4 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:border-emerald-500 w-full lg:w-64" placeholder="Cari Pasien...">
                         </div>
-                        <button onclick="loadAllData()" class="bg-white text-emerald-600 border-2 border-emerald-100 w-11 h-11 shrink-0 rounded-xl font-bold flex items-center justify-center hover:bg-emerald-50 shadow-sm transition-colors">
+                        <button data-action="refresh-bookings" class="bg-white text-emerald-600 border-2 border-emerald-100 w-11 h-11 shrink-0 rounded-xl font-bold flex items-center justify-center hover:bg-emerald-50 shadow-sm transition-colors">
                             <i class="fas fa-sync-alt"></i>
                         </button>
                     </div>
@@ -345,10 +345,10 @@
                             <h3 class="text-xl sm:text-2xl font-extrabold leading-tight">QR ini dipindai langsung oleh pasien saat tiba di meja admin.</h3>
                             <p class="text-emerald-50/90 text-sm font-medium mt-3 max-w-2xl">Pasien membuka halaman status reservasi dari HP mereka, lalu menekan tombol scan untuk memindai QR baku klinik ini. Check-in hanya akan diterima jika booking masih dalam jendela waktu kunjungan.</p>
                             <div class="mt-4 flex flex-wrap gap-3">
-                                <button onclick="copyClinicQrCode()" class="px-4 py-3 rounded-xl bg-white text-emerald-700 font-black text-xs uppercase tracking-widest hover:bg-emerald-50 transition-colors">
+                                <button data-action="copy-clinic-qr" class="px-4 py-3 rounded-xl bg-white text-emerald-700 font-black text-xs uppercase tracking-widest hover:bg-emerald-50 transition-colors">
                                     Salin Kode QR
                                 </button>
-                                <button onclick="printClinicQrPoster()" class="px-4 py-3 rounded-xl border border-white/30 bg-white/10 text-white font-black text-xs uppercase tracking-widest hover:bg-white/20 transition-colors">
+                                <button data-action="print-clinic-qr" class="px-4 py-3 rounded-xl border border-white/30 bg-white/10 text-white font-black text-xs uppercase tracking-widest hover:bg-white/20 transition-colors">
                                     Cetak Poster QR
                                 </button>
                             </div>
@@ -386,7 +386,7 @@
                         <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Konten Landing Page</h1>
                         <p class="text-sm font-bold text-slate-400 mt-1">Ubah teks dan informasi website publik.</p>
                     </div>
-                    <button onclick="saveCMS()" id="btnSaveCMS" class="bg-slate-900 text-white px-8 py-3.5 rounded-[1.5rem] font-extrabold text-sm hover:bg-emerald-600 shadow-xl shadow-slate-900/20 active:scale-95 transition-all flex items-center gap-2">
+                    <button data-action="save-cms" id="btnSaveCMS" class="bg-slate-900 text-white px-8 py-3.5 rounded-[1.5rem] font-extrabold text-sm hover:bg-emerald-600 shadow-xl shadow-slate-900/20 active:scale-95 transition-all flex items-center gap-2">
                         <i class="fas fa-save"></i> Simpan Web
                     </button>
                 </div>
@@ -426,10 +426,10 @@
                                         <i class="fas fa-image absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
                                         <input type="text" id="cms_hero_image" class="cms-input pl-11" placeholder="https://drive.google.com/...">
                                     </div>
-                                    <button id="btnUploadImage" onclick="document.getElementById('fileHero').click()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 border border-slate-300/50 shadow-sm">
+                                    <button id="btnUploadImage" data-action="trigger-file-input" data-target-id="fileHero" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 border border-slate-300/50 shadow-sm">
                                         <i class="fas fa-cloud-upload-alt"></i> <span class="hidden sm:inline">Upload Foto</span>
                                     </button>
-                                    <input type="file" id="fileHero" class="hidden" accept="image/*" onchange="uploadHeroImage(this)">
+                                    <input type="file" id="fileHero" class="hidden" accept="image/*" data-change-action="upload-hero-image">
                                 </div>
                             </div>
                         </div>
@@ -445,7 +445,7 @@
                                     <p class="text-xs text-slate-400 font-semibold">Tambah atau hapus layanan sesuka Anda</p>
                                 </div>
                             </div>
-                            <button onclick="addLayananRow()" class="bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-extrabold text-xs hover:bg-emerald-700 transition-all flex items-center gap-2 shadow-lg shadow-emerald-600/30">
+                            <button data-action="add-layanan-row" class="bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-extrabold text-xs hover:bg-emerald-700 transition-all flex items-center gap-2 shadow-lg shadow-emerald-600/30">
                                 <i class="fas fa-plus"></i> Tambah Layanan
                             </button>
                         </div>
@@ -455,7 +455,7 @@
                             </div>
                         </div>
                         <div class="mt-6 pt-4 border-t border-slate-100 flex justify-end">
-                            <button onclick="saveLayanan()" id="btnSaveLayanan" class="bg-slate-900 text-white px-8 py-3 rounded-xl font-extrabold text-sm hover:bg-emerald-600 shadow-xl shadow-slate-900/20 active:scale-95 transition-all flex items-center gap-2">
+                            <button data-action="save-layanan" id="btnSaveLayanan" class="bg-slate-900 text-white px-8 py-3 rounded-xl font-extrabold text-sm hover:bg-emerald-600 shadow-xl shadow-slate-900/20 active:scale-95 transition-all flex items-center gap-2">
                                 <i class="fas fa-save"></i> Simpan Semua Layanan
                             </button>
                         </div>
@@ -529,7 +529,7 @@
                         <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Manajemen Artikel</h1>
                         <p class="text-sm font-bold text-slate-400 mt-1">Kelola tulisan edukasi kesehatan.</p>
                     </div>
-                    <button onclick="openEditArtikel(null)" class="bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-indigo-700 shadow-md transition-all flex items-center gap-2">
+                    <button data-action="open-new-artikel" class="bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-indigo-700 shadow-md transition-all flex items-center gap-2">
                         <i class="fas fa-plus"></i> Artikel Baru
                     </button>
                 </div>
@@ -545,7 +545,7 @@
                         <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Kelola Galeri</h1>
                         <p class="text-sm font-bold text-slate-400 mt-1">Koleksi foto kegiatan &amp; fasilitas.</p>
                     </div>
-                    <button onclick="openEditGaleri(null)" class="bg-violet-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-violet-700 shadow-md transition-all flex items-center gap-2">
+                    <button data-action="open-new-galeri" class="bg-violet-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-violet-700 shadow-md transition-all flex items-center gap-2">
                         <i class="fas fa-plus"></i> Tambah Foto
                     </button>
                 </div>
@@ -594,7 +594,7 @@
                         <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm"><i class="fas fa-tools"></i></div>
                         <h3 class="font-extrabold text-slate-800 text-lg mb-2">Inisialisasi Database</h3>
                         <p class="text-sm text-slate-500 mb-8 px-4">Buat tabel Pasien, Booking, dan Rekam Medis di Neon. Jalankan ini hanya satu kali saat pertama setup.</p>
-                        <button onclick="runDatabaseInit()" id="btnDbInit" class="w-full py-4 text-white font-extrabold text-sm bg-blue-600 rounded-[1.5rem] hover:bg-blue-700 shadow-xl shadow-blue-600/20 active:scale-95 transition-all">
+                        <button data-action="run-db-init" id="btnDbInit" class="w-full py-4 text-white font-extrabold text-sm bg-blue-600 rounded-[1.5rem] hover:bg-blue-700 shadow-xl shadow-blue-600/20 active:scale-95 transition-all">
                             Setup Tabel Sekarang
                         </button>
                     </div>
@@ -605,7 +605,7 @@
                         <h3 class="font-extrabold text-slate-800 text-lg mb-2">Sinkron Booking ke Neon</h3>
                         <span class="inline-block px-3 py-1 bg-emerald-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full mb-4">✅ Direkomendasikan</span>
                         <p class="text-sm text-slate-500 mb-6 px-4">Sinkronisasi cepat semua booking dari Google Sheets ke Neon. Aman, tidak menghapus data, bisa dijalankan kapan saja.</p>
-                        <button onclick="runSinkronCepat()" id="btnSinkronCepat" class="w-full py-4 text-white font-extrabold text-sm bg-emerald-600 rounded-[1.5rem] hover:bg-emerald-700 shadow-xl shadow-emerald-600/20 active:scale-95 transition-all">
+                        <button data-action="run-sinkron-cepat" id="btnSinkronCepat" class="w-full py-4 text-white font-extrabold text-sm bg-emerald-600 rounded-[1.5rem] hover:bg-emerald-700 shadow-xl shadow-emerald-600/20 active:scale-95 transition-all">
                             <i class="fas fa-sync-alt mr-2"></i> Sinkron Booking Sekarang
                         </button>
                     </div>
@@ -617,7 +617,7 @@
                     <div>
                         <h4 class="font-bold text-amber-800 text-sm mb-2">Migrasi Lengkap (JDBC) — Harus Dijalankan dari GAS Editor</h4>
                         <p class="text-[11px] text-amber-700 leading-relaxed font-semibold">Fungsi <code class="bg-amber-100 px-1 rounded">jalankanMigrasiSemua()</code> menggunakan koneksi JDBC yang membutuhkan waktu lebih dari 30 detik, sehingga <strong>akan timeout jika dijalankan dari tombol web</strong>. Untuk migrasi data awal yang besar, buka <strong>Google Apps Script Editor → Pilih fungsi jalankanMigrasiSemua → Klik ▶ Run</strong>.</p>
-                        <button onclick="runFullMigration()" class="mt-3 text-amber-700 font-bold text-[11px] underline hover:text-amber-900 transition-colors">
+                        <button data-action="run-full-migration" class="mt-3 text-amber-700 font-bold text-[11px] underline hover:text-amber-900 transition-colors">
                             <i class="fas fa-info-circle mr-1"></i> Lihat Instruksi Lengkap
                         </button>
                     </div>
@@ -632,7 +632,7 @@
         <div class="glass-modal w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/60 animate-slide-up">
             <div class="bg-slate-900 p-6 flex justify-between items-center text-white">
                 <h3 class="font-extrabold text-lg flex items-center gap-2"><i class="fas fa-edit text-emerald-400"></i> Update Status</h3>
-                <button onclick="closeModalStatus()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"><i class="fas fa-times"></i></button>
+                <button data-action="close-status-modal" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-8 space-y-6">
                 <input type="hidden" id="editRowIndex">
@@ -647,8 +647,8 @@
                 </div>
             </div>
             <div class="p-6 bg-slate-50/80 border-t border-slate-200/60 flex gap-4">
-                <button onclick="closeModalStatus()" class="flex-1 py-4 text-slate-500 font-bold text-sm bg-white border border-slate-200 rounded-[1.5rem]">Batal</button>
-                <button id="btnSaveStatus" onclick="saveStatus()" class="flex-1 py-4 text-white font-extrabold text-sm bg-emerald-600 rounded-[1.5rem] hover:bg-emerald-700 shadow-xl shadow-emerald-600/30">Simpan</button>
+                <button data-action="close-status-modal" class="flex-1 py-4 text-slate-500 font-bold text-sm bg-white border border-slate-200 rounded-[1.5rem]">Batal</button>
+                <button id="btnSaveStatus" data-action="save-status" class="flex-1 py-4 text-white font-extrabold text-sm bg-emerald-600 rounded-[1.5rem] hover:bg-emerald-700 shadow-xl shadow-emerald-600/30">Simpan</button>
             </div>
         </div>
     </div>
@@ -658,7 +658,7 @@
         <div class="glass-modal w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-slide-up">
             <div class="bg-emerald-600 p-6 flex justify-between items-center text-white">
                 <h3 class="font-extrabold text-lg flex items-center gap-2"><i class="fas fa-file-medical"></i> Catat Rekam Medis (EMR)</h3>
-                <button onclick="closeEMR()" class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center"><i class="fas fa-times"></i></button>
+                <button data-action="close-emr" class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-8 space-y-6">
                 <input type="hidden" id="emrRowIndex">
@@ -675,8 +675,8 @@
                 </div>
             </div>
             <div class="p-6 bg-slate-50 border-t flex gap-4">
-                <button onclick="closeEMR()" class="flex-1 py-4 text-slate-500 font-bold text-sm bg-white border rounded-[1.5rem]">Tutup</button>
-                <button id="btnSaveEMR" onclick="saveEMR()" class="flex-1 py-4 text-white font-extrabold text-sm bg-emerald-600 rounded-[1.5rem] hover:bg-emerald-700 shadow-xl shadow-emerald-600/30">Simpan EMR</button>
+                <button data-action="close-emr" class="flex-1 py-4 text-slate-500 font-bold text-sm bg-white border rounded-[1.5rem]">Tutup</button>
+                <button id="btnSaveEMR" data-action="save-emr" class="flex-1 py-4 text-white font-extrabold text-sm bg-emerald-600 rounded-[1.5rem] hover:bg-emerald-700 shadow-xl shadow-emerald-600/30">Simpan EMR</button>
             </div>
         </div>
     </div>
@@ -686,7 +686,7 @@
         <div class="glass-modal w-full max-w-4xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-slide-up max-h-[90vh] flex flex-col">
             <div class="bg-indigo-600 p-6 flex justify-between items-center text-white shrink-0">
                 <h3 class="font-extrabold text-lg flex items-center gap-2"><i class="fas fa-edit"></i> Editor Artikel</h3>
-                <button onclick="closeModal('modalEditorArtikel')" class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center"><i class="fas fa-times"></i></button>
+                <button data-action="close-modal" data-modal-id="modalEditorArtikel" class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-8 space-y-6 overflow-y-auto flex-grow">
                 <input type="hidden" id="art_idx_modal">
@@ -702,11 +702,11 @@
                                 <label class="block text-[10px] text-slate-400 uppercase tracking-widest font-black mb-2">Google Doc ID (Opsional)</label>
                                 <div class="flex gap-2">
                                     <input type="text" id="art_doc_id_modal" class="cms-input flex-grow" placeholder="Contoh: 1abc123456789xyz">
-                                    <button onclick="window.open('https://docs.google.com/document/d/' + document.getElementById('art_doc_id_modal').value, '_blank')" class="bg-blue-50 text-blue-600 px-4 rounded-xl border border-blue-200 hover:bg-blue-600 hover:text-white transition-all" title="Buka Dokumen"><i class="fas fa-external-link-alt"></i></button>
+                                    <button data-action="open-doc-link" data-input-id="art_doc_id_modal" class="bg-blue-50 text-blue-600 px-4 rounded-xl border border-blue-200 hover:bg-blue-600 hover:text-white transition-all" title="Buka Dokumen"><i class="fas fa-external-link-alt"></i></button>
                                 </div>
                                 <div class="flex justify-between items-center mt-1">
                                     <p class="text-[9px] text-slate-400 italic">Jika diisi, isi artikel diambil dari Google Doc ini.</p>
-                                    <button id="btnCreateDocModal" onclick="createDocFromModal()" class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg text-[9px] font-bold border border-indigo-100 hover:bg-indigo-600 hover:text-white transition-all">✨ Buat Doc Otomatis</button>
+                                    <button id="btnCreateDocModal" data-action="create-doc" class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg text-[9px] font-bold border border-indigo-100 hover:bg-indigo-600 hover:text-white transition-all">✨ Buat Doc Otomatis</button>
                                 </div>
                             </div>
                             <div>
@@ -725,8 +725,8 @@
                             <label class="block text-[10px] text-slate-400 uppercase tracking-widest font-black mb-2">Link Gambar / Foto</label>
                             <div class="flex gap-2">
                                 <input type="text" id="art_foto_modal" class="cms-input flex-grow" placeholder="URL Foto">
-                                <button onclick="document.getElementById('fileArtModal').click()" class="bg-emerald-50 text-emerald-600 px-4 rounded-xl border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-all"><i class="fas fa-cloud-upload-alt"></i></button>
-                                <input type="file" id="fileArtModal" class="hidden" accept="image/*" onchange="uploadArtikelImageModal(this)">
+                                <button data-action="trigger-file-input" data-target-id="fileArtModal" class="bg-emerald-50 text-emerald-600 px-4 rounded-xl border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-all"><i class="fas fa-cloud-upload-alt"></i></button>
+                                <input type="file" id="fileArtModal" class="hidden" accept="image/*" data-change-action="upload-artikel-image">
                             </div>
                         </div>
                     </div>
@@ -749,8 +749,8 @@
                 </div>
             </div>
             <div class="p-6 bg-slate-50 border-t flex gap-4 shrink-0">
-                <button onclick="closeModal('modalEditorArtikel')" class="flex-1 py-4 text-slate-500 font-bold text-sm bg-white border rounded-[1.5rem]">Tutup</button>
-                <button id="btnSaveArtModal" onclick="saveArtikelFromModal()" class="flex-1 py-4 text-white font-extrabold text-sm bg-indigo-600 rounded-[1.5rem] hover:bg-indigo-700 shadow-xl shadow-indigo-600/30">Simpan Perubahan</button>
+                <button data-action="close-modal" data-modal-id="modalEditorArtikel" class="flex-1 py-4 text-slate-500 font-bold text-sm bg-white border rounded-[1.5rem]">Tutup</button>
+                <button id="btnSaveArtModal" data-action="save-artikel" class="flex-1 py-4 text-white font-extrabold text-sm bg-indigo-600 rounded-[1.5rem] hover:bg-indigo-700 shadow-xl shadow-indigo-600/30">Simpan Perubahan</button>
             </div>
         </div>
     </div>
@@ -760,17 +760,17 @@
         <div class="glass-modal w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-slide-up">
             <div class="bg-violet-600 p-6 flex justify-between items-center text-white">
                 <h3 class="font-extrabold text-lg flex items-center gap-2"><i class="fas fa-image"></i> Editor Galeri</h3>
-                <button onclick="closeModal('modalEditorGaleri')" class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center"><i class="fas fa-times"></i></button>
+                <button data-action="close-modal" data-modal-id="modalEditorGaleri" class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-8 space-y-5">
                 <input type="hidden" id="gal_idx_modal">
                 <div class="flex justify-center mb-4">
                     <div class="w-32 h-32 bg-slate-100 rounded-3xl border-4 border-white shadow-lg overflow-hidden relative group">
                         <img id="gal_preview_modal" src="" class="w-full h-full object-cover hidden">
-                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer" onclick="document.getElementById('fileGalModal').click()">
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer" data-action="trigger-file-input" data-target-id="fileGalModal">
                             <i class="fas fa-camera text-white text-2xl"></i>
                         </div>
-                        <input type="file" id="fileGalModal" class="hidden" accept="image/*" onchange="uploadGaleriImageModal(this)">
+                        <input type="file" id="fileGalModal" class="hidden" accept="image/*" data-change-action="upload-galeri-image">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
@@ -794,8 +794,8 @@
                 </div>
             </div>
             <div class="p-6 bg-slate-50 border-t flex gap-4">
-                <button onclick="closeModal('modalEditorGaleri')" class="flex-1 py-4 text-slate-500 font-bold text-sm bg-white border rounded-[1.5rem]">Batal</button>
-                <button id="btnSaveGalModal" onclick="saveGaleriFromModal()" class="flex-1 py-4 text-white font-extrabold text-sm bg-violet-600 rounded-[1.5rem] hover:bg-violet-700 shadow-xl shadow-violet-600/30">Simpan Foto</button>
+                <button data-action="close-modal" data-modal-id="modalEditorGaleri" class="flex-1 py-4 text-slate-500 font-bold text-sm bg-white border rounded-[1.5rem]">Batal</button>
+                <button id="btnSaveGalModal" data-action="save-galeri" class="flex-1 py-4 text-white font-extrabold text-sm bg-violet-600 rounded-[1.5rem] hover:bg-violet-700 shadow-xl shadow-violet-600/30">Simpan Foto</button>
             </div>
         </div>
     </div>
@@ -840,6 +840,7 @@
     <script src="admin/admin.cms.js"></script>
     <script src="admin/admin.content.js"></script>
     <script src="admin/admin.system.js"></script>
+    <script src="admin/admin.bindings.js"></script>
     <script src="admin.js"></script>
 </body>
 </html>

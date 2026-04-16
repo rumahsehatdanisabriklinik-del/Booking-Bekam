@@ -43,8 +43,8 @@ function renderArtikelList() {
             <div class="flex items-center justify-between">
                 <span class="text-[9px] font-black uppercase tracking-widest ${safeStatus === 'published' ? 'text-emerald-500' : 'text-amber-500'}">${escapeHtml(artikel.status || 'Draft')}</span>
                 <div class="flex gap-2 relative z-10">
-                    <button onclick="openEditArtikel(${idx})" class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white flex items-center justify-center transition-all shadow-sm"><i class="fas fa-pencil-alt text-xs"></i></button>
-                    <button onclick="deleteArtikelRecord('${escapeJsSingle(artikel.id)}', ${idx})" class="w-9 h-9 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all shadow-sm"><i class="fas fa-trash-alt text-xs"></i></button>
+                    <button data-action="edit-artikel" data-idx="${idx}" class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white flex items-center justify-center transition-all shadow-sm"><i class="fas fa-pencil-alt text-xs"></i></button>
+                    <button data-action="delete-artikel" data-idx="${idx}" class="w-9 h-9 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all shadow-sm"><i class="fas fa-trash-alt text-xs"></i></button>
                 </div>
             </div>
         </div>`;
@@ -197,8 +197,8 @@ function renderGaleriList() {
             <div class="px-2 pb-2">
                 <h4 class="font-bold text-slate-800 text-[10px] truncate mb-2">${escapeHtml(galeri.judul || '(Tanpa Nama)')}</h4>
                 <div class="flex gap-2 justify-end">
-                    <button onclick="openEditGaleri(${idx})" class="w-7 h-7 rounded-lg bg-violet-50 text-violet-600 hover:bg-violet-600 hover:text-white flex items-center justify-center transition-all"><i class="fas fa-pencil-alt text-[10px]"></i></button>
-                    <button onclick="deleteGaleriRecord('${escapeJsSingle(galeri.id)}', ${idx})" class="w-7 h-7 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all"><i class="fas fa-trash-alt text-[10px]"></i></button>
+                    <button data-action="edit-galeri" data-idx="${idx}" class="w-7 h-7 rounded-lg bg-violet-50 text-violet-600 hover:bg-violet-600 hover:text-white flex items-center justify-center transition-all"><i class="fas fa-pencil-alt text-[10px]"></i></button>
+                    <button data-action="delete-galeri" data-idx="${idx}" class="w-7 h-7 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all"><i class="fas fa-trash-alt text-[10px]"></i></button>
                 </div>
             </div>
         </div>`;

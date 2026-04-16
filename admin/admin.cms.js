@@ -125,7 +125,7 @@ function renderLayananList() {
     const container = document.getElementById('layananList');
     container.innerHTML = window.AdminState.cms.layanan.map((layanan, idx) => `
         <div class="bg-white/60 border border-white rounded-[1.5rem] p-5 shadow-sm relative group">
-            <button onclick="deleteLayananRow(${idx})" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">
+            <button data-action="delete-layanan-row" data-idx="${idx}" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">
                 <i class="fas fa-trash-alt text-xs"></i>
             </button>
             <div class="grid md:grid-cols-12 gap-6">

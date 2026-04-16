@@ -5,6 +5,8 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+    window.AdminApp.bindAdminEvents();
+
     const passInput = document.getElementById('passInput');
     if (passInput) passInput.placeholder = '........';
 

@@ -41,7 +41,7 @@ function renderTables() {
             <td class="text-xs font-medium text-slate-600 max-w-xs truncate">${escapeHtml(booking.keluhan || '-')}</td>
             <td class="text-xs font-medium text-slate-600 max-w-xs truncate">${escapeHtml(booking.tindakan || '-')}</td>
             <td class="text-center">
-                <button onclick="openEMR(${Number(booking.row) || 0}, '${escapeJsSingle(booking.nama)}', '${escapeJsSingle(booking.keluhan || '')}', '${escapeJsSingle(booking.tindakan || '')}')" class="bg-emerald-50 text-emerald-600 font-bold text-[10px] px-4 py-2 rounded-xl hover:bg-emerald-600 hover:text-white transition-all uppercase tracking-widest">
+                <button data-action="open-emr" data-row="${Number(booking.row) || 0}" class="bg-emerald-50 text-emerald-600 font-bold text-[10px] px-4 py-2 rounded-xl hover:bg-emerald-600 hover:text-white transition-all uppercase tracking-widest">
                     Edit EMR
                 </button>
             </td>
@@ -129,7 +129,7 @@ function renderReservationsTable() {
                 </span>
             </td>
             <td class="text-center">
-                <button onclick="openModalStatus(${Number(booking.row) || 0}, '${escapeJsSingle(booking.status)}')" class="bg-white border border-slate-200 hover:border-emerald-400 hover:text-emerald-600 w-9 h-9 rounded-xl flex items-center justify-center transition-colors shadow-sm mx-auto">
+                <button data-action="open-status-modal" data-row="${Number(booking.row) || 0}" data-status="${escapeAttr(booking.status)}" class="bg-white border border-slate-200 hover:border-emerald-400 hover:text-emerald-600 w-9 h-9 rounded-xl flex items-center justify-center transition-colors shadow-sm mx-auto">
                     <i class="fas fa-edit text-xs"></i>
                 </button>
             </td>
@@ -158,13 +158,13 @@ function renderReservationPagination(totalItems, totalPages, startItem, endItem)
             Menampilkan ${startItem}-${endItem} dari ${totalItems} reservasi
         </div>
         <div class="flex items-center gap-2">
-            <button onclick="changeReservationPage(-1)" class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-500 text-xs font-black ${window.AdminState.bookings.currentPage <= 1 ? 'opacity-50 cursor-not-allowed' : 'hover:border-emerald-300 hover:text-emerald-600'}" ${window.AdminState.bookings.currentPage <= 1 ? 'disabled' : ''}>
+            <button data-action="change-reservation-page" data-direction="-1" class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-500 text-xs font-black ${window.AdminState.bookings.currentPage <= 1 ? 'opacity-50 cursor-not-allowed' : 'hover:border-emerald-300 hover:text-emerald-600'}" ${window.AdminState.bookings.currentPage <= 1 ? 'disabled' : ''}>
                 Sebelumnya
             </button>
             <div class="px-3 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-black">
                 Hal. ${window.AdminState.bookings.currentPage}/${totalPages}
             </div>
-            <button onclick="changeReservationPage(1)" class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-500 text-xs font-black ${window.AdminState.bookings.currentPage >= totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:border-emerald-300 hover:text-emerald-600'}" ${window.AdminState.bookings.currentPage >= totalPages ? 'disabled' : ''}>
+            <button data-action="change-reservation-page" data-direction="1" class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-500 text-xs font-black ${window.AdminState.bookings.currentPage >= totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:border-emerald-300 hover:text-emerald-600'}" ${window.AdminState.bookings.currentPage >= totalPages ? 'disabled' : ''}>
                 Berikutnya
             </button>
         </div>
