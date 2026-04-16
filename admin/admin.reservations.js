@@ -120,7 +120,7 @@ window.AdminApp.bookings.renderReservationsTable = function renderReservationsTa
                 <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mt-1"><i class="fas fa-user-md"></i> ${window.AdminApp.utils.escapeHtml(booking.terapis)}</div>
             </td>
             <td>
-                <div class="font-bold text-slate-700">${window.AdminApp.utils.escapeHtml(new Date(booking.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }))}</div>
+                <div class="font-bold text-slate-700">${window.AdminApp.utils.escapeHtml(window.AdminApp.utils.formatShortDate(booking.tanggal))}</div>
                 <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">${window.AdminApp.utils.escapeHtml(booking.waktu)} WIB</div>
             </td>
             <td>

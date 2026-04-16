@@ -6,7 +6,7 @@
 
 window.AdminApp.bindings.findBookingByRow = function findBookingByRow(row) {
     const rowNumber = Number(row) || 0;
-    return window.AdminState.bookings.all.find((booking) => Number(booking.row) === rowNumber) || null;
+    return window.AdminState.bookings.byRow[rowNumber] || null;
 };
 
 window.AdminApp.bindings.handleAdminAction = function handleAdminAction(actionEl) {

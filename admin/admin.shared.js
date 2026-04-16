@@ -12,10 +12,12 @@ window.AdminConfig = window.AdminConfig || {
 window.AdminState = window.AdminState || {
     bookings: {
         all: [],
+        byRow: {},
         filtered: [],
         currentPage: 1,
         searchQuery: '',
-        searchDebounce: null
+        searchDebounce: null,
+        loadPromise: null
     },
     cms: {
         settingsCache: {},
@@ -88,6 +90,17 @@ window.AdminApp.utils.normalizeThumbUrl = function normalizeThumbUrl(url) {
     }
 
     return thumb;
+};
+
+window.AdminApp.utils.shortDateFormatter = window.AdminApp.utils.shortDateFormatter || new Intl.DateTimeFormat('id-ID', {
+    day: 'numeric',
+    month: 'short'
+});
+
+window.AdminApp.utils.formatShortDate = function formatShortDate(value) {
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value || '');
+    return window.AdminApp.utils.shortDateFormatter.format(date);
 };
 
 window.AdminApp.auth.getAdminSessionToken = function getAdminSessionToken() {
@@ -246,17 +259,33 @@ window.AdminApp.ui.ensureTabData = function ensureTabData(tabId, options = {}) {
 };
 
 window.AdminApp.loadAllData = async function loadAllData() {
-    window.AdminApp.ui.showLoader(true);
-    try {
-        const result = await window.AdminApp.auth.adminGet('getSemuaBooking');
-        if (result.status === 'success') {
-            window.AdminState.bookings.all = result.data;
-            window.AdminState.bookings.currentPage = 1;
-            window.AdminApp.bookings.renderTables();
-        }
-    } catch (e) {
-        console.error(e);
-    } finally {
-        window.AdminApp.ui.showLoader(false);
+    if (window.AdminState.bookings.loadPromise) {
+        return window.AdminState.bookings.loadPromise;
     }
+
+    window.AdminApp.ui.showLoader(true);
+    const loadPromise = (async () => {
+        try {
+            const result = await window.AdminApp.auth.adminGet('getSemuaBooking');
+            if (result.status === 'success') {
+                const allBookings = Array.isArray(result.data) ? result.data : [];
+                window.AdminState.bookings.all = allBookings;
+                window.AdminState.bookings.byRow = allBookings.reduce((acc, booking) => {
+                    const rowKey = Number(booking.row) || 0;
+                    if (rowKey) acc[rowKey] = booking;
+                    return acc;
+                }, {});
+                window.AdminState.bookings.currentPage = 1;
+                window.AdminApp.bookings.renderTables();
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            window.AdminState.bookings.loadPromise = null;
+            window.AdminApp.ui.showLoader(false);
+        }
+    })();
+
+    window.AdminState.bookings.loadPromise = loadPromise;
+    return loadPromise;
 };
