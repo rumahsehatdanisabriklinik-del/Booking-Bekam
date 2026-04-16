@@ -9,6 +9,10 @@ let allBookings = [];
 let filteredBookings = [];
 let cmsSettingsCache = {};
 const ADMIN_SESSION_KEY = 'adminSessionToken';
+const RESERVATION_PAGE_SIZE = 25;
+let currentReservationPage = 1;
+let reservationSearchQuery = '';
+let reservationSearchDebounce = null;
 
 function getAdminSessionToken() {
     return localStorage.getItem(ADMIN_SESSION_KEY) || '';
@@ -160,6 +164,7 @@ async function loadAllData() {
         const result = await adminGet('getSemuaBooking');
         if(result.status === 'success') {
             allBookings = result.data;
+            currentReservationPage = 1;
             renderTables();
         }
     } catch(e) { console.error(e); }
@@ -253,6 +258,181 @@ function handleSearch(val) {
         const text = row.innerText.toLowerCase();
         row.style.display = text.includes(query) ? '' : 'none';
     });
+}
+
+// Override versi lama dengan render yang lebih ringan + pagination.
+function renderTables() {
+    const role = localStorage.getItem('adminRole');
+    const myName = localStorage.getItem('adminNama');
+
+    const visibleData = allBookings.filter(b => {
+        if(role === 'terapis') return b.terapis === myName;
+        return true;
+    });
+
+    filteredBookings = getReservationFilteredData(visibleData);
+    renderReservationsTable();
+
+    const ulasanBody = document.getElementById('tbUlasanBody');
+    let ulasanHtml = '';
+    visibleData.filter(b => b.rating).forEach(b => {
+        let stars = 'â­'.repeat(parseInt(b.rating));
+        ulasanHtml += `
+            <tr>
+                <td class="font-bold text-slate-800">${b.nama}</td>
+                <td class="text-xs font-bold text-slate-500">${b.layanan}</td>
+                <td class="text-xs">${stars}</td>
+                <td class="text-xs font-medium text-slate-600 max-w-xs italic">${b.ulasan || '-'}</td>
+            </tr>
+        `;
+    });
+    ulasanBody.innerHTML = ulasanHtml;
+
+    const emrBody = document.getElementById('tbEMRBody');
+    let emrHtml = '';
+    visibleData.forEach(b => {
+        emrHtml += `
+            <tr>
+                <td class="text-xs font-mono text-slate-500">#${b.row}</td>
+                <td class="font-bold text-slate-800">${b.nama}</td>
+                <td class="text-xs font-medium text-slate-600 max-w-xs truncate">${b.keluhan || '-'}</td>
+                <td class="text-xs font-medium text-slate-600 max-w-xs truncate">${b.tindakan || '-'}</td>
+                <td class="text-center">
+                    <button onclick="openEMR(${b.row}, '${b.nama}', '${b.keluhan || ''}', '${b.tindakan || ''}')" class="bg-emerald-50 text-emerald-600 font-bold text-[10px] px-4 py-2 rounded-xl hover:bg-emerald-600 hover:text-white transition-all uppercase tracking-widest">
+                        Edit EMR
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+    emrBody.innerHTML = emrHtml;
+}
+
+function handleSearch(val) {
+    reservationSearchQuery = (val || '').toLowerCase().trim();
+    currentReservationPage = 1;
+    if (reservationSearchDebounce) clearTimeout(reservationSearchDebounce);
+    reservationSearchDebounce = setTimeout(() => {
+        const role = localStorage.getItem('adminRole');
+        const myName = localStorage.getItem('adminNama');
+        const visibleData = allBookings.filter(b => {
+            if(role === 'terapis') return b.terapis === myName;
+            return true;
+        });
+        filteredBookings = getReservationFilteredData(visibleData);
+        renderReservationsTable();
+    }, 180);
+}
+
+function getReservationFilteredData(bookings) {
+    if (!reservationSearchQuery) return bookings;
+    return bookings.filter(b => {
+        const haystack = [
+            b.nama,
+            b.hp,
+            b.layanan,
+            b.terapis,
+            b.tanggal,
+            b.waktu,
+            b.status
+        ].join(' ').toLowerCase();
+        return haystack.includes(reservationSearchQuery);
+    });
+}
+
+function getReservationBadgeClass(status) {
+    let badgeClass = 'bg-slate-50 text-slate-400 border-slate-100';
+    if(status === 'DITERIMA') badgeClass = 'bg-blue-50 text-blue-600 border-blue-200';
+    else if(status === 'SELESAI') badgeClass = 'bg-emerald-50 text-emerald-600 border-emerald-200';
+    else if((status || '').includes('Batal')) badgeClass = 'bg-red-50 text-red-600 border-red-200';
+    return badgeClass;
+}
+
+function renderReservationsTable() {
+    const resBody = document.getElementById('tbReservasiBody');
+    if (!resBody) return;
+
+    const totalItems = filteredBookings.length;
+    const totalPages = Math.max(1, Math.ceil(totalItems / RESERVATION_PAGE_SIZE));
+    currentReservationPage = Math.min(currentReservationPage, totalPages);
+    const startIndex = (currentReservationPage - 1) * RESERVATION_PAGE_SIZE;
+    const pageItems = filteredBookings.slice(startIndex, startIndex + RESERVATION_PAGE_SIZE);
+
+    if (pageItems.length === 0) {
+        resBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-slate-400 font-bold py-10">
+                    Tidak ada data reservasi yang cocok.
+                </td>
+            </tr>
+        `;
+        renderReservationPagination(totalItems, totalPages, 0, 0);
+        return;
+    }
+
+    resBody.innerHTML = pageItems.map(b => `
+        <tr>
+            <td>
+                <div class="font-bold text-slate-800">${b.nama}</div>
+                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mt-1"><i class="fab fa-whatsapp text-emerald-500"></i> ${b.hp}</div>
+            </td>
+            <td>
+                <div class="font-bold text-emerald-700">${b.layanan}</div>
+                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mt-1"><i class="fas fa-user-md"></i> ${b.terapis}</div>
+            </td>
+            <td>
+                <div class="font-bold text-slate-700">${new Date(b.tanggal).toLocaleDateString('id-ID', {day:'numeric', month:'short'})}</div>
+                <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">${b.waktu} WIB</div>
+            </td>
+            <td>
+                <span class="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border ${getReservationBadgeClass(b.status)}">
+                    ${b.status}
+                </span>
+            </td>
+            <td class="text-center">
+                <button onclick="openModalStatus(${b.row}, '${b.status}')" class="bg-white border border-slate-200 hover:border-emerald-400 hover:text-emerald-600 w-9 h-9 rounded-xl flex items-center justify-center transition-colors shadow-sm mx-auto">
+                    <i class="fas fa-edit text-xs"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+
+    renderReservationPagination(totalItems, totalPages, startIndex + 1, Math.min(startIndex + pageItems.length, totalItems));
+}
+
+function renderReservationPagination(totalItems, totalPages, startItem, endItem) {
+    const container = document.getElementById('reservasiPagination');
+    if (!container) return;
+
+    if (totalItems === 0) {
+        container.innerHTML = `<div class="text-xs font-bold text-slate-400">0 data</div>`;
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="text-xs font-bold text-slate-400">
+            Menampilkan ${startItem}-${endItem} dari ${totalItems} reservasi
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="changeReservationPage(-1)" class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-500 text-xs font-black ${currentReservationPage <= 1 ? 'opacity-50 cursor-not-allowed' : 'hover:border-emerald-300 hover:text-emerald-600'}" ${currentReservationPage <= 1 ? 'disabled' : ''}>
+                Sebelumnya
+            </button>
+            <div class="px-3 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-black">
+                Hal. ${currentReservationPage}/${totalPages}
+            </div>
+            <button onclick="changeReservationPage(1)" class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-500 text-xs font-black ${currentReservationPage >= totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:border-emerald-300 hover:text-emerald-600'}" ${currentReservationPage >= totalPages ? 'disabled' : ''}>
+                Berikutnya
+            </button>
+        </div>
+    `;
+}
+
+function changeReservationPage(direction) {
+    const totalPages = Math.max(1, Math.ceil(filteredBookings.length / RESERVATION_PAGE_SIZE));
+    const nextPage = currentReservationPage + direction;
+    if (nextPage < 1 || nextPage > totalPages) return;
+    currentReservationPage = nextPage;
+    renderReservationsTable();
 }
 
 function showLoader(show) {
