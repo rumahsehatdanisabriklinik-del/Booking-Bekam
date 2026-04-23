@@ -1,0 +1,13 @@
+{
+  "name": "rumah-sehat-dani-sabri",
+  "version": "1.0.0",
+  "description": "Klinik Bekam & Ruqyah Rumah Sehat Dani Sabri",
+  "scripts": {
+    "dev": "node local-dev.js",
+    "start": "node local-dev.js",
+    "test": "node tests/smoke.js"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
