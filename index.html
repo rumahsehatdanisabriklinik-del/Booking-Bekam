@@ -856,6 +856,14 @@
             return url;
         }
 
+        function applyCmsImage(imgId, rawUrl) {
+            const img = document.getElementById(imgId);
+            if (!img || !rawUrl || typeof rawUrl !== 'string' || !rawUrl.trim()) return;
+            const normalizedUrl = normalizeImageUrl(rawUrl);
+            img.src = normalizedUrl;
+            img.dataset.fallbackSrc = normalizedUrl;
+        }
+
         function bindLandingUIEvents() {
             document.addEventListener('click', (event) => {
                 const target = event.target.closest('[data-action]');
@@ -1019,19 +1027,19 @@
                     if(d.cms_team1_desc) document.getElementById('cms-team1-desc').textContent = d.cms_team1_desc;
                     if(d.cms_team1_point1) document.getElementById('cms-team1-point1').textContent = d.cms_team1_point1;
                     if(d.cms_team1_point2) document.getElementById('cms-team1-point2').textContent = d.cms_team1_point2;
-                    if(d.cms_team1_image) document.getElementById('cms-team1-image').src = normalizeImageUrl(d.cms_team1_image);
+                    if(d.cms_team1_image) applyCmsImage('cms-team1-image', d.cms_team1_image);
                     if(d.cms_team2_label) document.getElementById('cms-team2-label').textContent = d.cms_team2_label;
                     if(d.cms_team2_title) document.getElementById('cms-team2-title').textContent = d.cms_team2_title;
                     if(d.cms_team2_desc) document.getElementById('cms-team2-desc').textContent = d.cms_team2_desc;
                     if(d.cms_team2_point1) document.getElementById('cms-team2-point1').textContent = d.cms_team2_point1;
                     if(d.cms_team2_point2) document.getElementById('cms-team2-point2').textContent = d.cms_team2_point2;
-                    if(d.cms_team2_image) document.getElementById('cms-team2-image').src = normalizeImageUrl(d.cms_team2_image);
+                    if(d.cms_team2_image) applyCmsImage('cms-team2-image', d.cms_team2_image);
                     if(d.cms_team3_label) document.getElementById('cms-team3-label').textContent = d.cms_team3_label;
                     if(d.cms_team3_title) document.getElementById('cms-team3-title').textContent = d.cms_team3_title;
                     if(d.cms_team3_desc) document.getElementById('cms-team3-desc').textContent = d.cms_team3_desc;
                     if(d.cms_team3_focus_title) document.getElementById('cms-team3-focus-title').textContent = d.cms_team3_focus_title;
                     if(d.cms_team3_focus_desc) document.getElementById('cms-team3-focus-desc').textContent = d.cms_team3_focus_desc;
-                    if(d.cms_team3_image) document.getElementById('cms-team3-image').src = normalizeImageUrl(d.cms_team3_image);
+                    if(d.cms_team3_image) applyCmsImage('cms-team3-image', d.cms_team3_image);
             };
 
             const cachedCMS = localStorage.getItem('cmsDataVal');
