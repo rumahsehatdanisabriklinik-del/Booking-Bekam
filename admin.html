@@ -43,23 +43,91 @@
                 @apply bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30 transform scale-105;
             }
             .cms-input {
-                @apply w-full bg-white/80 backdrop-blur-sm border-2 border-slate-200 rounded-[1.5rem] px-5 py-3.5 text-sm font-bold text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm transition-all;
+                @apply w-full bg-white/90 backdrop-blur-sm border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-bold text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm transition-all;
             }
             .data-table-wrapper {
-                @apply overflow-x-auto rounded-[2rem] border border-slate-100 bg-white/70 backdrop-blur-xl shadow-xl shadow-slate-200/50;
+                @apply overflow-x-auto rounded-[1.75rem] border border-slate-100 bg-white/80 backdrop-blur-xl shadow-xl shadow-slate-200/40;
             }
             .data-table { @apply w-full text-left border-collapse min-w-[800px]; }
             .data-table th { @apply px-6 py-5 bg-slate-50/80 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100 whitespace-nowrap; }
             .data-table td { @apply px-6 py-5 border-b border-slate-50/50 text-sm font-semibold text-slate-700 align-middle; }
             .data-table tr:hover td { @apply bg-emerald-50/30; }
         }
-        body { background-color: #f8fafc; }
+        body { background-color: #f8fafc; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+        button, input, select, textarea { font: inherit; }
+        button { touch-action: manipulation; }
+        button:not(:disabled) { cursor: pointer; }
+        button:disabled { cursor: not-allowed; opacity: 0.68; transform: none !important; box-shadow: none !important; }
+        select.cms-input {
+            appearance: none;
+            background-image:
+                linear-gradient(45deg, transparent 50%, #64748b 50%),
+                linear-gradient(135deg, #64748b 50%, transparent 50%);
+            background-position:
+                calc(100% - 22px) calc(50% - 3px),
+                calc(100% - 16px) calc(50% - 3px);
+            background-size: 6px 6px, 6px 6px;
+            background-repeat: no-repeat;
+            padding-right: 3rem;
+        }
+        .cms-input:hover { border-color: #a7f3d0; background-color: #ffffff; }
+        .cms-input::placeholder { color: #94a3b8; font-weight: 700; }
+        textarea.cms-input { line-height: 1.65; resize: vertical; }
+        label { letter-spacing: 0.14em !important; }
         .bg-blobs { position: fixed; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; z-index: -1; pointer-events: none; }
         .blob { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.4; }
         .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #a7f3d0; animation: blob 15s infinite alternate; }
         .blob-2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: #99f6e4; animation: blob 15s infinite alternate; animation-delay: -5s; }
-        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5); }
-        .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(226, 232, 240, 0.86);
+            box-shadow: 0 18px 50px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255,255,255,0.86);
+        }
+        .glass-panel:hover { border-color: rgba(167, 243, 208, 0.9); box-shadow: 0 22px 60px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255,255,255,0.95); }
+        .glass-modal {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            box-shadow: 0 28px 80px rgba(15, 23, 42, 0.22), inset 0 1px 0 rgba(255,255,255,0.95);
+        }
+        .glass-modal > div:first-child {
+            background: linear-gradient(135deg, #0f172a 0%, #14532d 100%) !important;
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+        }
+        .glass-modal > div:first-child button {
+            background: rgba(255,255,255,0.14) !important;
+            border: 1px solid rgba(255,255,255,0.18);
+            transition: transform 0.18s ease, background 0.18s ease;
+        }
+        .glass-modal > div:first-child button:hover { background: rgba(255,255,255,0.24) !important; transform: scale(1.04); }
+        .glass-modal > div:last-child {
+            background: linear-gradient(180deg, rgba(248,250,252,0.92), rgba(241,245,249,0.98)) !important;
+            border-top: 1px solid rgba(226,232,240,0.85) !important;
+        }
+        .glass-modal > div:last-child button,
+        #mainApp button,
+        #loginScreen button {
+            min-height: 2.75rem;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+        }
+        .glass-modal > div:last-child button:not(:disabled):hover,
+        #mainApp button:not(:disabled):hover,
+        #loginScreen button:not(:disabled):hover {
+            transform: translateY(-1px);
+        }
+        .glass-modal > div:last-child button:not(:disabled):active,
+        #mainApp button:not(:disabled):active,
+        #loginScreen button:not(:disabled):active {
+            transform: scale(0.985);
+        }
+        .data-table th:first-child { border-top-left-radius: 1.5rem; }
+        .data-table th:last-child { border-top-right-radius: 1.5rem; }
+        .data-table tbody tr:last-child td { border-bottom: 0; }
+        .data-table tr { transition: background-color 0.18s ease; }
+        .nav-item { position: relative; }
+        .nav-item:not(.active):hover { transform: translateX(2px); }
+        .nav-item.active div { background: rgba(255,255,255,0.18) !important; }
         .login-shell {
             background:
                 radial-gradient(circle at top left, rgba(110, 231, 183, 0.34), transparent 28%),
