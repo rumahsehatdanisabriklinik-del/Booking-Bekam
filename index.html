@@ -115,9 +115,144 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
         .chip-suggestion { @apply px-3 py-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full border border-emerald-100 hover:bg-emerald-100 transition-all active:scale-95 whitespace-nowrap; }
+
+        .hero-shell {
+            background:
+                linear-gradient(90deg, rgba(6, 95, 70, 0.72) 0%, rgba(16, 185, 129, 0.42) 38%, rgba(167, 243, 208, 0.18) 68%, rgba(255, 255, 255, 0.08) 100%),
+                radial-gradient(circle at top left, rgba(167, 243, 208, 0.34), transparent 34%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+        }
+
+        .hero-frame {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 30px 80px rgba(15, 23, 42, 0.18);
+        }
+
+        .hero-frame::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(120deg, rgba(15, 23, 42, 0.18), transparent 32%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 26%, transparent 74%, rgba(15, 23, 42, 0.2));
+            pointer-events: none;
+        }
+
+        .hero-grain::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.08;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.7) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px);
+            background-size: 4px 4px, 4px 4px;
+            mix-blend-mode: soft-light;
+            pointer-events: none;
+        }
+
+        .premium-divider {
+            background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.2), transparent);
+            height: 1px;
+        }
+
+        .section-tint {
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.9)),
+                radial-gradient(circle at top right, rgba(167, 243, 208, 0.35), transparent 35%);
+        }
+
+        .hero-copy-readable {
+            color: rgba(240, 253, 244, 0.98);
+            text-shadow: 0 2px 18px rgba(6, 78, 59, 0.24);
+        }
+
+        .panel-copy-readable {
+            color: rgba(6, 78, 59, 0.92);
+            text-shadow: none;
+        }
+
+        .skip-link {
+            position: absolute;
+            left: 1rem;
+            top: -4rem;
+            z-index: 1200;
+            padding: 0.875rem 1.125rem;
+            border-radius: 999px;
+            background: #022c22;
+            color: #ffffff;
+            font-weight: 800;
+            transition: top 0.2s ease;
+        }
+
+        .skip-link:focus {
+            top: 1rem;
+        }
+
+        .focus-ring:focus-visible {
+            outline: 3px solid rgba(16, 185, 129, 0.45);
+            outline-offset: 3px;
+        }
+
+        .status-ticket-preview {
+            background: #ffffff;
+            border-radius: 1.5rem;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        .status-ticket-divider {
+            border-top: 2px dashed #e2e8f0;
+            margin: 1rem 0;
+            position: relative;
+        }
+
+        .status-ticket-divider::before,
+        .status-ticket-divider::after {
+            content: '';
+            position: absolute;
+            top: -0.5rem;
+            width: 1rem;
+            height: 1rem;
+            background: #f8fafc;
+            border-radius: 50%;
+            border: 1px solid #f1f5f9;
+        }
+
+        .status-ticket-divider::before {
+            left: -1.5rem;
+            border-left-color: transparent;
+            border-top-color: transparent;
+            transform: rotate(45deg);
+        }
+
+        .status-ticket-divider::after {
+            right: -1.5rem;
+            border-right-color: transparent;
+            border-bottom-color: transparent;
+            transform: rotate(45deg);
+        }
+
+        @media (max-width: 640px) {
+            #ai-chatbot-container {
+                width: min(320px, calc(100vw - 1.5rem));
+                height: min(480px, calc(100vh - 6rem));
+                right: -0.25rem;
+                bottom: 4.5rem;
+            }
+
+            #chatbot-fab {
+                width: 3.5rem;
+                height: 3.5rem;
+                font-size: 1.25rem;
+            }
+        }
     </style>
 </head>
 <body class="text-slate-900 antialiased overflow-x-hidden relative">
+    <a href="#main-content" class="skip-link">Lewati ke konten utama</a>
 
     <!-- Preloader -->
     <div id="preloader" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center transition-opacity duration-500">
@@ -137,31 +272,31 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="fixed w-full z-50 transition-all duration-500 pt-6" id="navbar">
+    <nav class="fixed w-full z-50 transition-all duration-500 pt-4 sm:pt-6" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
-            <div id="navInner" class="glass-dark shadow-xl shadow-slate-200/50 rounded-[2rem] flex items-center justify-between transition-all duration-300 px-6 sm:px-8 py-4">
+            <div id="navInner" class="bg-white/72 backdrop-blur-2xl border border-white/50 shadow-xl shadow-slate-900/10 rounded-[2rem] flex items-center justify-between transition-all duration-300 px-5 sm:px-8 py-4">
                 <a href="#" class="flex items-center gap-3 group">
-                    <div id="cms-logo-nav-container" class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-bold text-lg sm:text-xl shadow-lg group-hover:rotate-6 transition-transform">
+                    <div id="cms-logo-nav-container" class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white flex items-center justify-center font-bold text-lg sm:text-xl shadow-lg shadow-emerald-900/20 group-hover:rotate-6 transition-transform">
                         <i class="fas fa-leaf"></i>
                     </div>
                     <div class="flex flex-col">
                         <span class="font-extrabold text-base sm:text-lg text-slate-900 tracking-tight leading-none" id="cms-nama-klinik-nav">Dani Sabri</span>
-                        <span class="text-[9px] sm:text-[10px] font-bold text-emerald-600 uppercase tracking-widest mt-1">Klinik Terapi Bekam</span>
+                        <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-[0.24em] mt-1">Klinik Terapi Bekam</span>
                     </div>
                 </a>
                 
                 <div class="hidden lg:flex items-center gap-8 xl:gap-10 font-bold text-sm text-slate-500 uppercase tracking-widest">
                     <a href="#services" class="hover:text-emerald-600 transition-colors">Layanan</a>
-                    <a href="artikel.html" class="hover:text-emerald-600 transition-colors">Artikel</a>
-                    <a href="galeri.html" class="hover:text-emerald-600 transition-colors">Galeri</a>
+                    <a href="#team" class="hover:text-emerald-600 transition-colors">Tim Klinik</a>
+                    <a href="#patient-portal" class="hover:text-emerald-600 transition-colors">Portal Pasien</a>
                     <a href="status.html" class="hover:text-emerald-600 transition-colors">Lacak Pesanan</a>
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <a href="booking.html" class="hidden sm:flex items-center gap-2 bg-gradient-to-br from-emerald-500 to-teal-600 text-white px-6 sm:px-7 py-2.5 sm:py-3 rounded-full font-bold text-sm shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/40 transition-all hover:-translate-y-0.5">
+                    <a href="booking.html" class="hidden sm:flex items-center gap-2 bg-gradient-to-br from-emerald-500 to-teal-600 text-white px-6 sm:px-7 py-2.5 sm:py-3 rounded-full font-bold text-sm shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/40 transition-all hover:-translate-y-0.5 focus-ring">
                         Buat Janji <i class="fas fa-calendar-check text-xs"></i>
                     </a>
-                    <button data-action="toggle-mobile-menu" id="btnHamburger" class="lg:hidden w-10 h-10 rounded-xl bg-slate-100/80 flex items-center justify-center text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 transition-all focus:outline-none">
+                    <button data-action="toggle-mobile-menu" id="btnHamburger" aria-label="Buka menu navigasi" class="lg:hidden w-11 h-11 rounded-xl bg-slate-100/80 flex items-center justify-center text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 transition-all focus-ring">
                         <i class="fas fa-bars" id="hamburgerIcon"></i>
                     </button>
                 </div>
@@ -173,11 +308,11 @@
             <div class="glass-dark rounded-2xl p-6 shadow-2xl animate-fade-up">
                 <div class="flex flex-col gap-2 font-bold text-sm uppercase tracking-widest">
                     <a href="#services" data-action="toggle-mobile-menu" class="block text-slate-600 hover:text-emerald-600 hover:bg-emerald-50/50 rounded-xl transition-all p-3">Layanan</a>
-                    <a href="artikel.html" class="block text-slate-600 hover:text-emerald-600 hover:bg-emerald-50/50 rounded-xl transition-all p-3">Artikel</a>
-                    <a href="galeri.html" class="block text-slate-600 hover:text-emerald-600 hover:bg-emerald-50/50 rounded-xl transition-all p-3">Galeri</a>
+                    <a href="#team" data-action="toggle-mobile-menu" class="block text-slate-600 hover:text-emerald-600 hover:bg-emerald-50/50 rounded-xl transition-all p-3">Tim Klinik</a>
+                    <a href="#patient-portal" data-action="toggle-mobile-menu" class="block text-slate-600 hover:text-emerald-600 hover:bg-emerald-50/50 rounded-xl transition-all p-3">Portal Pasien</a>
                     <a href="status.html" class="block text-slate-600 hover:text-emerald-600 hover:bg-emerald-50/50 rounded-xl transition-all p-3">Lacak Pesanan</a>
                     <a href="admin.html" class="block text-slate-600 hover:text-emerald-600 hover:bg-emerald-50/50 rounded-xl transition-all p-3"><i class="fas fa-lock mr-2 text-xs"></i>Portal Admin</a>
-                    <a href="booking.html" data-action="toggle-mobile-menu" class="flex items-center justify-center gap-2 bg-gradient-to-br from-emerald-500 to-teal-600 text-white px-7 py-3.5 rounded-xl font-bold text-sm shadow-lg mt-4 active:scale-95 transition-all">
+                    <a href="booking.html" data-action="toggle-mobile-menu" class="flex items-center justify-center gap-2 bg-gradient-to-br from-emerald-500 to-teal-600 text-white px-7 py-3.5 rounded-xl font-bold text-sm shadow-lg mt-4 active:scale-95 transition-all focus-ring">
                         Buat Janji <i class="fas fa-calendar-check text-xs"></i>
                     </a>
                 </div>
@@ -185,96 +320,94 @@
         </div>
     </nav>
 
+    <main id="main-content">
     <!-- Hero Section -->
-    <section class="relative pt-36 sm:pt-44 pb-20 lg:pt-52 lg:pb-32 px-6 min-h-[90vh] lg:min-h-screen flex items-center overflow-hidden z-10">
-        <!-- Abstract decorative shapes -->
-        <div class="absolute top-20 left-10 w-64 h-64 sm:w-96 sm:h-96 bg-emerald-400/20 rounded-full blur-[80px] sm:blur-[120px] animate-pulse -z-10"></div>
-        <div class="absolute bottom-20 right-10 w-64 h-64 sm:w-96 sm:h-96 bg-teal-400/20 rounded-full blur-[80px] sm:blur-[120px] animate-pulse -z-10" style="animation-delay: 1s;"></div>
+    <section class="relative px-4 sm:px-6 pt-28 sm:pt-32 lg:pt-36 pb-10 sm:pb-14 z-10">
+        <div class="max-w-7xl mx-auto hero-frame hero-grain rounded-[2.5rem] sm:rounded-[3rem] min-h-[calc(100svh-7rem)] lg:min-h-[calc(100svh-8rem)]">
+            <img id="cms-hero-image" src="https://images.unsplash.com/photo-1659080540643-7dcbbc530bd2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtdXNsaW0lMjB3b21hbiUyMGhpamFiJTIwdGhlcmFweSUyMHdlbGxuZXNzfGVufDF8fHx8MTc3NTQ1OTA5NXww&ixlib=rb-4.1.0&q=80&w=1400" class="absolute inset-0 w-full h-full object-cover" alt="Therapy Session">
+            <div class="absolute inset-0 hero-shell"></div>
+            <div class="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-slate-950/30 to-transparent"></div>
 
-        <div class="max-w-7xl mx-auto grid lg:grid-cols-12 gap-12 lg:gap-16 items-center relative z-10 w-full">
+            <div class="relative h-full px-6 sm:px-10 lg:px-14 py-12 sm:py-16 lg:py-20 grid lg:grid-cols-12 gap-12 lg:gap-10 items-end">
             <!-- Left Content -->
-            <div class="lg:col-span-7 space-y-8 sm:space-y-10 reveal" style="animation-delay: 0.1s;">
-                <div class="inline-flex items-center gap-3 glass px-4 sm:px-5 py-2.5 rounded-full shadow-sm">
+            <div class="lg:col-span-7 self-center space-y-7 sm:space-y-9 reveal" style="animation-delay: 0.1s;">
+                <div class="inline-flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 sm:px-5 py-2.5 rounded-full shadow-sm border border-white/10 text-white/90">
                     <span class="flex h-2 w-2 relative">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                     </span>
-                    <span id="cms-badge" class="text-emerald-800 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em]">Klinik Terapis Profesional</span>
+                    <span id="cms-badge" class="text-white text-[9px] sm:text-[10px] font-black uppercase tracking-[0.24em]">Bekam Sunnah dengan Adab Islami</span>
                 </div>
                 
-                <h1 class="text-4xl sm:text-5xl lg:text-7xl font-extrabold leading-[1.1] lg:leading-[0.95] text-slate-950 tracking-tight" id="cms-tagline">
-                    Lebih Sehat dengan <br><span class="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent">Terapi Bekam</span>
+                <h1 class="text-4xl sm:text-5xl lg:text-7xl font-extrabold leading-[1.05] lg:leading-[0.92] text-white tracking-tight max-w-4xl" id="cms-tagline">
+                    Bekam Sunnah <br><span class="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent">untuk Ikhtiar Sehat yang Lebih Tenang</span>
                 </h1>
                 
-                <p class="text-lg sm:text-xl text-slate-600 font-medium leading-relaxed max-w-xl" id="cms-deskripsi">
-                    Rumah Sehat Dani Sabri menyediakan layanan terapi bekam, ruqyah syar'iyyah, dan pengobatan Islami untuk pemulihan kesehatan fisik dan rohani Anda.
+                <p class="hero-copy-readable text-lg sm:text-xl font-semibold leading-relaxed max-w-2xl" id="cms-deskripsi">
+                    Rasakan layanan bekam sunnah dan ruqyah syar'iyyah dengan adab Islami, tempat yang nyaman, serta pelayanan yang jelas agar Anda lebih mantap dalam berikhtiar.
                 </p>
                 
                 <div class="flex flex-wrap items-center gap-4 sm:gap-6 pt-2">
-                    <a href="booking.html" class="group flex items-center justify-center gap-3 w-full sm:w-auto bg-gradient-to-br from-emerald-500 to-teal-600 text-white px-8 sm:px-10 py-4 sm:py-5 rounded-2xl text-base sm:text-lg font-bold shadow-xl shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all hover:-translate-y-1">
+                    <a href="booking.html" class="group flex items-center justify-center gap-3 w-full sm:w-auto bg-white text-emerald-950 px-8 sm:px-10 py-4 sm:py-5 rounded-2xl text-base sm:text-lg font-bold shadow-2xl shadow-slate-950/15 hover:shadow-2xl hover:-translate-y-1 transition-all">
                         <i class="fas fa-calendar-check text-lg sm:text-xl"></i>
                         Reservasi Jadwal
                         <i class="fas fa-arrow-right ml-1 sm:ml-2 text-sm group-hover:translate-x-1 transition-transform"></i>
                     </a>
-                    <a href="#services" class="group flex items-center justify-center w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 rounded-2xl text-base sm:text-lg font-bold text-slate-700 glass hover:bg-white hover:shadow-lg transition-all">
+                    <a href="#services" class="group flex items-center justify-center w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 rounded-2xl text-base sm:text-lg font-bold text-white bg-white/8 border border-white/15 backdrop-blur-md hover:bg-white/14 transition-all">
                         Lihat Layanan
                     </a>
                 </div>
                 
-                <div class="pt-8 sm:pt-10 flex flex-wrap items-center gap-6 sm:gap-8 border-t border-slate-200/60">
-                    <div class="flex -space-x-3">
-                        <img class="w-10 h-10 sm:w-12 sm:h-12 rounded-full ring-4 ring-white shadow-md object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop" alt="Pasien">
-                        <img class="w-10 h-10 sm:w-12 sm:h-12 rounded-full ring-4 ring-white shadow-md object-cover" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop" alt="Pasien">
-                        <img class="w-10 h-10 sm:w-12 sm:h-12 rounded-full ring-4 ring-white shadow-md object-cover" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop" alt="Pasien">
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full ring-4 ring-white bg-gradient-to-br from-emerald-600 to-teal-600 text-white flex items-center justify-center font-bold text-[10px] sm:text-xs shadow-md">1K+</div>
-                    </div>
-                    <div>
-                        <div class="flex text-amber-400 text-xs sm:text-sm gap-1">
-                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                <div class="pt-8 sm:pt-10 space-y-5">
+                    <div class="premium-divider max-w-2xl"></div>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 max-w-3xl">
+                        <div class="rounded-[1.35rem] bg-white/10 backdrop-blur-md border border-white/10 p-4 sm:p-5">
+                            <p class="text-white text-xl sm:text-2xl font-extrabold">1.2K+</p>
+                            <p class="text-[10px] sm:text-xs font-bold text-white/70 uppercase tracking-[0.22em] mt-1">Pasien Dilayani</p>
                         </div>
-                        <p class="text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-widest mt-1">Rating dari 1,200 Pasien</p>
+                        <div class="rounded-[1.35rem] bg-white/10 backdrop-blur-md border border-white/10 p-4 sm:p-5">
+                            <p class="text-white text-xl sm:text-2xl font-extrabold">4.9/5</p>
+                            <p class="text-[10px] sm:text-xs font-bold text-white/70 uppercase tracking-[0.22em] mt-1">Ulasan Pasien</p>
+                        </div>
+                        <div class="rounded-[1.35rem] bg-white/10 backdrop-blur-md border border-white/10 p-4 sm:p-5 col-span-2 sm:col-span-1">
+                            <p class="text-white text-xl sm:text-2xl font-extrabold">Syar'i</p>
+                            <p class="text-[10px] sm:text-xs font-bold text-white/70 uppercase tracking-[0.22em] mt-1">Privasi Dijaga</p>
+                        </div>
                     </div>
                 </div>
             </div>
             
             <!-- Right Visual -->
-            <div class="lg:col-span-5 relative mt-10 lg:mt-0 reveal" style="animation-delay: 0.3s;">
-                <div class="relative w-full aspect-[4/5] max-w-sm sm:max-w-md mx-auto">
-                    <!-- Accent background shape -->
-                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-[2.5rem] sm:rounded-[3rem] rotate-3 sm:rotate-6 opacity-20 animate-pulse"></div>
-                    
-                    <!-- Main image container -->
-                    <div class="absolute inset-0 glass rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden shadow-2xl animate-float">
-                        <img id="cms-hero-image" src="https://images.unsplash.com/photo-1659080540643-7dcbbc530bd2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtdXNsaW0lMjB3b21hbiUyMGhpamFiJTIwdGhlcmFweSUyMHdlbGxuZXNzfGVufDF8fHx8MTc3NTQ1OTA5NXww&ixlib=rb-4.1.0&q=80&w=1080" class="w-full h-full object-cover" alt="Therapy Session">
-                        
-                        <!-- Gradient Overlay -->
-                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/10 to-transparent"></div>
-                        
-                        <!-- Floating Badge -->
-                        <div class="absolute bottom-6 sm:bottom-8 left-6 sm:left-8 right-6 sm:right-8">
-                            <div class="glass-dark p-4 sm:p-5 rounded-[1.5rem] flex items-center gap-3 sm:gap-4 shadow-xl glow-emerald">
-                                <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white text-lg sm:text-xl shadow-md shrink-0">
-                                    <i class="fas fa-shield-heart"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-slate-900 text-xs sm:text-sm">Aman & Higienis</h4>
-                                    <p class="text-[9px] sm:text-[10px] font-bold text-emerald-600 uppercase tracking-widest mt-0.5">Standar Medis Tinggi</p>
-                                </div>
+            <div class="lg:col-span-5 relative mt-2 lg:mt-0 reveal" style="animation-delay: 0.3s;">
+                <div class="w-full max-w-md ml-auto">
+                    <div class="bg-white/12 backdrop-blur-xl border border-white/12 rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-6 shadow-2xl shadow-slate-950/15">
+                        <div class="rounded-[1.6rem] overflow-hidden border border-white/10 shadow-2xl shadow-slate-950/20 aspect-[4/5]">
+                            <img src="https://images.unsplash.com/photo-1659080540643-7dcbbc530bd2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtdXNsaW0lMjB3b21hbiUyMGhpamFiJTIwdGhlcmFweSUyMHdlbGxuZXNzfGVufDF8fHx8MTc3NTQ1OTA5NXww&ixlib=rb-4.1.0&q=80&w=1080" class="w-full h-full object-cover animate-float" alt="Therapy Session Detail">
+                        </div>
+                        <div class="mt-5 sm:mt-6 grid grid-cols-2 gap-3">
+                            <div class="rounded-[1.35rem] bg-white/90 px-4 py-4 shadow-lg shadow-slate-950/5">
+                                <p class="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-700">Amanah Layanan</p>
+                                <p class="mt-2 text-sm sm:text-base font-bold text-slate-900 leading-snug">Alat bersih, privasi terjaga, dan tindakan dijelaskan sebelum dimulai.</p>
+                            </div>
+                            <div class="rounded-[1.35rem] bg-emerald-50/92 px-4 py-4 border border-emerald-100">
+                                <p class="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-700">Alur Ikhtiar</p>
+                                <p class="mt-2 text-sm sm:text-base font-bold text-emerald-950 leading-snug">Booking, konfirmasi, dan kedatangan dibuat ringkas dan mudah diikuti.</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        </div>
     </section>
 
     <!-- Services Section -->
-    <section id="services" class="py-20 sm:py-32 px-6 relative z-10 bg-white/50 backdrop-blur-3xl border-y border-white/50">
+    <section id="services" class="py-20 sm:py-32 px-6 relative z-10 section-tint border-y border-white/60">
         <div class="max-w-7xl mx-auto">
-            <div class="text-center max-w-3xl mx-auto mb-16 sm:mb-20 space-y-4 reveal">
-                <span class="inline-block bg-emerald-50 text-emerald-600 font-black tracking-[0.2em] uppercase text-[10px] sm:text-xs px-4 py-2 rounded-full">Layanan Unggulan</span>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">Terapi Komprehensif Berkah</h2>
-                <p class="text-base sm:text-lg text-slate-500 font-medium">Metode thibbun nabawi yang memadukan keilmuan modern dan adab islami.</p>
+            <div class="text-center max-w-3xl mx-auto mb-16 sm:mb-20 space-y-5 reveal">
+                <span class="inline-block bg-white text-emerald-700 font-black tracking-[0.22em] uppercase text-[10px] sm:text-xs px-4 py-2 rounded-full border border-emerald-100 shadow-sm">Layanan Unggulan</span>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">Pilihan layanan bekam yang jelas dan mudah dipahami.</h2>
+                <p class="text-base sm:text-lg text-slate-500 font-medium leading-relaxed">Setiap layanan dijelaskan singkat agar Anda mudah memilih ikhtiar yang sesuai.</p>
             </div>
             <div id="services-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
                 <!-- Diisi dinamis oleh JavaScript -->
@@ -288,12 +421,13 @@
 
     <!-- Benefits Section -->
     <section id="benefits" class="py-20 sm:py-32 px-6 relative overflow-hidden">
+        <div class="absolute inset-x-0 top-10 h-40 bg-gradient-to-b from-emerald-100/40 to-transparent pointer-events-none"></div>
         <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 lg:gap-24 items-center relative z-10">
             <!-- Left: Benefit Cards Grid -->
             <div class="grid grid-cols-2 gap-4 sm:gap-6 relative order-2 lg:order-1">
                 <div class="space-y-4 sm:space-y-6 pt-8 sm:pt-12 reveal" style="animation-delay: 0.1s;">
                     <!-- Card: Terapis Ahli -->
-                    <div class="glass p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] text-center shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                    <div class="bg-white/75 backdrop-blur-xl p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] text-center shadow-xl shadow-slate-900/5 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border border-white/80">
                         <div class="w-12 h-12 sm:w-14 sm:h-14 mx-auto bg-emerald-100 text-emerald-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-lg sm:text-xl mb-4 sm:mb-5 shadow-inner"><i id="cms-unggul1-icon" class="fas fa-user-md"></i></div>
                         <h4 id="cms-unggul1-nama" class="font-extrabold text-slate-900 text-base sm:text-lg mb-1 sm:mb-2">Terapis Ahli</h4>
                         <p id="cms-unggul1-sub" class="text-[10px] sm:text-xs text-slate-500 font-bold uppercase tracking-widest leading-relaxed">Sertifikasi Nasional</p>
@@ -307,13 +441,13 @@
                 </div>
                 <div class="space-y-4 sm:space-y-6 reveal" style="animation-delay: 0.3s;">
                     <!-- Card: Efisien -->
-                    <div class="glass p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] text-center shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                    <div class="bg-white/75 backdrop-blur-xl p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] text-center shadow-xl shadow-slate-900/5 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border border-white/80">
                         <div class="w-12 h-12 sm:w-14 sm:h-14 mx-auto bg-emerald-100 text-emerald-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-lg sm:text-xl mb-4 sm:mb-5 shadow-inner"><i id="cms-unggul3-icon" class="fas fa-clock"></i></div>
                         <h4 id="cms-unggul3-nama" class="font-extrabold text-slate-900 text-base sm:text-lg mb-1 sm:mb-2">Efisien</h4>
                         <p id="cms-unggul3-sub" class="text-[10px] sm:text-xs text-slate-500 font-bold uppercase tracking-widest leading-relaxed">Tepat Waktu</p>
                     </div>
                     <!-- Card: Sesuai Adab -->
-                    <div class="glass p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] text-center shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                    <div class="bg-white/75 backdrop-blur-xl p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] text-center shadow-xl shadow-slate-900/5 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border border-white/80">
                         <div class="w-12 h-12 sm:w-14 sm:h-14 mx-auto bg-emerald-100 text-emerald-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-lg sm:text-xl mb-4 sm:mb-5 shadow-inner"><i id="cms-unggul4-icon" class="fas fa-mosque"></i></div>
                         <h4 id="cms-unggul4-nama" class="font-extrabold text-slate-900 text-base sm:text-lg mb-1 sm:mb-2">Sesuai Adab</h4>
                         <p id="cms-unggul4-sub" class="text-[10px] sm:text-xs text-slate-500 font-bold uppercase tracking-widest leading-relaxed">Privasi Terjaga</p>
@@ -324,40 +458,175 @@
             <!-- Right: Text Content -->
             <div class="space-y-6 sm:space-y-8 order-1 lg:order-2 reveal">
                 <span id="cms-keunggulan-judul-kecil" class="inline-block bg-emerald-50 text-emerald-600 font-black tracking-[0.2em] uppercase text-[10px] sm:text-xs px-4 py-2 rounded-full">Mengapa Kami?</span>
-                <h2 id="cms-keunggulan-judul-besar" class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">Standar Baru Terapi <br class="hidden sm:block">Thibbun Nabawi</h2>
+                <h2 id="cms-keunggulan-judul-besar" class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">Mengapa Banyak Pasien <br class="hidden sm:block">Merasa Lebih Tenang</h2>
                 <p id="cms-keunggulan-deskripsi" class="text-base sm:text-lg text-slate-600 font-medium leading-relaxed">
-                    Kami percaya pengobatan sunnah harus dijalankan dengan profesionalisme tinggi. Dari pendaftaran hingga sesi berakhir, semua dirancang untuk kenyamanan dan keshalihan Anda.
+                    Kami berusaha melayani dengan amanah, menjaga adab, serta membuat proses reservasi sampai tindakan terasa jelas dan tidak membingungkan.
                 </p>
                 <div class="space-y-4 pt-2 sm:pt-4">
-                    <div class="flex items-center gap-4 sm:gap-5 glass p-4 sm:p-5 rounded-2xl sm:rounded-3xl hover:shadow-md transition-all duration-300 border-white/60">
+                    <div class="flex items-center gap-4 sm:gap-5 bg-white/80 backdrop-blur-xl p-4 sm:p-5 rounded-2xl sm:rounded-3xl hover:shadow-lg transition-all duration-300 border border-white/80 shadow-lg shadow-slate-900/5">
                         <div class="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-emerald-100 text-emerald-600 rounded-xl sm:rounded-2xl flex items-center justify-center font-bold"><i class="fas fa-check"></i></div>
                         <p id="cms-keunggulan-poin1" class="font-bold text-slate-700 text-xs sm:text-sm">Terapis Pria & Wanita 100% dipisah (Privasi Utama).</p>
                     </div>
-                    <div class="flex items-center gap-4 sm:gap-5 glass p-4 sm:p-5 rounded-2xl sm:rounded-3xl hover:shadow-md transition-all duration-300 border-white/60">
+                    <div class="flex items-center gap-4 sm:gap-5 bg-white/80 backdrop-blur-xl p-4 sm:p-5 rounded-2xl sm:rounded-3xl hover:shadow-lg transition-all duration-300 border border-white/80 shadow-lg shadow-slate-900/5">
                         <div class="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-emerald-100 text-emerald-600 rounded-xl sm:rounded-2xl flex items-center justify-center font-bold"><i class="fas fa-check"></i></div>
                         <p id="cms-keunggulan-poin2" class="font-bold text-slate-700 text-xs sm:text-sm">Pisau tindakan sekali pakai, sedangkan cup digunakan ulang setelah proses sterilisasi medis.</p>
                     </div>
                 </div>
             </div>
         </div>
-    </section>    
+    </section>
+
+    <section id="team" class="py-20 sm:py-28 px-6 relative">
+        <div class="max-w-7xl mx-auto">
+            <div class="max-w-3xl space-y-5 mb-14 reveal">
+                <span id="cms-team-label" class="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-white px-4 py-2 text-[10px] sm:text-xs font-black uppercase tracking-[0.22em] text-emerald-700 shadow-sm">Tim pendamping</span>
+                <h2 id="cms-team-title" class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900">Tim yang mendampingi ikhtiar sehat Anda.</h2>
+                <p id="cms-team-desc" class="text-base sm:text-lg text-slate-600 font-medium leading-relaxed">Kami jelaskan peran tim agar Anda tahu siapa yang membantu dari awal reservasi sampai selesai terapi.</p>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-6 sm:gap-8">
+                <article class="reveal rounded-[2rem] bg-white/85 backdrop-blur-xl border border-white shadow-xl shadow-slate-900/5 overflow-hidden">
+                    <img id="cms-team1-image" src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=900&auto=format&fit=crop" alt="Konsultan klinik memeriksa catatan pasien" class="w-full h-60 object-cover" loading="lazy">
+                    <div class="p-6 sm:p-7 space-y-4">
+                        <div>
+                            <p id="cms-team1-label" class="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-700">Pendamping awal</p>
+                            <h3 id="cms-team1-title" class="mt-2 text-2xl font-extrabold text-slate-900">Konsultasi Awal</h3>
+                        </div>
+                        <p id="cms-team1-desc" class="text-slate-600 font-medium leading-relaxed">Membantu memahami keluhan awal, pilihan layanan, dan arahan sebelum datang ke klinik.</p>
+                        <ul class="space-y-3 text-sm font-semibold text-slate-700">
+                            <li class="flex gap-3"><i class="fas fa-check-circle text-emerald-500 mt-0.5"></i><span id="cms-team1-point1">Penjelasan layanan yang mudah dipahami</span></li>
+                            <li class="flex gap-3"><i class="fas fa-check-circle text-emerald-500 mt-0.5"></i><span id="cms-team1-point2">Arahan awal yang jelas</span></li>
+                        </ul>
+                    </div>
+                </article>
+
+                <article class="reveal rounded-[2rem] bg-white/85 backdrop-blur-xl border border-white shadow-xl shadow-slate-900/5 overflow-hidden" style="animation-delay: 0.1s;">
+                    <img id="cms-team2-image" src="https://images.unsplash.com/photo-1612277795421-9bc7706a4a41?q=80&w=900&auto=format&fit=crop" alt="Terapis klinik menyiapkan alat tindakan higienis" class="w-full h-60 object-cover" loading="lazy">
+                    <div class="p-6 sm:p-7 space-y-4">
+                        <div>
+                            <p id="cms-team2-label" class="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-700">Terapis bekam</p>
+                            <h3 id="cms-team2-title" class="mt-2 text-2xl font-extrabold text-slate-900">Pelaksana Tindakan</h3>
+                        </div>
+                        <p id="cms-team2-desc" class="text-slate-600 font-medium leading-relaxed">Menjalankan bekam dengan tenang, menjaga kebersihan alat, dan menjelaskan tindakan sebelum dimulai.</p>
+                        <ul class="space-y-3 text-sm font-semibold text-slate-700">
+                            <li class="flex gap-3"><i class="fas fa-check-circle text-emerald-500 mt-0.5"></i><span id="cms-team2-point1">Privasi dan pemisahan gender dijaga</span></li>
+                            <li class="flex gap-3"><i class="fas fa-check-circle text-emerald-500 mt-0.5"></i><span id="cms-team2-point2">Kebersihan tindakan diperhatikan</span></li>
+                        </ul>
+                    </div>
+                </article>
+
+                <article class="reveal rounded-[2rem] bg-gradient-to-br from-emerald-100 to-teal-100 text-emerald-950 border border-emerald-200 shadow-2xl shadow-emerald-900/10 overflow-hidden" style="animation-delay: 0.2s;">
+                    <img id="cms-team3-image" src="https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=900&auto=format&fit=crop" alt="Pendamping pasien meninjau jadwal reservasi" class="w-full h-60 object-cover" loading="lazy">
+                    <div class="p-6 sm:p-7 space-y-5 h-full flex flex-col">
+                        <div>
+                            <p id="cms-team3-label" class="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-700">Pendamping akhir</p>
+                            <h3 id="cms-team3-title" class="mt-2 text-2xl font-extrabold">Layanan Lanjutan</h3>
+                        </div>
+                        <p id="cms-team3-desc" class="text-emerald-900/80 font-medium leading-relaxed">Membantu pasien melihat status booking, konfirmasi jadwal, dan arahan lanjutan dengan lebih mudah.</p>
+                        <div class="rounded-[1.5rem] bg-white/70 border border-emerald-200 p-5 mt-auto">
+                            <p id="cms-team3-focus-title" class="text-sm font-semibold text-emerald-950">Fokus utama</p>
+                            <p id="cms-team3-focus-desc" class="mt-2 text-sm leading-relaxed text-emerald-900/75">Informasi singkat, jadwal yang jelas, dan akses mudah setelah reservasi.</p>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section id="patient-portal" class="py-20 sm:py-28 px-6 relative">
+        <div class="max-w-7xl mx-auto grid lg:grid-cols-[0.95fr_1.05fr] gap-10 lg:gap-14 items-center">
+            <div class="space-y-6 reveal">
+                <span class="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-white px-4 py-2 text-[10px] sm:text-xs font-black uppercase tracking-[0.22em] text-emerald-700 shadow-sm">Status booking</span>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900">Cek status booking dengan tampilan yang ringkas.</h2>
+                <p class="text-base sm:text-lg text-slate-600 font-medium leading-relaxed">Anda bisa melihat status, jadwal datang, dan arahan berikutnya tanpa perlu bertanya berulang kali.</p>
+                <div class="space-y-4">
+                    <div class="flex items-start gap-4 rounded-[1.5rem] bg-white/85 border border-white p-5 shadow-lg shadow-slate-900/5">
+                        <div class="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0"><i class="fas fa-id-card"></i></div>
+                        <div>
+                            <h3 class="font-extrabold text-slate-900">Ringkasan booking</h3>
+                            <p class="mt-1 text-sm text-slate-600 font-medium leading-relaxed">Nomor booking, status, dan jam datang tampil ringkas di layar ponsel.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4 rounded-[1.5rem] bg-white/85 border border-white p-5 shadow-lg shadow-slate-900/5">
+                        <div class="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0"><i class="fas fa-bell"></i></div>
+                        <div>
+                            <h3 class="font-extrabold text-slate-900">Arahan berikutnya</h3>
+                            <p class="mt-1 text-sm text-slate-600 font-medium leading-relaxed">Anda tahu kapan datang dan apa yang perlu disiapkan.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="reveal" style="animation-delay: 0.15s;">
+                <div class="rounded-[2.2rem] bg-gradient-to-br from-emerald-200 via-emerald-100 to-teal-100 p-4 sm:p-5 shadow-2xl shadow-emerald-900/10 border border-emerald-200/70">
+                    <div class="status-ticket-preview p-5 sm:p-6">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl bg-blue-100 text-blue-500 shadow-lg shadow-blue-500/20 ring-4 ring-blue-50">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-700">Preview status</p>
+                                    <h3 class="mt-1 text-xl font-extrabold text-slate-900">Status Reservasi</h3>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">ID: #018</p>
+                                </div>
+                            </div>
+                            <span class="inline-flex min-h-[44px] items-center justify-center rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-blue-600">Terjadwal</span>
+                        </div>
+
+                        <div class="status-ticket-divider"></div>
+
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center gap-4">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2"><i class="fas fa-user-md text-slate-300"></i> Terapis</span>
+                                <span class="font-bold text-slate-900 text-sm bg-slate-50 px-3 py-1 rounded-lg">Terapis Ikhwan</span>
+                            </div>
+                            <div class="flex justify-between items-center gap-4">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2"><i class="fas fa-briefcase-medical text-slate-300"></i> Layanan</span>
+                                <span class="font-bold text-emerald-600 text-sm bg-emerald-50 px-3 py-1 rounded-lg">Bekam Sunnah</span>
+                            </div>
+                            <div class="flex justify-between items-center gap-4 pt-2">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2"><i class="fas fa-calendar-alt text-slate-300"></i> Jadwal</span>
+                                <div class="text-right">
+                                    <div class="font-bold text-slate-900 text-sm">Jumat, 25 April 2026</div>
+                                    <div class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mt-0.5"><i class="far fa-clock"></i> 09.30 WIB</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="status.html" class="mt-6 inline-flex min-h-[44px] w-full items-center justify-center gap-3 rounded-[1.2rem] bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-4 text-white font-extrabold transition-all hover:brightness-105 focus-ring">
+                            Cek Status Booking <i class="fas fa-arrow-right text-sm"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- CTA Section -->
     <section class="py-16 sm:py-24 px-4 sm:px-6 relative z-10 overflow-hidden">
-        <div class="max-w-6xl mx-auto rounded-[2.5rem] sm:rounded-[4rem] bg-gradient-to-br from-emerald-600 to-teal-800 overflow-hidden relative shadow-2xl shadow-emerald-900/20 min-h-[400px] sm:min-h-[500px] flex items-center justify-center reveal">
+        <div class="max-w-6xl mx-auto rounded-[2.5rem] sm:rounded-[4rem] bg-gradient-to-br from-emerald-100 via-emerald-50 to-teal-100 overflow-hidden relative shadow-2xl shadow-emerald-900/10 border border-emerald-200/70 min-h-[400px] sm:min-h-[500px] flex items-center justify-center reveal">
             <!-- Subtle pattern overlay -->
             <div class="absolute inset-0 opacity-[0.03]" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
             
-            <div class="absolute -top-40 -left-40 w-80 h-80 sm:w-96 sm:h-96 bg-white/10 rounded-full blur-[80px] sm:blur-[100px]"></div>
-            <div class="absolute -bottom-40 -right-40 w-80 h-80 sm:w-96 sm:h-96 bg-emerald-400/20 rounded-full blur-[80px] sm:blur-[100px]"></div>
+            <div class="absolute -top-40 -left-40 w-80 h-80 sm:w-96 sm:h-96 bg-white/40 rounded-full blur-[80px] sm:blur-[100px]"></div>
+            <div class="absolute inset-y-0 right-0 w-full sm:w-1/2 bg-[radial-gradient(circle_at_center,rgba(52,211,153,0.22),transparent_68%)]"></div>
+            <div class="absolute -bottom-40 -right-40 w-80 h-80 sm:w-96 sm:h-96 bg-emerald-300/30 rounded-full blur-[80px] sm:blur-[100px]"></div>
             
-            <div class="relative p-8 sm:p-12 lg:p-24 text-center space-y-6 sm:space-y-10 z-10">
-                <h2 id="cms-cta-judul" class="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight tracking-tight">Beri Tubuh Anda Hak <br class="hidden sm:block">Untuk Sehat Kembali</h2>
-                <p id="cms-cta-deskripsi" class="text-emerald-50/80 text-base sm:text-xl max-w-2xl mx-auto font-medium leading-relaxed">Jadwalkan kunjungan Anda dalam kurang dari 2 menit melalui sistem cerdas kami.</p>
-                <div class="pt-4 sm:pt-6">
-                    <a href="booking.html" class="group inline-flex items-center justify-center gap-3 sm:gap-4 bg-white text-emerald-900 px-8 sm:px-12 py-4 sm:py-5 rounded-2xl sm:rounded-[2rem] text-lg sm:text-xl font-extrabold shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 w-full sm:w-auto">
+            <div class="relative p-8 sm:p-12 lg:p-20 grid lg:grid-cols-[1.2fr_0.8fr] gap-10 items-end z-10">
+                <div class="space-y-6 sm:space-y-8 text-left">
+                    <span class="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-emerald-200 bg-white/70 text-emerald-700 text-[10px] sm:text-xs font-black uppercase tracking-[0.24em]">Mulai ikhtiar sehat</span>
+                    <h2 id="cms-cta-judul" class="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-emerald-950 leading-tight tracking-tight">Buat Jadwal Bekam <br class="hidden sm:block">dengan Mudah</h2>
+                    <p id="cms-cta-deskripsi" class="text-base sm:text-xl max-w-2xl font-semibold leading-relaxed text-emerald-900/85">Pilih layanan, tentukan jadwal, lalu datang sesuai waktu yang Anda pilih.</p>
+                </div>
+                <div class="space-y-5">
+                    <div class="rounded-[2rem] border border-emerald-200 bg-white/72 backdrop-blur-xl p-5 sm:p-6 shadow-lg shadow-emerald-900/5">
+                        <p class="text-[10px] sm:text-xs font-black uppercase tracking-[0.24em] text-emerald-700">Reservasi cepat</p>
+                        <p class="panel-copy-readable mt-3 text-sm sm:text-base font-semibold leading-relaxed">Isi data singkat, pilih jadwal, lalu lanjutkan konfirmasi booking.</p>
+                    </div>
+                    <a href="booking.html" class="group inline-flex items-center justify-center gap-3 sm:gap-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-8 sm:px-12 py-4 sm:py-5 rounded-2xl sm:rounded-[2rem] text-lg sm:text-xl font-extrabold shadow-xl shadow-emerald-500/20 hover:shadow-2xl hover:scale-[1.02] active:scale-95 transition-all duration-300 w-full">
                         Buat Jadwal Sekarang 
-                        <i class="fas fa-arrow-right text-emerald-600 group-hover:translate-x-2 transition-transform"></i>
+                        <i class="fas fa-arrow-right text-white group-hover:translate-x-2 transition-transform"></i>
                     </a>
                 </div>
             </div>
@@ -366,7 +635,8 @@
 
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-slate-100 pt-20 sm:pt-24 pb-8 sm:pb-12 relative z-10">
+    <footer class="bg-gradient-to-br from-emerald-50 via-white to-teal-50 text-emerald-950 pt-20 sm:pt-24 pb-8 sm:pb-12 relative z-10 overflow-hidden border-t border-emerald-100">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(167,243,208,0.35),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(153,246,228,0.22),transparent_24%)] pointer-events-none"></div>
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16 mb-16 sm:mb-20 reveal">
                 <!-- Brand Info -->
@@ -375,70 +645,71 @@
                         <div id="cms-logo-footer-container" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-bold text-xl sm:text-2xl shadow-lg group-hover:rotate-6 transition-transform">
                             <i class="fas fa-leaf"></i>
                         </div>
-                        <span class="font-extrabold text-xl sm:text-2xl text-slate-900 tracking-tight" id="cms-nama-klinik-footer">Rumah Sehat Dani Sabri</span>
+                        <span class="font-extrabold text-xl sm:text-2xl text-emerald-950 tracking-tight" id="cms-nama-klinik-footer">Rumah Sehat Dani Sabri</span>
                     </a>
-                    <p id="cms-footer-deskripsi" class="text-slate-500 text-base sm:text-lg leading-relaxed font-medium max-w-md">
-                        Melayani dengan hati, mengobati dengan iman. Klinik bekam dan ruqyah terbaik dengan pendekatan syariah dan standar medis modern.
+                    <p id="cms-footer-deskripsi" class="text-emerald-900/70 text-base sm:text-lg leading-relaxed font-medium max-w-md">
+                        Melayani bekam sunnah dan ruqyah syar'iyyah dengan adab Islami, amanah, dan pelayanan yang jelas.
                     </p>
                     <div class="flex gap-4 pt-2">
-                        <a href="#" id="cms-instagram" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all shadow-sm"><i class="fab fa-instagram text-lg"></i></a>
-                        <a href="#" id="cms-facebook" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all shadow-sm"><i class="fab fa-facebook-f text-lg"></i></a>
-                        <a href="#" id="cms-whatsapp-social" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all shadow-sm"><i class="fab fa-whatsapp text-lg"></i></a>
+                        <a href="#" id="cms-instagram" aria-label="Instagram klinik" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/80 border border-emerald-100 flex items-center justify-center text-emerald-800 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all shadow-sm focus-ring"><i class="fab fa-instagram text-lg"></i></a>
+                        <a href="#" id="cms-facebook" aria-label="Facebook klinik" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/80 border border-emerald-100 flex items-center justify-center text-emerald-800 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all shadow-sm focus-ring"><i class="fab fa-facebook-f text-lg"></i></a>
+                        <a href="#" id="cms-whatsapp-social" aria-label="WhatsApp klinik" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/80 border border-emerald-100 flex items-center justify-center text-emerald-800 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all shadow-sm focus-ring"><i class="fab fa-whatsapp text-lg"></i></a>
                     </div>
                 </div>
                 
                 <!-- Links -->
                 <div class="md:col-span-3 space-y-6 sm:space-y-8">
-                    <h4 class="font-black text-slate-900 uppercase tracking-widest text-xs">Portal Akses</h4>
+                    <h4 class="font-black text-emerald-950 uppercase tracking-widest text-xs">Portal Akses</h4>
                     <ul class="space-y-4">
-                        <li><a href="booking.html" class="group flex items-center gap-2 text-slate-500 hover:text-emerald-600 font-bold transition-colors text-sm sm:text-base">Booking Reservasi <i class="fas fa-arrow-right text-[10px] opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all"></i></a></li>
-                        <li><a href="status.html" class="group flex items-center gap-2 text-slate-500 hover:text-emerald-600 font-bold transition-colors text-sm sm:text-base">Lacak Status <i class="fas fa-arrow-right text-[10px] opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all"></i></a></li>
-                        <li><a href="admin.html" class="group flex items-center gap-2 text-slate-500 hover:text-emerald-600 font-bold transition-colors text-sm sm:text-base">Portal Admin <i class="fas fa-arrow-right text-[10px] opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all"></i></a></li>
+                        <li><a href="booking.html" class="group flex items-center gap-2 text-emerald-900/70 hover:text-emerald-700 font-bold transition-colors text-sm sm:text-base">Booking Reservasi <i class="fas fa-arrow-right text-[10px] opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all"></i></a></li>
+                        <li><a href="status.html" class="group flex items-center gap-2 text-emerald-900/70 hover:text-emerald-700 font-bold transition-colors text-sm sm:text-base">Lacak Status <i class="fas fa-arrow-right text-[10px] opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all"></i></a></li>
+                        <li><a href="admin.html" class="group flex items-center gap-2 text-emerald-900/70 hover:text-emerald-700 font-bold transition-colors text-sm sm:text-base">Portal Admin <i class="fas fa-arrow-right text-[10px] opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all"></i></a></li>
                     </ul>
                 </div>
 
                 <!-- Contact -->
                 <div class="md:col-span-4 space-y-6 sm:space-y-8">
-                    <h4 class="font-black text-slate-900 uppercase tracking-widest text-xs">Lokasi & Operasional</h4>
-                    <ul class="glass-dark bg-slate-50/80 p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-100 space-y-5 shadow-sm">
+                    <h4 class="font-black text-emerald-950 uppercase tracking-widest text-xs">Lokasi & Operasional</h4>
+                    <ul class="bg-white/80 backdrop-blur-xl p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] border border-emerald-100 space-y-5 shadow-sm">
                         <li class="flex items-start gap-4">
                             <a id="cms-maps-link" href="#" target="_blank" class="flex items-start gap-4 group cursor-pointer hover:opacity-80 transition-opacity">
-                                <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5"><i class="fas fa-map-marker-alt text-sm"></i></div>
-                                <span id="cms-alamat" class="text-slate-600 font-semibold text-sm leading-relaxed group-hover:text-emerald-700 transition-colors">Jl. Kesehatan No. 12, Bekasi Barat, Jawa Barat</span>
+                                <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5"><i class="fas fa-map-marker-alt text-sm"></i></div>
+                                <span id="cms-alamat" class="text-emerald-900/76 font-semibold text-sm leading-relaxed group-hover:text-emerald-700 transition-colors">Jl. Kesehatan No. 12, Bekasi Barat, Jawa Barat</span>
                             </a>
                         </li>
                         <li class="flex items-center gap-4">
-                            <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0"><i class="fas fa-phone-alt text-sm"></i></div>
-                            <span id="cms-whatsapp" class="text-slate-600 font-semibold text-sm">0812-3456-7890</span>
+                            <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0"><i class="fas fa-phone-alt text-sm"></i></div>
+                            <span id="cms-whatsapp" class="text-emerald-900/76 font-semibold text-sm">0812-3456-7890</span>
                         </li>
                         <li class="flex items-center gap-4">
-                            <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0"><i class="fas fa-clock text-sm"></i></div>
-                            <span id="cms-jam-operasional" class="text-slate-600 font-semibold text-sm">Setiap Hari, 08:00 - 17:00</span>
+                            <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0"><i class="fas fa-clock text-sm"></i></div>
+                            <span id="cms-jam-operasional" class="text-emerald-900/76 font-semibold text-sm">Setiap Hari, 08:00 - 17:00</span>
                         </li>
                     </ul>
                 </div>
             </div>
 
             <!-- Bottom Footer -->
-            <div class="border-t border-slate-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
-                <p class="text-slate-400 text-xs font-bold tracking-widest uppercase text-center md:text-left">
+            <div class="border-t border-emerald-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                <p class="text-emerald-900/35 text-xs font-bold tracking-widest uppercase text-center md:text-left">
                     &copy; <span id="current-year"></span> Rumah Sehat Dani Sabri. All rights reserved.
                 </p>
                 <div class="flex items-center gap-4 sm:gap-6">
-                    <a href="#" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-500 hover:text-emerald-700 hover:border-emerald-200 transition-all font-bold text-[10px] uppercase tracking-widest">
+                    <a href="#" class="inline-flex items-center gap-2 px-4 py-2 bg-white/80 border border-emerald-100 rounded-lg text-emerald-800/70 hover:text-emerald-700 hover:border-emerald-300 transition-all font-bold text-[10px] uppercase tracking-widest">
                         <i class="fas fa-lock"></i> Secured
                     </a>
-                    <div class="h-8 w-px bg-slate-200 hidden sm:block"></div>
-                    <span class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] hidden sm:block">Thibbun Nabawi</span>
+                    <div class="h-8 w-px bg-emerald-100 hidden sm:block"></div>
+                    <span class="text-[10px] font-black text-emerald-900/25 uppercase tracking-[0.2em] hidden sm:block">Thibbun Nabawi</span>
                 </div>
             </div>
         </div>
     </footer>
+    </main>
 
     <!-- PREMIUM AI FLOATING CHATBOT -->
     <div class="fixed bottom-6 right-6 z-[999]">
         <!-- Chat FAB -->
-        <button id="chatbot-fab" data-action="toggle-chatbot" class="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl hover:scale-110 active:scale-95 transition-transform duration-300 relative group pulse-emerald">
+        <button id="chatbot-fab" aria-label="Buka asisten chat klinik" data-action="toggle-chatbot" class="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl hover:scale-110 active:scale-95 transition-transform duration-300 relative group pulse-emerald focus-ring">
             <i class="fas fa-robot group-hover:rotate-12 transition-transform"></i>
             <span class="absolute -top-1 -right-1 flex h-4 w-4">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
@@ -462,7 +733,7 @@
                         </div>
                     </div>
                 </div>
-                <button data-action="toggle-chatbot" class="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors">
+                <button data-action="toggle-chatbot" aria-label="Tutup asisten chat klinik" class="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors focus-ring">
                     <i class="fas fa-times text-lg"></i>
                 </button>
             </div>
@@ -530,15 +801,15 @@
             const nav = document.getElementById('navbar');
             const inner = document.getElementById('navInner');
             if (window.scrollY > 20) {
-                nav.classList.remove('pt-6');
+                nav.classList.remove('pt-4', 'sm:pt-6');
                 nav.classList.add('pt-2');
-                inner.classList.remove('px-6', 'sm:px-8', 'py-4', 'shadow-slate-200/50');
-                inner.classList.add('px-5', 'sm:px-6', 'py-3', 'shadow-slate-200/80', 'bg-white/95');
+                inner.classList.remove('sm:px-8', 'py-4', 'bg-white/72', 'shadow-slate-900/10');
+                inner.classList.add('sm:px-6', 'py-3', 'bg-white/95', 'shadow-slate-900/15');
             } else {
                 nav.classList.remove('pt-2');
-                nav.classList.add('pt-6');
-                inner.classList.remove('px-5', 'sm:px-6', 'py-3', 'shadow-slate-200/80', 'bg-white/95');
-                inner.classList.add('px-6', 'sm:px-8', 'py-4', 'shadow-slate-200/50');
+                nav.classList.add('pt-4', 'sm:pt-6');
+                inner.classList.remove('sm:px-6', 'py-3', 'bg-white/95', 'shadow-slate-900/15');
+                inner.classList.add('sm:px-8', 'py-4', 'bg-white/72', 'shadow-slate-900/10');
             }
         });
 
@@ -722,6 +993,29 @@
                     // CTA
                     if(d.cms_cta_judul) document.getElementById('cms-cta-judul').innerHTML = d.cms_cta_judul;
                     if(d.cms_cta_deskripsi) document.getElementById('cms-cta-deskripsi').textContent = d.cms_cta_deskripsi;
+
+                    // Team Section
+                    if(d.cms_team_label) document.getElementById('cms-team-label').textContent = d.cms_team_label;
+                    if(d.cms_team_title) document.getElementById('cms-team-title').textContent = d.cms_team_title;
+                    if(d.cms_team_desc) document.getElementById('cms-team-desc').textContent = d.cms_team_desc;
+                    if(d.cms_team1_label) document.getElementById('cms-team1-label').textContent = d.cms_team1_label;
+                    if(d.cms_team1_title) document.getElementById('cms-team1-title').textContent = d.cms_team1_title;
+                    if(d.cms_team1_desc) document.getElementById('cms-team1-desc').textContent = d.cms_team1_desc;
+                    if(d.cms_team1_point1) document.getElementById('cms-team1-point1').textContent = d.cms_team1_point1;
+                    if(d.cms_team1_point2) document.getElementById('cms-team1-point2').textContent = d.cms_team1_point2;
+                    if(d.cms_team1_image) document.getElementById('cms-team1-image').src = normalizeImageUrl(d.cms_team1_image);
+                    if(d.cms_team2_label) document.getElementById('cms-team2-label').textContent = d.cms_team2_label;
+                    if(d.cms_team2_title) document.getElementById('cms-team2-title').textContent = d.cms_team2_title;
+                    if(d.cms_team2_desc) document.getElementById('cms-team2-desc').textContent = d.cms_team2_desc;
+                    if(d.cms_team2_point1) document.getElementById('cms-team2-point1').textContent = d.cms_team2_point1;
+                    if(d.cms_team2_point2) document.getElementById('cms-team2-point2').textContent = d.cms_team2_point2;
+                    if(d.cms_team2_image) document.getElementById('cms-team2-image').src = normalizeImageUrl(d.cms_team2_image);
+                    if(d.cms_team3_label) document.getElementById('cms-team3-label').textContent = d.cms_team3_label;
+                    if(d.cms_team3_title) document.getElementById('cms-team3-title').textContent = d.cms_team3_title;
+                    if(d.cms_team3_desc) document.getElementById('cms-team3-desc').textContent = d.cms_team3_desc;
+                    if(d.cms_team3_focus_title) document.getElementById('cms-team3-focus-title').textContent = d.cms_team3_focus_title;
+                    if(d.cms_team3_focus_desc) document.getElementById('cms-team3-focus-desc').textContent = d.cms_team3_focus_desc;
+                    if(d.cms_team3_image) document.getElementById('cms-team3-image').src = normalizeImageUrl(d.cms_team3_image);
             };
 
             const cachedCMS = localStorage.getItem('cmsDataVal');
@@ -822,13 +1116,13 @@
                         }
 
                         return `<div class="relative group reveal" style="animation-delay: ${delay}s;">
-                            <div class="glass p-8 sm:p-10 rounded-[3rem] shadow-sm hover:shadow-2xl ${c.shadow} hover:-translate-y-2 transition-all duration-300 h-full flex flex-col border-white/60 overflow-hidden">
-                                ${l.terlaris ? `<div class="absolute top-0 right-0 bg-gradient-to-bl ${c.badge} text-white text-[10px] font-black px-4 sm:px-6 py-2 rounded-bl-2xl shadow-md uppercase tracking-widest">Terlaris</div>` : ''}
+                            <div class="bg-white/78 backdrop-blur-xl p-8 sm:p-10 rounded-[2.3rem] shadow-xl shadow-slate-900/6 hover:shadow-2xl ${c.shadow} hover:-translate-y-2 transition-all duration-300 h-full flex flex-col border border-white/80 overflow-hidden">
+                                ${l.terlaris ? `<div class="absolute top-5 right-5 bg-gradient-to-r ${c.badge} text-white text-[10px] font-black px-4 py-2 rounded-full shadow-md uppercase tracking-widest">Terlaris</div>` : ''}
                                 ${mediaEl}
                                 <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3 sm:mb-4 line-clamp-2 min-h-[3.5rem] sm:min-h-[4rem]">${l.nama || 'Layanan Tanpa Nama'}</h3>
                                 <p class="text-sm sm:text-base text-slate-500 font-medium leading-relaxed mb-6 sm:mb-8 line-clamp-4 min-h-[5rem] sm:min-h-[6rem]">${l.deskripsi || 'Tidak ada deskripsi tersedia.'}</p>
                                 ${details.length > 0 ? `<ul class="space-y-3 mb-8 sm:mb-10 flex-grow">${details.slice(0, 4).map(d => `<li class="flex items-start gap-3 text-xs sm:text-sm font-bold text-slate-600"><i class="fas fa-check-circle ${c.check} text-lg mt-0.5"></i> <span class="line-clamp-2">${d}</span></li>`).join('')}</ul>` : '<div class="flex-grow"></div>'}
-                                <a href="booking.html" class="group/btn flex items-center justify-center gap-2 w-full py-3.5 sm:py-4 rounded-xl sm:rounded-2xl ${c.btn} hover:text-white font-extrabold transition-colors duration-300">
+                                <a href="booking.html" class="group/btn flex items-center justify-center gap-2 w-full py-3.5 sm:py-4 rounded-xl sm:rounded-2xl ${c.btn} border border-transparent hover:text-white font-extrabold transition-colors duration-300">
                                     Pesan Jadwal <i class="fas fa-arrow-right text-xs group-hover/btn:translate-x-1 transition-transform"></i>
                                 </a>
                             </div>
