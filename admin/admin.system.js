@@ -23,6 +23,37 @@ window.AdminApp.system.uploadHeroImage = async function uploadHeroImage(input) {
     }
 };
 
+window.AdminApp.system.uploadCmsImage = async function uploadCmsImage(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const targetInput = document.getElementById(input.dataset.targetInput || '');
+    const triggerButton = document.getElementById(input.dataset.targetButtonId || '');
+    const originalHTML = triggerButton ? triggerButton.innerHTML : '';
+
+    if (triggerButton) {
+        triggerButton.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Upload...';
+        triggerButton.disabled = true;
+    }
+
+    try {
+        const url = await window.AdminApp.system.uploadToDrive(file);
+        if (targetInput) {
+            targetInput.value = url;
+            targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        alert(input.dataset.successMessage || 'Gambar berhasil diupload.');
+    } catch (e) {
+        alert(e.message);
+    } finally {
+        if (triggerButton) {
+            triggerButton.innerHTML = originalHTML;
+            triggerButton.disabled = false;
+        }
+        input.value = '';
+    }
+};
+
 window.AdminApp.system.uploadToDrive = async function uploadToDrive(file) {
     return new Promise((resolve, reject) => {
         if (!window.GAS_URL) {

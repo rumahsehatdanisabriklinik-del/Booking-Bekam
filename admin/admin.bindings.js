@@ -149,6 +149,9 @@ window.AdminApp.bindings.handleAdminChange = function handleAdminChange(changeEl
         case 'upload-hero-image':
             window.AdminApp.system.uploadHeroImage(changeEl);
             break;
+        case 'upload-cms-image':
+            window.AdminApp.system.uploadCmsImage(changeEl);
+            break;
         case 'upload-artikel-image':
             window.AdminApp.content.uploadArtikelImageModal(changeEl);
             break;
@@ -167,6 +170,9 @@ window.AdminApp.bindings.handleAdminInput = function handleAdminInput(inputEl) {
     switch (action) {
         case 'reservation-search':
             window.AdminApp.bookings.handleSearch(inputEl.value);
+            break;
+        case 'preview-clinic-qr':
+            window.AdminApp.cms.renderClinicCheckinQr(inputEl.value);
             break;
         default:
             break;

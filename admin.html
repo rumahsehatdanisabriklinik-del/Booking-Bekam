@@ -417,6 +417,7 @@
                         </div>
                         <div class="space-y-5">
                             <div><label class="block text-[10px] text-slate-400 uppercase tracking-[0.2em] mb-2 font-black">Alamat Lengkap</label><textarea id="cms_alamat" class="cms-input" rows="2"></textarea></div>
+                            <div><label class="block text-[10px] text-slate-400 uppercase tracking-[0.2em] mb-2 font-black">Link Google Maps</label><input type="text" id="cms_maps_link" class="cms-input" placeholder="https://maps.app.goo.gl/..."></div>
                             <div><label class="block text-[10px] text-slate-400 uppercase tracking-[0.2em] mb-2 font-black">Jam Operasional</label><input type="text" id="cms_jam_operasional" class="cms-input"></div>
                             <div><label class="block text-[10px] text-slate-400 uppercase tracking-[0.2em] mb-2 font-black">WhatsApp Admin</label><input type="text" id="cms_whatsapp" class="cms-input"></div>
                             <div class="grid grid-cols-2 gap-4">
@@ -474,13 +475,23 @@
                         <div class="grid md:grid-cols-2 gap-8">
                             <div class="space-y-4 bg-white/50 border border-white p-6 rounded-[2rem]">
                                 <h4 class="font-bold text-slate-800"><i class="fas fa-image text-emerald-500"></i> Logo &amp; Footer</h4>
-                                <div><label class="block text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Link Gambar Logo (G-Drive)</label><input type="text" id="cms_logo_image" class="cms-input" placeholder="Jika kosong, pakai logo bawaan"></div>
+                                <div class="space-y-2">
+                                    <label class="block text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Link Gambar Logo (G-Drive)</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="cms_logo_image" class="cms-input flex-1" placeholder="Jika kosong, pakai logo bawaan">
+                                        <button id="btnUploadLogoImage" data-action="trigger-file-input" data-target-id="fileLogoImage" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 border border-slate-300/50 shadow-sm">
+                                            <i class="fas fa-folder-open"></i> <span class="hidden sm:inline">Pilih File</span>
+                                        </button>
+                                        <input type="file" id="fileLogoImage" class="hidden" accept="image/*" data-change-action="upload-cms-image" data-target-input="cms_logo_image" data-target-button-id="btnUploadLogoImage" data-success-message="Logo berhasil diupload.">
+                                    </div>
+                                </div>
                                 <div><label class="block text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Teks Pendek Footer</label><textarea id="cms_footer_deskripsi" class="cms-input" rows="3"></textarea></div>
                             </div>
                             <div class="space-y-4 bg-white/50 border border-white p-6 rounded-[2rem]">
                                 <h4 class="font-bold text-slate-800"><i class="fas fa-bullhorn text-teal-500"></i> Call To Action (Banner)</h4>
                                 <div><label class="block text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Judul Kalimat Ajakan</label><input type="text" id="cms_cta_judul" class="cms-input"></div>
                                 <div><label class="block text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Deskripsi Tambahan</label><textarea id="cms_cta_deskripsi" class="cms-input" rows="3"></textarea></div>
+                                <div><label class="block text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Kode Check-in Klinik</label><input type="text" id="cms_checkin_secret_code" data-input-action="preview-clinic-qr" class="cms-input" placeholder="KLINIK-DANI-SABRI-PRESENSI"></div>
                             </div>
                             <div class="md:col-span-2 space-y-4 bg-white/50 border border-white p-6 rounded-[2rem]">
                                 <h4 class="font-bold text-slate-800"><i class="fas fa-star text-amber-500"></i> Bagian Keunggulan ("Mengapa Kami")</h4>
@@ -533,7 +544,13 @@
                                         <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Kartu 1</div>
                                         <input type="text" id="cms_team1_label" class="cms-input !text-xs !p-2" placeholder="Label">
                                         <input type="text" id="cms_team1_title" class="cms-input !text-xs !p-2" placeholder="Judul">
-                                        <input type="text" id="cms_team1_image" class="cms-input !text-xs !p-2" placeholder="Link Gambar">
+                                        <div class="flex gap-2">
+                                            <input type="text" id="cms_team1_image" class="cms-input !text-xs !p-2 flex-1" placeholder="Link Gambar">
+                                            <button id="btnUploadTeam1Image" data-action="trigger-file-input" data-target-id="fileTeam1Image" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg font-bold text-[10px] flex items-center gap-1 transition-all shrink-0 border border-slate-300/50 shadow-sm">
+                                                <i class="fas fa-folder-open"></i> File
+                                            </button>
+                                            <input type="file" id="fileTeam1Image" class="hidden" accept="image/*" data-change-action="upload-cms-image" data-target-input="cms_team1_image" data-target-button-id="btnUploadTeam1Image" data-success-message="Gambar tim 1 berhasil diupload.">
+                                        </div>
                                         <textarea id="cms_team1_desc" class="cms-input !text-xs !p-2" rows="3" placeholder="Deskripsi"></textarea>
                                         <input type="text" id="cms_team1_point1" class="cms-input !text-xs !p-2" placeholder="Poin 1">
                                         <input type="text" id="cms_team1_point2" class="cms-input !text-xs !p-2" placeholder="Poin 2">
@@ -542,7 +559,13 @@
                                         <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Kartu 2</div>
                                         <input type="text" id="cms_team2_label" class="cms-input !text-xs !p-2" placeholder="Label">
                                         <input type="text" id="cms_team2_title" class="cms-input !text-xs !p-2" placeholder="Judul">
-                                        <input type="text" id="cms_team2_image" class="cms-input !text-xs !p-2" placeholder="Link Gambar">
+                                        <div class="flex gap-2">
+                                            <input type="text" id="cms_team2_image" class="cms-input !text-xs !p-2 flex-1" placeholder="Link Gambar">
+                                            <button id="btnUploadTeam2Image" data-action="trigger-file-input" data-target-id="fileTeam2Image" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg font-bold text-[10px] flex items-center gap-1 transition-all shrink-0 border border-slate-300/50 shadow-sm">
+                                                <i class="fas fa-folder-open"></i> File
+                                            </button>
+                                            <input type="file" id="fileTeam2Image" class="hidden" accept="image/*" data-change-action="upload-cms-image" data-target-input="cms_team2_image" data-target-button-id="btnUploadTeam2Image" data-success-message="Gambar tim 2 berhasil diupload.">
+                                        </div>
                                         <textarea id="cms_team2_desc" class="cms-input !text-xs !p-2" rows="3" placeholder="Deskripsi"></textarea>
                                         <input type="text" id="cms_team2_point1" class="cms-input !text-xs !p-2" placeholder="Poin 1">
                                         <input type="text" id="cms_team2_point2" class="cms-input !text-xs !p-2" placeholder="Poin 2">
@@ -551,7 +574,13 @@
                                         <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Kartu 3</div>
                                         <input type="text" id="cms_team3_label" class="cms-input !text-xs !p-2" placeholder="Label">
                                         <input type="text" id="cms_team3_title" class="cms-input !text-xs !p-2" placeholder="Judul">
-                                        <input type="text" id="cms_team3_image" class="cms-input !text-xs !p-2" placeholder="Link Gambar">
+                                        <div class="flex gap-2">
+                                            <input type="text" id="cms_team3_image" class="cms-input !text-xs !p-2 flex-1" placeholder="Link Gambar">
+                                            <button id="btnUploadTeam3Image" data-action="trigger-file-input" data-target-id="fileTeam3Image" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg font-bold text-[10px] flex items-center gap-1 transition-all shrink-0 border border-slate-300/50 shadow-sm">
+                                                <i class="fas fa-folder-open"></i> File
+                                            </button>
+                                            <input type="file" id="fileTeam3Image" class="hidden" accept="image/*" data-change-action="upload-cms-image" data-target-input="cms_team3_image" data-target-button-id="btnUploadTeam3Image" data-success-message="Gambar tim 3 berhasil diupload.">
+                                        </div>
                                         <textarea id="cms_team3_desc" class="cms-input !text-xs !p-2" rows="3" placeholder="Deskripsi"></textarea>
                                         <input type="text" id="cms_team3_focus_title" class="cms-input !text-xs !p-2" placeholder="Judul Fokus">
                                         <textarea id="cms_team3_focus_desc" class="cms-input !text-xs !p-2" rows="3" placeholder="Isi Fokus"></textarea>

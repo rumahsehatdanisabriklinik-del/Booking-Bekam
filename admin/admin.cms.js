@@ -15,7 +15,9 @@ window.AdminApp.cms.renderClinicCheckinQr = function renderClinicCheckinQr(secre
     const printText = document.getElementById('printClinicQrCodeText');
     if (!img || !text) return;
 
-    if (!secretCode) {
+    const normalizedCode = String(secretCode || '').trim();
+
+    if (!normalizedCode) {
         img.removeAttribute('src');
         text.textContent = 'Kode check-in belum diatur di CMS.';
         if (printImg) printImg.removeAttribute('src');
@@ -23,13 +25,27 @@ window.AdminApp.cms.renderClinicCheckinQr = function renderClinicCheckinQr(secre
         return;
     }
 
-    const payload = window.AdminApp.cms.getClinicCheckinPayload(secretCode);
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=700x700&data=${encodeURIComponent(payload)}`;
+    const payload = window.AdminApp.cms.getClinicCheckinPayload(normalizedCode);
+    const primaryQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=700x700&data=${encodeURIComponent(payload)}`;
+    const fallbackQrUrl = `https://quickchart.io/qr?size=700&text=${encodeURIComponent(payload)}`;
 
-    img.src = qrUrl;
+    const bindFallback = (imageEl) => {
+        if (!imageEl) return;
+        imageEl.dataset.qrFallbackApplied = 'false';
+        imageEl.onerror = () => {
+            if (imageEl.dataset.qrFallbackApplied === 'true') return;
+            imageEl.dataset.qrFallbackApplied = 'true';
+            imageEl.src = fallbackQrUrl;
+        };
+    };
+
+    bindFallback(img);
+    bindFallback(printImg);
+
+    img.src = primaryQrUrl;
     text.textContent = payload;
 
-    if (printImg) printImg.src = qrUrl;
+    if (printImg) printImg.src = primaryQrUrl;
     if (printText) printText.textContent = payload;
 };
 
