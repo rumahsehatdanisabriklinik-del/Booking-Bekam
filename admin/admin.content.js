@@ -149,10 +149,10 @@ window.AdminApp.content.saveArtikelFromModal = async function saveArtikelFromMod
             window.AdminState.content.hasLoadedArtikel = false;
             window.AdminApp.content.loadArtikelListAdmin({ force: true });
         } else {
-            alert(result.message);
+            alert(result.message || 'Gagal menyimpan artikel.');
         }
     } catch (e) {
-        alert('Error koneksi saat simpan.');
+        alert(e?.message ? `Error koneksi saat simpan: ${e.message}` : 'Error koneksi saat simpan.');
     } finally {
         btn.innerHTML = orig;
         btn.disabled = false;
