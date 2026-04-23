@@ -426,17 +426,68 @@
             return Math.max(1, Math.ceil(words / 180));
         }
 
+        function splitArticleLine(line) {
+            const value = String(line || '').trim();
+            const starters = [
+                'Bekam membantu',
+                'Sangat efektif',
+                'Bekam memberikan',
+                'Dengan sirkulasi',
+                'Bekam membantu mengontrol',
+                'Mengeluarkan racun',
+                'Bekam sering'
+            ];
+            for (const starter of starters) {
+                const idx = value.indexOf(starter);
+                if (idx > 12) {
+                    return {
+                        title: value.slice(0, idx).trim(),
+                        body: value.slice(idx).trim()
+                    };
+                }
+            }
+            return { title: value, body: '' };
+        }
+
+        function autoFormatPlainArticle(text) {
+            const prepared = String(text || '')
+                .replace(/\r/g, '')
+                .replace(/\s+((?:\d+\.\s*)?(?:Apa Itu|Manfaat|Melancarkan|Mengurangi|Menenangkan|Meningkatkan|Menjaga|Detoksifikasi|Bekam untuk|Berikut beberapa))/g, '\n\n$1')
+                .replace(/\s+(Migrain dan vertigo|Kolesterol tinggi|Asam urat|Hipertensi|Masalah pencernaan|Kelelahan kronis)/g, '\n$1');
+
+            return prepared
+                .split(/\n{2,}/)
+                .map((part) => part.trim())
+                .filter(Boolean)
+                .map((part) => {
+                    const clean = escapeHtml(part).replace(/\n/g, '<br>');
+                    if (/^(Apa Itu|Manfaat|Bekam untuk|Berikut beberapa)/i.test(part)) {
+                        return `<h2>${clean}</h2>`;
+                    }
+                    if (/^\d+\.\s+/.test(part)) {
+                        const section = splitArticleLine(part.replace(/^\d+\.\s+/, ''));
+                        const title = escapeHtml(section.title);
+                        const body = section.body ? `<p>${escapeHtml(section.body).replace(/\n/g, '<br>')}</p>` : '';
+                        return `<h3>${title}</h3>${body}`;
+                    }
+                    return `<p>${clean}</p>`;
+                })
+                .join('');
+        }
+
         function formatArticleBody(input) {
             const raw = String(input || '').trim();
             if (!raw) return '<p>Konten artikel belum tersedia.</p>';
             if (raw.includes('<')) {
-                return typeof sanitizeAssistantHtml === 'function' ? sanitizeAssistantHtml(raw) : raw;
+                const parts = raw.split(/(<figure[\s\S]*?<\/figure>|<img\b[^>]*>)/gi);
+                const html = parts.map((part) => {
+                    if (!part.trim()) return '';
+                    if (/^<(figure|img)\b/i.test(part.trim())) return part;
+                    return autoFormatPlainArticle(part);
+                }).join('');
+                return typeof sanitizeAssistantHtml === 'function' ? sanitizeAssistantHtml(html) : html;
             }
-            return '<p>' + raw
-                .split(/\n{2,}/)
-                .map((paragraph) => escapeHtml(paragraph.trim()).replace(/\n/g, '<br>'))
-                .filter(Boolean)
-                .join('</p><p>') + '</p>';
+            return autoFormatPlainArticle(raw);
         }
 
         function slugify(text) {
