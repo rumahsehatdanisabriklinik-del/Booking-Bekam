@@ -3,9 +3,7 @@
 import crypto from 'node:crypto';
 
 export const config = {
-    api: {
-        bodyParser: false
-    }
+    bodyParser: false
 };
 
 function canonicalizeParams(params = {}) {
