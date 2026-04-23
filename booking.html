@@ -309,7 +309,7 @@
             <div class="bg-slate-50 rounded-[2rem] p-8 border border-white shadow-inner mb-8 text-left space-y-4">
                 <div class="flex justify-between items-center pb-4 border-b border-slate-200/50">
                     <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><i class="fas fa-receipt text-slate-300"></i> Detail Reservasi</span>
-                    <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[10px] font-black uppercase">Terjadwalkan</span>
+                    <span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-[10px] font-black uppercase">Menunggu Konfirmasi</span>
                 </div>
                 <div class="grid grid-cols-2 gap-y-4 gap-x-6">
                     <div>
@@ -331,6 +331,18 @@
                     <div>
                         <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Jam Kedatangan</label>
                         <p id="succ-waktu" class="font-extrabold text-emerald-600"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-amber-50 border border-amber-100 rounded-[2rem] p-6 mb-8 text-left">
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-xl shrink-0">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-black text-slate-900">Menunggu Konfirmasi Admin</h3>
+                        <p class="text-sm text-slate-600 font-medium mt-2">Setelah booking, reservasi Bapak/Ibu akan dicek admin terlebih dahulu. Jika sudah disetujui, status berubah menjadi <strong>DITERIMA</strong> dan Bapak/Ibu bisa lanjut ke tahap check-in saat tiba di klinik.</p>
                     </div>
                 </div>
             </div>
@@ -372,8 +384,8 @@
                         <i class="fas fa-qrcode"></i>
                     </div>
                     <div>
-                        <h3 class="text-lg font-black text-slate-900">Check-In Saat Tiba di Klinik</h3>
-                        <p class="text-sm text-slate-600 font-medium mt-2">Saat sampai di meja admin, buka halaman status reservasi lalu tekan tombol scan QR check-in. QR klinik hanya aktif mendekati jadwal kunjungan Anda.</p>
+                        <h3 class="text-lg font-black text-slate-900">Check-In Setelah Status Diterima</h3>
+                        <p class="text-sm text-slate-600 font-medium mt-2">Tombol scan QR check-in akan digunakan saat status sudah <strong>DITERIMA</strong> dan Bapak/Ibu tiba di klinik. QR klinik hanya aktif mendekati jadwal kunjungan.</p>
                     </div>
                 </div>
             </div>

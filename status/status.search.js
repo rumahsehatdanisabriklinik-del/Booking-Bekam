@@ -84,8 +84,15 @@ function renderSingleBooking(data, isLatest, delayIndex = 0) {
     const encodedPayload = checkInPayload ? btoa(unescape(encodeURIComponent(checkInPayload))) : '';
     const summaryText = `${data.terapis} - ${data.tanggal} ${data.waktu}`;
     const encodedSummary = btoa(unescape(encodeURIComponent(summaryText)));
-    const canCheckIn = ['MENUNGGU', 'TERJADWAL', 'DITERIMA'].includes(stat) && !!checkInPayload;
-    const checkInInfo = data.checkIn ? `<div class="mt-4 p-4 rounded-2xl bg-emerald-50 border border-emerald-100">
+    const canCheckIn = ['TERJADWAL', 'DITERIMA'].includes(stat) && !!checkInPayload;
+    const statusGuide = stat === 'MENUNGGU'
+        ? `<div class="mt-4 p-4 rounded-2xl bg-amber-50 border border-amber-100">
+                    <div class="text-[10px] font-black uppercase tracking-[0.2em] text-amber-600 mb-2">Menunggu Konfirmasi Admin</div>
+                    <div class="text-xs font-bold text-slate-700">Reservasi sudah masuk. Admin akan mengubah status menjadi DITERIMA jika jadwal disetujui.</div>
+                    <div class="text-xs font-bold text-slate-500 mt-1">Setelah status DITERIMA, Bapak/Ibu bisa lanjut check-in saat tiba di klinik.</div>
+                </div>`
+        : '';
+    const checkInInfo = data.checkIn && canCheckIn ? `<div class="mt-4 p-4 rounded-2xl bg-emerald-50 border border-emerald-100">
                     <div class="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 mb-2">Jendela Check-In</div>
                     <div class="text-xs font-bold text-slate-700">Aktif mulai ${data.checkIn.validFrom}</div>
                     <div class="text-xs font-bold text-slate-500 mt-1">Berakhir ${data.checkIn.expiresAt}</div>
@@ -127,6 +134,7 @@ function renderSingleBooking(data, isLatest, delayIndex = 0) {
                     </div>
                 </div>
             </div>
+            ${statusGuide}
             ${checkInInfo}
 
             ${stat === 'SELESAI' ? `
