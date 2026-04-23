@@ -282,6 +282,29 @@ async function testAdminRequestsUseSharedHelpers() {
     assert.strictEqual(calls[1].options.retries, 1);
 }
 
+function testSignatureErrorDoesNotLogoutAdmin() {
+    const context = createBrowserContext({
+        context: {
+            apiGetJson() {
+                return Promise.resolve({ status: 'success', data: [] });
+            },
+            apiPostJson() {
+                return Promise.resolve({ status: 'success' });
+            }
+        }
+    });
+
+    runFile(context, 'admin/admin.shared.js');
+    assert.strictEqual(context.window.AdminApp.auth.isAuthError({
+        status: 'error',
+        message: 'Akses Ditolak: Signature request tidak valid.'
+    }), false);
+    assert.strictEqual(context.window.AdminApp.auth.isAuthError({
+        status: 'error',
+        message: 'Sesi login berakhir. Silakan login kembali.'
+    }), true);
+}
+
 async function testAdminPaginationAndReportRequests() {
     const calls = [];
     const context = createBrowserContext({
@@ -361,6 +384,7 @@ function testBookingStateBuildsIndexes() {
     testSyntaxChecks();
     testGasBackendSyntaxIfPresent();
     await testAdminRequestsUseSharedHelpers();
+    testSignatureErrorDoesNotLogoutAdmin();
     await testAdminPaginationAndReportRequests();
     testBookingStateBuildsIndexes();
     await testBookingFlowCompletesWithMockedApi();

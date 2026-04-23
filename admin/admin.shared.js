@@ -130,10 +130,17 @@ window.AdminApp.auth.clearAdminSession = function clearAdminSession() {
 
 window.AdminApp.auth.isAuthError = function isAuthError(result) {
     const message = (result && result.message ? result.message : '').toLowerCase();
+    if (
+        message.includes('signature') ||
+        message.includes('tanda tangan') ||
+        message.includes('timestamp') ||
+        message.includes('request replay')
+    ) {
+        return false;
+    }
     return result && result.status === 'error' && (
         message.includes('sesi login') ||
-        message.includes('login kembali') ||
-        message.includes('akses ditolak')
+        message.includes('login kembali')
     );
 };
 
