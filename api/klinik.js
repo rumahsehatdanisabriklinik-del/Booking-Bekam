@@ -2,6 +2,12 @@
 // api/klinik.js
 import crypto from 'node:crypto';
 
+export const config = {
+    api: {
+        bodyParser: false
+    }
+};
+
 function canonicalizeParams(params = {}) {
     const ignored = new Set(['token', 'ts', 'nonce', 'sig']);
     const keys = Object.keys(params).filter((k) => !ignored.has(k)).sort();
@@ -22,6 +28,27 @@ function buildClientKey(req) {
     const ip = xfwd || req.socket?.remoteAddress || 'unknown';
     const ua = String(req.headers['user-agent'] || 'ua');
     return crypto.createHash('sha256').update(`${ip}|${ua}`).digest('hex').slice(0, 24);
+}
+
+function readRawBody(req) {
+    return new Promise((resolve, reject) => {
+        if (typeof req.body === 'string') {
+            resolve(req.body);
+            return;
+        }
+        if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
+            resolve(JSON.stringify(req.body));
+            return;
+        }
+
+        let body = '';
+        req.setEncoding('utf8');
+        req.on('data', (chunk) => {
+            body += chunk;
+        });
+        req.on('end', () => resolve(body));
+        req.on('error', reject);
+    });
 }
 
 export default async function handler(req, res) {
@@ -62,7 +89,7 @@ export default async function handler(req, res) {
 
         let bodyString = '';
         if (req.method === 'POST') {
-            bodyString = typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {});
+            bodyString = await readRawBody(req);
         }
         forwardedParams.clientKey = buildClientKey(req);
 
