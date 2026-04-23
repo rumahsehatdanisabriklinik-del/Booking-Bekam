@@ -6,7 +6,8 @@
 
 window.AdminConfig = window.AdminConfig || {
     sessionKey: 'adminSessionToken',
-    reservationPageSize: 25
+    reservationPageSize: 25,
+    syncCooldownMs: 10 * 60 * 1000
 };
 
 window.AdminState = window.AdminState || {
@@ -16,9 +17,14 @@ window.AdminState = window.AdminState || {
         version: 0,
         filtered: [],
         currentPage: 1,
+        hasMore: false,
         searchQuery: '',
         searchDebounce: null,
-        loadPromise: null
+        loadPromise: null,
+        filters: {
+            startDate: '',
+            endDate: ''
+        }
     },
     cms: {
         settingsCache: {},
@@ -253,24 +259,36 @@ window.AdminApp.ui.ensureTabData = function ensureTabData(tabId, options = {}) {
 };
 
 window.AdminApp.loadAllData = async function loadAllData() {
+    const options = arguments[0] || {};
     if (window.AdminState.bookings.loadPromise) {
         return window.AdminState.bookings.loadPromise;
     }
 
+    if (options.page) window.AdminState.bookings.currentPage = Math.max(1, Number(options.page) || 1);
+    if (options.query !== undefined) window.AdminState.bookings.searchQuery = String(options.query || '').toLowerCase().trim();
+
     window.AdminApp.ui.showLoader(true);
     const loadPromise = (async () => {
         try {
-            const result = await window.AdminApp.auth.adminGet('getSemuaBooking');
+            const result = await window.AdminApp.auth.adminGet('getSemuaBooking', {
+                page: window.AdminState.bookings.currentPage,
+                pageSize: window.AdminConfig.reservationPageSize,
+                query: window.AdminState.bookings.searchQuery,
+                startDate: window.AdminState.bookings.filters.startDate,
+                endDate: window.AdminState.bookings.filters.endDate
+            });
             if (result.status === 'success') {
                 const allBookings = Array.isArray(result.data) ? result.data : [];
                 window.AdminState.bookings.all = allBookings;
+                window.AdminState.bookings.filtered = allBookings;
+                window.AdminState.bookings.hasMore = Boolean(result.hasMore);
+                window.AdminState.bookings.currentPage = Number(result.page) || window.AdminState.bookings.currentPage;
                 window.AdminState.bookings.byRow = allBookings.reduce((acc, booking) => {
                     const rowKey = Number(booking.row) || 0;
                     if (rowKey) acc[rowKey] = booking;
                     return acc;
                 }, {});
                 window.AdminState.bookings.version = (window.AdminState.bookings.version || 0) + 1;
-                window.AdminState.bookings.currentPage = 1;
                 window.AdminApp.bookings.renderTables();
                 const reportTab = document.getElementById('tab-laporan');
                 if (reportTab && !reportTab.classList.contains('hidden') && window.AdminApp.reports?.loadSummary) {

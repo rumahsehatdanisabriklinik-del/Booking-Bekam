@@ -21,7 +21,7 @@ window.AdminApp.bookings.getBookingByRow = function getBookingByRow(row) {
 
 window.AdminApp.bookings.refreshFilteredBookings = function refreshFilteredBookings() {
     const visibleData = window.AdminApp.bookings.getVisibleBookings();
-    window.AdminState.bookings.filtered = window.AdminApp.bookings.getReservationFilteredData(visibleData);
+    window.AdminState.bookings.filtered = visibleData;
     return visibleData;
 };
 
@@ -74,9 +74,8 @@ window.AdminApp.bookings.handleSearch = function handleSearch(val) {
 
     if (window.AdminState.bookings.searchDebounce) clearTimeout(window.AdminState.bookings.searchDebounce);
     window.AdminState.bookings.searchDebounce = setTimeout(() => {
-        window.AdminApp.bookings.refreshFilteredBookings();
-        window.AdminApp.bookings.renderReservationsTable();
-    }, 180);
+        window.AdminApp.loadAllData({ page: 1, query: window.AdminState.bookings.searchQuery });
+    }, 350);
 };
 
 window.AdminApp.bookings.getReservationFilteredData = function getReservationFilteredData(bookings) {
@@ -109,12 +108,7 @@ window.AdminApp.bookings.renderReservationsTable = function renderReservationsTa
     const resBody = document.getElementById('tbReservasiBody');
     if (!resBody) return;
 
-    const totalItems = window.AdminState.bookings.filtered.length;
-    const totalPages = Math.max(1, Math.ceil(totalItems / window.AdminConfig.reservationPageSize));
-    window.AdminState.bookings.currentPage = Math.min(window.AdminState.bookings.currentPage, totalPages);
-
-    const startIndex = (window.AdminState.bookings.currentPage - 1) * window.AdminConfig.reservationPageSize;
-    const pageItems = window.AdminState.bookings.filtered.slice(startIndex, startIndex + window.AdminConfig.reservationPageSize);
+    const pageItems = window.AdminState.bookings.filtered;
 
     if (pageItems.length === 0) {
         resBody.innerHTML = `
@@ -124,7 +118,7 @@ window.AdminApp.bookings.renderReservationsTable = function renderReservationsTa
                 </td>
             </tr>
         `;
-        window.AdminApp.bookings.renderReservationPagination(totalItems, totalPages, 0, 0);
+        window.AdminApp.bookings.renderReservationPagination(pageItems.length, 0, 0);
         return;
     }
 
@@ -156,34 +150,35 @@ window.AdminApp.bookings.renderReservationsTable = function renderReservationsTa
     `).join('');
 
     window.AdminApp.bookings.renderReservationPagination(
-        totalItems,
-        totalPages,
-        startIndex + 1,
-        Math.min(startIndex + pageItems.length, totalItems)
+        pageItems.length,
+        ((window.AdminState.bookings.currentPage - 1) * window.AdminConfig.reservationPageSize) + 1,
+        ((window.AdminState.bookings.currentPage - 1) * window.AdminConfig.reservationPageSize) + pageItems.length
     );
 };
 
-window.AdminApp.bookings.renderReservationPagination = function renderReservationPagination(totalItems, totalPages, startItem, endItem) {
+window.AdminApp.bookings.renderReservationPagination = function renderReservationPagination(pageItemsCount, startItem, endItem) {
     const container = document.getElementById('reservasiPagination');
     if (!container) return;
 
-    if (totalItems === 0) {
+    if (pageItemsCount === 0) {
         container.innerHTML = '<div class="text-xs font-bold text-slate-400">0 data</div>';
         return;
     }
 
+    const hasPrev = window.AdminState.bookings.currentPage > 1;
+    const hasNext = window.AdminState.bookings.hasMore;
     container.innerHTML = `
         <div class="text-xs font-bold text-slate-400">
-            Menampilkan ${startItem}-${endItem} dari ${totalItems} reservasi
+            Menampilkan ${startItem}-${endItem}${hasNext ? '+' : ''} reservasi
         </div>
         <div class="flex items-center gap-2">
-            <button data-action="change-reservation-page" data-direction="-1" class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-500 text-xs font-black ${window.AdminState.bookings.currentPage <= 1 ? 'opacity-50 cursor-not-allowed' : 'hover:border-emerald-300 hover:text-emerald-600'}" ${window.AdminState.bookings.currentPage <= 1 ? 'disabled' : ''}>
+            <button data-action="change-reservation-page" data-direction="-1" class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-500 text-xs font-black ${!hasPrev ? 'opacity-50 cursor-not-allowed' : 'hover:border-emerald-300 hover:text-emerald-600'}" ${!hasPrev ? 'disabled' : ''}>
                 Sebelumnya
             </button>
             <div class="px-3 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-black">
-                Hal. ${window.AdminState.bookings.currentPage}/${totalPages}
+                Hal. ${window.AdminState.bookings.currentPage}
             </div>
-            <button data-action="change-reservation-page" data-direction="1" class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-500 text-xs font-black ${window.AdminState.bookings.currentPage >= totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:border-emerald-300 hover:text-emerald-600'}" ${window.AdminState.bookings.currentPage >= totalPages ? 'disabled' : ''}>
+            <button data-action="change-reservation-page" data-direction="1" class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-500 text-xs font-black ${!hasNext ? 'opacity-50 cursor-not-allowed' : 'hover:border-emerald-300 hover:text-emerald-600'}" ${!hasNext ? 'disabled' : ''}>
                 Berikutnya
             </button>
         </div>
@@ -191,12 +186,11 @@ window.AdminApp.bookings.renderReservationPagination = function renderReservatio
 };
 
 window.AdminApp.bookings.changeReservationPage = function changeReservationPage(direction) {
-    const totalPages = Math.max(1, Math.ceil(window.AdminState.bookings.filtered.length / window.AdminConfig.reservationPageSize));
     const nextPage = window.AdminState.bookings.currentPage + direction;
-    if (nextPage < 1 || nextPage > totalPages) return;
+    if (nextPage < 1) return;
+    if (direction > 0 && !window.AdminState.bookings.hasMore) return;
 
-    window.AdminState.bookings.currentPage = nextPage;
-    window.AdminApp.bookings.renderReservationsTable();
+    window.AdminApp.loadAllData({ page: nextPage });
 };
 
 window.AdminApp.bookings.openModalStatus = function openModalStatus(row, current) {
@@ -224,8 +218,7 @@ window.AdminApp.bookings.saveStatus = async function saveStatus() {
             const booking = window.AdminApp.bookings.getBookingByRow(row);
             if (booking) booking.status = stat;
             window.AdminState.bookings.version += 1;
-            window.AdminApp.bookings.refreshFilteredBookings();
-            window.AdminApp.bookings.renderReservationsTable();
+            window.AdminApp.loadAllData({ page: window.AdminState.bookings.currentPage });
             window.AdminApp.bookings.closeModalStatus();
         } else {
             alert(`Gagal update status: ${result.message}`);

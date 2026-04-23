@@ -248,6 +248,35 @@ window.AdminApp.reports.renderSummary = function renderSummary(summary) {
     window.AdminApp.reports.renderTrend(summary.trend);
 };
 
+window.AdminApp.reports.normalizeBackendSummary = function normalizeBackendSummary(data) {
+    const ringkasan = data?.ringkasan || {};
+    return {
+        totalBookings: Number(ringkasan.total) || 0,
+        completedCount: Number(ringkasan.selesai) || 0,
+        acceptedCount: Number(ringkasan.terjadwal) || 0,
+        canceledCount: Number(ringkasan.batal) || 0,
+        ratedCount: 0,
+        revenue: Number(ringkasan.pendapatan) || 0,
+        services: (data?.perLayanan || []).slice(0, 5).map((item) => ({
+            label: item.nama || item.label || 'Tanpa Layanan',
+            total: item.jumlah || item.total || 0
+        })),
+        therapists: (data?.perTerapis || []).slice(0, 5).map((item) => ({
+            label: item.nama || item.label || 'Tanpa Terapis',
+            total: item.total || item.jumlah || 0
+        })),
+        statuses: [
+            { label: 'Selesai', total: Number(ringkasan.selesai) || 0 },
+            { label: 'Terjadwal', total: Number(ringkasan.terjadwal) || 0 },
+            { label: 'Batal', total: Number(ringkasan.batal) || 0 }
+        ].filter((item) => item.total > 0),
+        trend: (data?.perHari || []).map((item) => ({
+            date: item.hari || item.date || '',
+            total: item.jumlah || item.total || 0
+        }))
+    };
+};
+
 window.AdminApp.reports.applyFilterPreset = function applyFilterPreset(days) {
     const endInput = document.getElementById('reportEndDate');
     const startInput = document.getElementById('reportStartDate');
@@ -265,32 +294,32 @@ window.AdminApp.reports.applyFilterPreset = function applyFilterPreset(days) {
 window.AdminApp.reports.loadSummary = async function loadSummary(options = {}) {
     window.AdminApp.reports.initDefaultFilters();
 
-    if (!window.AdminState.bookings.all.length && window.AdminState.bookings.loadPromise) {
-        await window.AdminState.bookings.loadPromise;
-    }
-
-    if (!window.AdminState.bookings.all.length) {
-        await window.AdminApp.loadAllData();
-    }
-
     const startInput = document.getElementById('reportStartDate');
     const endInput = document.getElementById('reportEndDate');
     const startDate = startInput ? startInput.value : '';
     const endDate = endInput ? endInput.value : '';
     const filterKey = window.AdminApp.reports.getFilterKey(startDate, endDate);
-    const version = window.AdminState.bookings.version || 0;
+    const version = window.AdminState.reports.lastRenderedVersion || 0;
 
-    if (!options.force && window.AdminState.reports.lastRenderedVersion === version && window.AdminState.reports.lastRenderedKey === filterKey) {
+    if (!options.force && window.AdminState.reports.lastRenderedKey === filterKey) {
         return;
     }
 
     window.AdminState.reports.filterStart = startDate;
     window.AdminState.reports.filterEnd = endDate;
 
-    const bookings = window.AdminApp.reports.getReportBookings(startDate, endDate);
-    const summary = window.AdminApp.reports.summarizeBookings(bookings);
-    window.AdminApp.reports.renderSummary(summary);
+    try {
+        const result = await window.AdminApp.auth.adminGet('getLaporan', { startDate, endDate });
+        if (result.status !== 'success') {
+            alert(result.message || 'Gagal memuat laporan.');
+            return;
+        }
+        window.AdminApp.reports.renderSummary(window.AdminApp.reports.normalizeBackendSummary(result.data));
+    } catch (e) {
+        alert('Error koneksi saat memuat laporan.');
+        return;
+    }
 
-    window.AdminState.reports.lastRenderedVersion = version;
+    window.AdminState.reports.lastRenderedVersion = version + 1;
     window.AdminState.reports.lastRenderedKey = filterKey;
 };

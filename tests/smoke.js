@@ -19,7 +19,8 @@ function createElement() {
         classList: {
             add() {},
             remove() {},
-            toggle() {}
+            toggle() {},
+            contains() { return false; }
         },
         setAttribute() {},
         appendChild() {},
@@ -281,6 +282,59 @@ async function testAdminRequestsUseSharedHelpers() {
     assert.strictEqual(calls[1].options.retries, 1);
 }
 
+async function testAdminPaginationAndReportRequests() {
+    const calls = [];
+    const context = createBrowserContext({
+        context: {
+            apiGetJson(action, params, options) {
+                calls.push({ type: 'get', action, params, options });
+                if (action === 'getSemuaBooking') {
+                    return Promise.resolve({
+                        status: 'success',
+                        data: [{ row: 10, nama: 'Pasien', terapis: 'Ahmad', tanggal: '2026-05-01' }],
+                        page: Number(params.page) || 1,
+                        pageSize: Number(params.pageSize) || 25,
+                        hasMore: true
+                    });
+                }
+                if (action === 'getLaporan') {
+                    return Promise.resolve({
+                        status: 'success',
+                        data: {
+                            ringkasan: { total: 1, selesai: 1, batal: 0, terjadwal: 0 },
+                            perLayanan: [{ nama: 'Bekam', jumlah: 1 }],
+                            perTerapis: [{ nama: 'Ahmad', total: 1 }],
+                            perHari: [{ hari: 'Sen', jumlah: 1 }]
+                        }
+                    });
+                }
+                return Promise.resolve({ status: 'success', data: [] });
+            },
+            apiPostJson() {
+                return Promise.resolve({ status: 'success' });
+            }
+        }
+    });
+
+    context.localStorage.setItem('adminSessionToken', 'SESSION-123');
+    runFile(context, 'admin/admin.shared.js');
+    runFile(context, 'admin/admin.reservations.js');
+    runFile(context, 'admin/admin.reports.js');
+
+    context.window.AdminState.bookings.searchQuery = 'pasien';
+    await context.window.AdminApp.loadAllData({ page: 2 });
+    await context.window.AdminApp.reports.loadSummary({ force: true });
+
+    const bookingCall = calls.find((call) => call.action === 'getSemuaBooking');
+    assert.strictEqual(bookingCall.params.page, 2);
+    assert.strictEqual(bookingCall.params.pageSize, 25);
+    assert.strictEqual(bookingCall.params.query, 'pasien');
+    assert.strictEqual(context.window.AdminState.bookings.hasMore, true);
+
+    const reportCall = calls.find((call) => call.action === 'getLaporan');
+    assert.ok(reportCall, 'report should use backend getLaporan endpoint');
+}
+
 function testBookingStateBuildsIndexes() {
     const context = createBrowserContext();
     runFile(context, 'booking/booking.core.js');
@@ -307,6 +361,7 @@ function testBookingStateBuildsIndexes() {
     testSyntaxChecks();
     testGasBackendSyntaxIfPresent();
     await testAdminRequestsUseSharedHelpers();
+    await testAdminPaginationAndReportRequests();
     testBookingStateBuildsIndexes();
     await testBookingFlowCompletesWithMockedApi();
     console.log('Smoke tests passed');

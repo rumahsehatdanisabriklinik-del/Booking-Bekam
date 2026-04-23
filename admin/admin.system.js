@@ -103,6 +103,14 @@ window.AdminApp.system.runDatabaseInit = async function runDatabaseInit() {
 };
 
 window.AdminApp.system.runSinkronCepat = async function runSinkronCepat() {
+    const lastRun = Number(localStorage.getItem('sinkronCepatLastRun') || 0);
+    const elapsed = Date.now() - lastRun;
+    if (lastRun && elapsed < window.AdminConfig.syncCooldownMs) {
+        const waitMinutes = Math.ceil((window.AdminConfig.syncCooldownMs - elapsed) / 60000);
+        alert(`Sinkronisasi baru dijalankan. Coba lagi sekitar ${waitMinutes} menit lagi.`);
+        return;
+    }
+
     if (!confirm('Sinkronisasi semua booking dari Sheets ke Neon sekarang?\n\nProses ini aman dan tidak menghapus data.')) return;
 
     const btn = document.getElementById('btnSinkronCepat');
@@ -112,6 +120,9 @@ window.AdminApp.system.runSinkronCepat = async function runSinkronCepat() {
 
     try {
         const result = await window.AdminApp.auth.adminPost({ action: 'sinkronCepat' });
+        if (result.status === 'success') {
+            localStorage.setItem('sinkronCepatLastRun', String(Date.now()));
+        }
         alert(result.message || 'Sinkronisasi selesai!');
     } catch (e) {
         alert('Error koneksi saat sinkronisasi.');
