@@ -4,6 +4,14 @@
  * ================================================
  */
 
+window.AdminApp.cms.DEFAULT_CLINIC_CHECKIN_CODE = 'KLINIK-DANI-SABRI-PRESENSI';
+
+window.AdminApp.cms.getClinicCheckinCode = function getClinicCheckinCode() {
+    const inputValue = document.getElementById('cms_checkin_secret_code')?.value?.trim();
+    const cachedValue = window.AdminState.cms.settingsCache?.cms_checkin_secret_code?.trim?.();
+    return inputValue || cachedValue || window.AdminApp.cms.DEFAULT_CLINIC_CHECKIN_CODE;
+};
+
 window.AdminApp.cms.getClinicCheckinPayload = function getClinicCheckinPayload(secretCode) {
     return `RSDS-CLINIC|${secretCode}`;
 };
@@ -50,7 +58,7 @@ window.AdminApp.cms.renderClinicCheckinQr = function renderClinicCheckinQr(secre
 };
 
 window.AdminApp.cms.copyClinicQrCode = async function copyClinicQrCode() {
-    const secretCode = window.AdminState.cms.settingsCache.cms_checkin_secret_code || '';
+    const secretCode = window.AdminApp.cms.getClinicCheckinCode();
     if (!secretCode) {
         alert('Kode QR check-in belum tersedia.');
         return;
@@ -65,7 +73,7 @@ window.AdminApp.cms.copyClinicQrCode = async function copyClinicQrCode() {
 };
 
 window.AdminApp.cms.printClinicQrPoster = function printClinicQrPoster() {
-    const secretCode = window.AdminState.cms.settingsCache.cms_checkin_secret_code || '';
+    const secretCode = window.AdminApp.cms.getClinicCheckinCode();
     if (!secretCode) {
         alert('Kode QR check-in belum tersedia.');
         return;
@@ -78,11 +86,11 @@ window.AdminApp.cms.loadCMSData = async function loadCMSData(options = {}) {
     const force = Boolean(options.force);
     if (!force && window.AdminState.cms.hasLoadedSettings) {
         const data = window.AdminState.cms.settingsCache || {};
-        window.AdminApp.cms.renderClinicCheckinQr(data.cms_checkin_secret_code || '');
         Object.keys(data).forEach((key) => {
             const el = document.getElementById(key);
             if (el) el.value = data[key];
         });
+        window.AdminApp.cms.renderClinicCheckinQr(window.AdminApp.cms.getClinicCheckinCode());
         return data;
     }
 
@@ -100,12 +108,12 @@ window.AdminApp.cms.loadCMSData = async function loadCMSData(options = {}) {
                 const data = result.data || {};
                 window.AdminState.cms.settingsCache = data;
                 window.AdminState.cms.hasLoadedSettings = true;
-                window.AdminApp.cms.renderClinicCheckinQr(window.AdminState.cms.settingsCache.cms_checkin_secret_code || '');
 
                 Object.keys(data).forEach((key) => {
                     const el = document.getElementById(key);
                     if (el) el.value = data[key];
                 });
+                window.AdminApp.cms.renderClinicCheckinQr(window.AdminApp.cms.getClinicCheckinCode());
 
                 return data;
             }
@@ -143,7 +151,7 @@ window.AdminApp.cms.saveCMS = async function saveCMS() {
                 ...updatedData
             };
             window.AdminState.cms.hasLoadedSettings = true;
-            window.AdminApp.cms.renderClinicCheckinQr(window.AdminState.cms.settingsCache.cms_checkin_secret_code || '');
+            window.AdminApp.cms.renderClinicCheckinQr(window.AdminApp.cms.getClinicCheckinCode());
             alert('Web berhasil disinkronkan (cache dibersihkan).');
         } else {
             alert(`Gagal: ${result.message}`);
