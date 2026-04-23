@@ -849,8 +849,17 @@
                         </div>
                     </div>
                     <div class="md:col-span-2">
-                        <label class="block text-[10px] text-slate-400 uppercase tracking-widest font-black mb-2">Isi Konten Artikel (Bisa Pakai HTML)</label>
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
+                            <label class="block text-[10px] text-slate-400 uppercase tracking-widest font-black">Isi Konten Artikel (Bisa Pakai HTML)</label>
+                            <div class="flex flex-wrap gap-2">
+                                <button type="button" id="btnInsertArticleImage" data-action="trigger-file-input" data-target-id="fileArtBodyModal" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 hover:bg-indigo-600 hover:text-white font-black text-[10px] uppercase tracking-widest transition-all">
+                                    <i class="fas fa-images"></i> Sisip Gambar
+                                </button>
+                                <input type="file" id="fileArtBodyModal" class="hidden" accept="image/*" multiple data-change-action="upload-artikel-body-image">
+                            </div>
+                        </div>
                         <textarea id="art_isi_modal" class="cms-input !text-xs font-mono" rows="8" placeholder="Isi artikel lengkap..."></textarea>
+                        <p class="mt-2 text-[10px] text-slate-400 font-bold">Taruh kursor di posisi yang diinginkan, lalu klik Sisip Gambar. Bisa pilih lebih dari satu gambar.</p>
                     </div>
                 </div>
             </div>

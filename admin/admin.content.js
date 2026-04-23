@@ -121,6 +121,52 @@ window.AdminApp.content.uploadArtikelImageModal = async function uploadArtikelIm
     }
 };
 
+window.AdminApp.content.insertArticleBodyHtml = function insertArticleBodyHtml(html) {
+    const textarea = document.getElementById('art_isi_modal');
+    const value = textarea.value || '';
+    const start = textarea.selectionStart ?? value.length;
+    const end = textarea.selectionEnd ?? value.length;
+    const before = value.slice(0, start).replace(/\s*$/, '');
+    const after = value.slice(end).replace(/^\s*/, '');
+    const insert = `\n\n${html}\n\n`;
+    textarea.value = `${before}${insert}${after}`.trim();
+    const cursor = Math.min(textarea.value.length, before.length + insert.length);
+    textarea.focus();
+    textarea.setSelectionRange(cursor, cursor);
+};
+
+window.AdminApp.content.uploadArtikelBodyImages = async function uploadArtikelBodyImages(input) {
+    const files = Array.from(input.files || []);
+    if (files.length === 0) return;
+
+    const btn = document.getElementById('btnInsertArticleImage');
+    const orig = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Upload...';
+        btn.disabled = true;
+    }
+
+    try {
+        const blocks = [];
+        for (const file of files) {
+            const url = await window.AdminApp.system.uploadToDrive(file);
+            const safeUrl = window.AdminApp.utils.escapeAttr(url);
+            const safeAlt = window.AdminApp.utils.escapeAttr(file.name.replace(/\.[^.]+$/, ''));
+            blocks.push(`<figure><img src="${safeUrl}" alt="${safeAlt}"><figcaption></figcaption></figure>`);
+        }
+        window.AdminApp.content.insertArticleBodyHtml(blocks.join('\n\n'));
+        alert(`${files.length} gambar berhasil disisipkan ke isi artikel.`);
+    } catch (e) {
+        alert(e.message);
+    } finally {
+        input.value = '';
+        if (btn) {
+            btn.innerHTML = orig;
+            btn.disabled = false;
+        }
+    }
+};
+
 window.AdminApp.content.saveArtikelFromModal = async function saveArtikelFromModal() {
     const btn = document.getElementById('btnSaveArtModal');
     const orig = btn.innerHTML;

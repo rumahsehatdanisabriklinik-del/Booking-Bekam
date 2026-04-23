@@ -155,6 +155,9 @@ window.AdminApp.bindings.handleAdminChange = function handleAdminChange(changeEl
         case 'upload-artikel-image':
             window.AdminApp.content.uploadArtikelImageModal(changeEl);
             break;
+        case 'upload-artikel-body-image':
+            window.AdminApp.content.uploadArtikelBodyImages(changeEl);
+            break;
         case 'upload-galeri-image':
             window.AdminApp.content.uploadGaleriImageModal(changeEl);
             break;
