@@ -91,7 +91,7 @@ export default async function handler(req, res) {
         }
         forwardedParams.clientKey = buildClientKey(req);
 
-        const signature = buildRequestSignature(APP_TOKEN, req.method, forwardedParams, bodyString);
+        const signature = buildRequestSignature(APP_TOKEN, req.method, forwardedParams, '');
 
         // 3. Rakit URL Rahasia dengan signature (tanpa token statis di query)
         const url = new URL(GAS_URL);

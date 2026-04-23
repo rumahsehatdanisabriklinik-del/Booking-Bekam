@@ -156,7 +156,7 @@ async function proxyToGAS(req, res) {
     });
 
     forwardedParams.clientKey = buildClientKey(req);
-    const signature = buildRequestSignature(APP_TOKEN, req.method, forwardedParams, bodyData || '');
+    const signature = buildRequestSignature(APP_TOKEN, req.method, forwardedParams, '');
     const gasUrlObj = new URL(GAS_URL);
     Object.entries(forwardedParams).forEach(([k, v]) => gasUrlObj.searchParams.set(k, v));
     gasUrlObj.searchParams.set('ts', signature.ts);
