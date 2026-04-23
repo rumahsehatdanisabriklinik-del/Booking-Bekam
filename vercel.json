@@ -3,9 +3,17 @@
     "api/klinik.js": {
       "memory": 1024,
       "maxDuration": 30
+    },
+    "api/artikel.js": {
+      "memory": 512,
+      "maxDuration": 10
     }
   },
   "rewrites": [
+    {
+      "source": "/artikel/:slug",
+      "destination": "/api/artikel?slug=:slug"
+    },
     {
       "source": "/api/klinik",
       "destination": "/api/klinik.js"
