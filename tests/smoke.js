@@ -118,6 +118,28 @@ function runFile(context, relativePath) {
     vm.runInContext(source, context, { filename: relativePath });
 }
 
+function testSyntaxChecks() {
+    [
+        'shared/shared.ui.js',
+        'admin/admin.shared.js',
+        'admin/admin.cms.js',
+        'admin/admin.content.js',
+        'booking/booking.core.js',
+        'booking/booking.selection.js',
+        'booking/booking.ai.js',
+        'booking/booking.submit.js',
+        'booking/booking.init.js',
+        'status/status.core.js',
+        'status/status.search.js',
+        'status/status.checkin.js',
+        'status/status.review.js',
+        'status/status.init.js'
+    ].forEach((relativePath) => {
+        const source = fs.readFileSync(path.join(rootDir, relativePath), 'utf8');
+        new vm.Script(source, { filename: relativePath });
+    });
+}
+
 async function testAdminRequestsUseSharedHelpers() {
     const calls = [];
     const context = createBrowserContext({
@@ -173,6 +195,7 @@ function testBookingStateBuildsIndexes() {
 }
 
 (async () => {
+    testSyntaxChecks();
     await testAdminRequestsUseSharedHelpers();
     testBookingStateBuildsIndexes();
     console.log('Smoke tests passed');
