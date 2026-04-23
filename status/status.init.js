@@ -22,7 +22,11 @@ function bindStatusUIEvents() {
                 openCheckinModalSafe(
                     Number(actionTarget.dataset.row),
                     actionTarget.dataset.payload || '',
-                    actionTarget.dataset.summary || ''
+                    actionTarget.dataset.summary || '',
+                    {
+                        validFrom: actionTarget.dataset.validFrom || '',
+                        expiresAt: actionTarget.dataset.expiresAt || ''
+                    }
                 );
                 break;
             case 'cancel-booking':

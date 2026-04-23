@@ -5,9 +5,13 @@ let fetchAborter = null;
 let currentCheckInPayload = "";
 let currentCheckInRow = null;
 let currentCheckInSummary = null;
+let currentCheckInWindow = null;
 let checkinStream = null;
 let checkinScanLoopActive = false;
 let checkinDetector = null;
+let checkinSubmitInFlight = false;
+let lastScannedClinicCode = "";
+let lastScannedClinicCodeAt = 0;
 
 document.getElementById('year').textContent = new Date().getFullYear();
 

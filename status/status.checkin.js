@@ -5,6 +5,30 @@ function updateCheckinStatus(message, isError = false) {
     el.className = `text-sm font-bold text-center ${isError ? 'text-red-500' : 'text-slate-500'}`;
 }
 
+function parseLocalDateTime(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return null;
+    const normalized = raw
+        .replace(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/, '$3-$2-$1T$4:$5:00')
+        .replace(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})$/, '$1-$2-$3T$4:$5:00');
+    const date = new Date(normalized);
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function getLocalCheckinWindowState() {
+    if (!currentCheckInWindow) return { state: 'unknown' };
+    const validFrom = parseLocalDateTime(currentCheckInWindow.validFrom);
+    const expiresAt = parseLocalDateTime(currentCheckInWindow.expiresAt);
+    const now = new Date();
+    if (validFrom && now < validFrom) {
+        return { state: 'early', message: `QR belum aktif. Check-in dibuka mulai ${currentCheckInWindow.validFrom}.` };
+    }
+    if (expiresAt && now > expiresAt) {
+        return { state: 'expired', message: `QR sudah kedaluwarsa. Batas check-in sampai ${currentCheckInWindow.expiresAt}.` };
+    }
+    return { state: 'active' };
+}
+
 function stopCheckinScanner() {
     checkinScanLoopActive = false;
     if (checkinStream) {
@@ -31,6 +55,9 @@ async function openCheckinModal(row, payload, summaryText) {
     currentCheckInRow = row;
     currentCheckInPayload = payload || "";
     currentCheckInSummary = summaryText || "";
+    checkinSubmitInFlight = false;
+    lastScannedClinicCode = "";
+    lastScannedClinicCodeAt = 0;
     document.getElementById('manualClinicCode').value = '';
 
     const modal = document.getElementById('checkinModal');
@@ -43,6 +70,12 @@ async function openCheckinModal(row, payload, summaryText) {
 
     if (!currentCheckInPayload) {
         updateCheckinStatus('Booking ini belum memiliki token check-in. Hubungi admin.', true);
+        return;
+    }
+
+    const localWindow = getLocalCheckinWindowState();
+    if (localWindow.state === 'early' || localWindow.state === 'expired') {
+        updateCheckinStatus(localWindow.message, true);
         return;
     }
 
@@ -77,11 +110,12 @@ async function openCheckinModal(row, payload, summaryText) {
     }
 }
 
-function openCheckinModalSafe(row, encodedPayload, encodedSummary) {
+function openCheckinModalSafe(row, encodedPayload, encodedSummary, windowInfo = {}) {
     let payload = '';
     let summary = '';
     try { payload = decodeURIComponent(escape(atob(encodedPayload))); } catch (e) {}
     try { summary = decodeURIComponent(escape(atob(encodedSummary))); } catch (e) {}
+    currentCheckInWindow = windowInfo || null;
     openCheckinModal(row, payload, summary);
 }
 
@@ -126,8 +160,23 @@ async function processPatientCheckin(clinicCode) {
         updateCheckinStatus('Token booking tidak ditemukan.', true);
         return;
     }
+    if (checkinSubmitInFlight) return;
+
+    const localWindow = getLocalCheckinWindowState();
+    if (localWindow.state === 'early' || localWindow.state === 'expired') {
+        updateCheckinStatus(localWindow.message, true);
+        return;
+    }
+
+    const now = Date.now();
+    if (clinicCode === lastScannedClinicCode && now - lastScannedClinicCodeAt < 5000) {
+        return;
+    }
+    lastScannedClinicCode = clinicCode;
+    lastScannedClinicCodeAt = now;
 
     checkinScanLoopActive = false;
+    checkinSubmitInFlight = true;
     updateCheckinStatus('Memproses check-in ke server...');
 
     try {
@@ -146,8 +195,10 @@ async function processPatientCheckin(clinicCode) {
             closeCheckinModal();
             checkStatus();
         } else {
-            updateCheckinStatus(result.message || 'Check-in gagal diproses.', true);
-            if (checkinStream) {
+            const message = result.message || 'Check-in gagal diproses.';
+            updateCheckinStatus(message, true);
+            const shouldResume = !/belum aktif|kedaluwarsa|tidak valid/i.test(message);
+            if (shouldResume && checkinStream) {
                 checkinScanLoopActive = true;
                 requestAnimationFrame(scanClinicQrFrame);
             }
@@ -159,5 +210,7 @@ async function processPatientCheckin(clinicCode) {
             checkinScanLoopActive = true;
             requestAnimationFrame(scanClinicQrFrame);
         }
+    } finally {
+        checkinSubmitInFlight = false;
     }
 }

@@ -146,7 +146,7 @@ function renderSingleBooking(data, isLatest, delayIndex = 0) {
             ` : (stat === 'MENUNGGU' || stat === 'TERJADWAL' || stat === 'DITERIMA' ? `
                 <div class="mt-6 pt-4 border-t border-slate-100">
                     ${canCheckIn ? `
-                    <button data-action="open-checkin" data-row="${data.row}" data-payload="${encodedPayload}" data-summary="${encodedSummary}" class="w-full mb-3 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-lg shadow-emerald-500/30 transition-all flex items-center justify-center gap-2">
+                    <button data-action="open-checkin" data-row="${data.row}" data-payload="${encodedPayload}" data-summary="${encodedSummary}" data-valid-from="${data.checkIn?.validFrom || ''}" data-expires-at="${data.checkIn?.expiresAt || ''}" class="w-full mb-3 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-lg shadow-emerald-500/30 transition-all flex items-center justify-center gap-2">
                         <i class="fas fa-qrcode"></i> Scan QR Check-In Klinik
                     </button>` : ''}
                     <button data-action="cancel-booking" data-row="${data.row}" class="w-full py-3.5 rounded-xl bg-white border-2 border-red-100 text-red-500 font-extrabold text-sm hover:bg-red-50 transition-all flex items-center justify-center gap-2">
