@@ -386,6 +386,12 @@ window.AdminApp.content.deleteGaleriRecord = async function deleteGaleriRecord(i
 window.AdminApp.content.createDocFromModal = async function createDocFromModal() {
     const judul = document.getElementById('art_judul_modal').value;
     if (!judul) return alert('Isi Judul Artikel terlebih dahulu!');
+    const artikelData = {
+        judul,
+        ringkasan: document.getElementById('art_ringkasan_modal').value,
+        isi: document.getElementById('art_isi_modal').value,
+        foto: document.getElementById('art_foto_modal').value
+    };
 
     const btn = document.getElementById('btnCreateDocModal');
     const orig = btn.innerHTML;
@@ -393,10 +399,10 @@ window.AdminApp.content.createDocFromModal = async function createDocFromModal()
     btn.disabled = true;
 
     try {
-        const result = await window.AdminApp.auth.adminPost({ action: 'createDoc', judul });
+        const result = await window.AdminApp.auth.adminPost({ action: 'createDoc', judul, artikelData });
         if (result.status === 'success') {
             document.getElementById('art_doc_id_modal').value = result.data.docId;
-            alert('Google Doc berhasil dibuat.');
+            alert(result.message || 'Google Doc berhasil dibuat.');
             window.open(`https://docs.google.com/document/d/${result.data.docId}`, '_blank');
         } else {
             alert(result.message);
