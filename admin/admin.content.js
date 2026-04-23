@@ -402,7 +402,7 @@ window.AdminApp.content.createDocFromModal = async function createDocFromModal()
             alert(result.message);
         }
     } catch (e) {
-        alert('Error koneksi saat membuat dokumen.');
+        alert(e?.message ? `Error saat membuat dokumen: ${e.message}` : 'Error koneksi saat membuat dokumen.');
     } finally {
         btn.innerHTML = orig;
         btn.disabled = false;
