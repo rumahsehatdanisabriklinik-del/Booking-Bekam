@@ -9,6 +9,8 @@ on:
 jobs:
   smoke:
     runs-on: ubuntu-latest
+    env:
+      PRODUCTION_URL: ${{ secrets.PRODUCTION_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -20,3 +22,9 @@ jobs:
 
       - name: Run smoke tests
         run: npm test
+
+      - name: Check production deployment
+        if: ${{ github.event_name == 'push' && env.PRODUCTION_URL != '' }}
+        run: |
+          curl --fail --silent --show-error --location "$PRODUCTION_URL" > /tmp/home.html
+          grep -qi "Rumah Sehat" /tmp/home.html

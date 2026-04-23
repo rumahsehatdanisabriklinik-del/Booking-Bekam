@@ -7,6 +7,12 @@
   status = 200
   force = true
 
+[[redirects]]
+  from = "/api/client-error"
+  to = "/.netlify/functions/client-error"
+  status = 200
+  force = true
+
 [[headers]]
   for = "/*"
   [headers.values]

@@ -7,7 +7,9 @@ const rootDir = path.resolve(__dirname, '..');
 
 function createElement() {
     return {
+        tagName: 'DIV',
         value: '',
+        checked: false,
         innerHTML: '',
         textContent: '',
         href: '',
@@ -22,6 +24,7 @@ function createElement() {
         setAttribute() {},
         appendChild() {},
         addEventListener() {},
+        remove() {},
         focus() {},
         closest() { return null; },
         matches() { return false; },
@@ -31,12 +34,14 @@ function createElement() {
 
 function createBrowserContext(overrides = {}) {
     const elements = new Map();
+    const selectors = overrides.selectors || {};
     const document = {
         getElementById(id) {
             if (!elements.has(id)) elements.set(id, createElement());
             return elements.get(id);
         },
-        querySelector() {
+        querySelector(selector) {
+            if (selectors[selector]) return selectors[selector];
             return createElement();
         },
         querySelectorAll() {
@@ -60,6 +65,11 @@ function createBrowserContext(overrides = {}) {
             setItem(key, value) { storage.set(key, String(value)); },
             removeItem(key) { storage.delete(key); }
         },
+        sessionStorage: {
+            getItem(key) { return storage.get(`session:${key}`) || ''; },
+            setItem(key, value) { storage.set(`session:${key}`, String(value)); },
+            removeItem(key) { storage.delete(`session:${key}`); }
+        },
         location: {
             reload() {}
         },
@@ -70,6 +80,7 @@ function createBrowserContext(overrides = {}) {
         window,
         document,
         localStorage: window.localStorage,
+        sessionStorage: window.sessionStorage,
         location: window.location,
         console,
         setTimeout(fn) {
@@ -121,6 +132,7 @@ function runFile(context, relativePath) {
 function testSyntaxChecks() {
     [
         'shared/shared.ui.js',
+        'shared/error-monitor.js',
         'admin/admin.shared.js',
         'admin/admin.cms.js',
         'admin/admin.content.js',
@@ -138,6 +150,103 @@ function testSyntaxChecks() {
         const source = fs.readFileSync(path.join(rootDir, relativePath), 'utf8');
         new vm.Script(source, { filename: relativePath });
     });
+}
+
+function testGasBackendSyntaxIfPresent() {
+    const gasFiles = fs.readdirSync(rootDir).filter((fileName) => fileName.endsWith('.gs'));
+    gasFiles.forEach((fileName) => {
+        const source = fs.readFileSync(path.join(rootDir, fileName), 'utf8');
+        new vm.Script(source, { filename: fileName });
+    });
+}
+
+async function testBookingFlowCompletesWithMockedApi() {
+    const genderInput = createElement();
+    genderInput.value = 'Pria';
+    genderInput.checked = true;
+
+    const terapisInput = createElement();
+    terapisInput.value = 'Ahmad';
+    terapisInput.checked = true;
+
+    const layananInput = createElement();
+    layananInput.value = Buffer.from(unescape(encodeURIComponent('Bekam Sunnah')), 'binary').toString('base64');
+    layananInput.checked = true;
+
+    const waktuInput = createElement();
+    waktuInput.value = '09:00';
+    waktuInput.checked = true;
+
+    const apiCalls = [];
+    const context = createBrowserContext({
+        selectors: {
+            'input[name="gender_terapis"]:checked': genderInput,
+            'input[name="pilih_nama_terapis"]:checked': terapisInput,
+            'input[name="layanan"]:checked': layananInput,
+            'input[name="waktu"]:checked': waktuInput,
+            '#step-2 .grid': createElement()
+        },
+        context: {
+            fetch() {
+                throw new Error('fetch should not be called directly in booking flow test');
+            }
+        }
+    });
+
+    runFile(context, 'shared/shared.ui.js');
+
+    context.apiGetJson = async (action) => {
+        apiCalls.push({ type: 'get', action });
+        if (action === 'getInitData') {
+            return {
+                status: 'success',
+                data: {
+                    terapis: [{ nama: 'Ahmad', gender: 'Laki-laki' }],
+                    layanan: [{ nama: 'Bekam Sunnah', hariAktif: [], terapisKhusus: [] }]
+                }
+            };
+        }
+        return { status: 'success', data: [] };
+    };
+    context.apiRequestJson = async (url) => {
+        apiCalls.push({ type: 'request', url });
+        return { status: 'success', data: ['09:00'] };
+    };
+    context.apiPostJson = async (action, payload) => {
+        apiCalls.push({ type: 'post', action, payload });
+        return { status: 'success', data: { whatsappUrl: 'https://wa.me/6281234567890' } };
+    };
+
+    context.window.apiGetJson = context.apiGetJson;
+    context.window.apiRequestJson = context.apiRequestJson;
+    context.window.apiPostJson = context.apiPostJson;
+
+    runFile(context, 'booking/booking.core.js');
+    runFile(context, 'booking/booking.selection.js');
+    runFile(context, 'booking/booking.ai.js');
+    runFile(context, 'booking/booking.submit.js');
+    runFile(context, 'booking/booking.init.js');
+
+    context.document.getElementById('tanggal').value = '2026-05-01';
+    context.document.getElementById('nama').value = 'Pasien Test';
+    context.document.getElementById('whatsapp').value = '081234567890';
+    context.document.getElementById('usia').value = '35';
+    context.document.getElementById('keluhan').value = 'Pegal';
+
+    await context.initBooking();
+    context.onGenderSelected();
+    context.selectSpecificTerapis('Ahmad');
+    context.onLayananSelectedSafe(layananInput.value);
+    await context.checkAvailability();
+    await context.handleBookingSubmit({ preventDefault() {} });
+
+    const submitCall = apiCalls.find((call) => call.type === 'post' && call.action === 'simpanBookingData');
+    assert.ok(submitCall, 'booking submit API should be called');
+    assert.strictEqual(submitCall.payload.nama, 'Pasien Test');
+    assert.strictEqual(submitCall.payload.terapis, 'Ahmad');
+    assert.strictEqual(submitCall.payload.sesiBekam, 'Bekam Sunnah');
+    assert.strictEqual(context.document.getElementById('success-screen').style.display, 'block');
+    assert.strictEqual(context.document.getElementById('bookingForm').style.display, 'none');
 }
 
 async function testAdminRequestsUseSharedHelpers() {
@@ -196,8 +305,10 @@ function testBookingStateBuildsIndexes() {
 
 (async () => {
     testSyntaxChecks();
+    testGasBackendSyntaxIfPresent();
     await testAdminRequestsUseSharedHelpers();
     testBookingStateBuildsIndexes();
+    await testBookingFlowCompletesWithMockedApi();
     console.log('Smoke tests passed');
 })().catch((error) => {
     console.error(error);
