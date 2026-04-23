@@ -195,9 +195,7 @@ window.AdminApp.content.loadGaleriListAdmin = async function loadGaleriListAdmin
     const loadPromise = (async () => {
         try {
             document.getElementById('galeriList').innerHTML = '<p class="text-slate-400 font-bold text-sm text-center py-8"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat galeri...</p>';
-            const connector = window.GAS_URL.includes('?') ? '&' : '?';
-            const res = await fetch(`${window.GAS_URL}${connector}action=getGaleriList`);
-            const result = await res.json();
+            const result = await apiGetJson('getGaleriList', null, { timeoutMs: 20000, retries: 1, retryDelayMs: 500 });
 
             if (result.status === 'success') {
                 window.AdminState.content.galeri = result.data || [];

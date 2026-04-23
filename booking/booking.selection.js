@@ -1,7 +1,7 @@
 function onLayananSelectedSafe(encodedName) {
     const namaLayanan = decodeURIComponent(escape(atob(encodedName)));
-    selectedLayanan = layananByNama.get(normalizeName(namaLayanan)) || null;
-    console.log("Layanan dipilih (Safe):", selectedLayanan);
+    BookingState.selectedLayanan = BookingState.layananByNama.get(normalizeName(namaLayanan)) || null;
+    console.log("Layanan dipilih (Safe):", BookingState.selectedLayanan);
     if (document.getElementById('tanggal').value) {
         checkAvailability();
     }
@@ -9,27 +9,27 @@ function onLayananSelectedSafe(encodedName) {
 }
 
 function onGenderSelected() {
-    selectedGender = document.querySelector('input[name="gender_terapis"]:checked').value;
+    BookingState.selectedGender = document.querySelector('input[name="gender_terapis"]:checked').value;
     filterTerapisName();
     document.getElementById('section-layanan').classList.add('hidden');
-    selectedLayanan = null;
-    selectedTerapisName = "";
+    BookingState.selectedLayanan = null;
+    BookingState.selectedTerapisName = "";
     scrollToElement('section-nama-terapis');
 }
 
 function filterTerapisName() {
-    if (!selectedGender) return;
+    if (!BookingState.selectedGender) return;
 
-    const genderLabel = (selectedGender === "Pria") ? "Laki-laki" : "Perempuan";
+    const genderLabel = (BookingState.selectedGender === "Pria") ? "Laki-laki" : "Perempuan";
     const container = document.getElementById('section-nama-terapis');
     const list = document.getElementById('list-terapis-nama');
 
     const addedExtraNames = new Set();
-    const terapisKhususExtra = allTerapis.filter(t => {
+    const terapisKhususExtra = BookingState.allTerapis.filter(t => {
         const cleanNama = normalizeName(t.nama);
         if (addedExtraNames.has(cleanNama)) return false;
 
-        if (t.gender === "lintas" || namaTerapisKhususSet.has(cleanNama)) {
+        if (t.gender === "lintas" || BookingState.namaTerapisKhususSet.has(cleanNama)) {
             addedExtraNames.add(cleanNama);
             return true;
         }
@@ -37,10 +37,10 @@ function filterTerapisName() {
     });
 
     const extraNamaSet = new Set(terapisKhususExtra.map(t => normalizeName(t.nama)));
-    const matches = allTerapis.filter(t => t.gender === genderLabel && !extraNamaSet.has(normalizeName(t.nama)));
+    const matches = BookingState.allTerapis.filter(t => t.gender === genderLabel && !extraNamaSet.has(normalizeName(t.nama)));
 
     const getLabelLayananKhusus = (namaTerapis) => {
-        return (specialLabelsByTerapis.get(normalizeName(namaTerapis)) || []).join(", ");
+        return (BookingState.specialLabelsByTerapis.get(normalizeName(namaTerapis)) || []).join(", ");
     };
 
     list.innerHTML = "";
@@ -52,7 +52,7 @@ function filterTerapisName() {
         div.style.animationDelay = `${index * 50}ms`;
 
         const cleanNama = normalizeName(t.nama);
-        const hasSpecialty = isKhusus || namaTerapisKhususSet.has(cleanNama);
+        const hasSpecialty = isKhusus || BookingState.namaTerapisKhususSet.has(cleanNama);
         const labelKhusus = hasSpecialty
             ? `<span class="text-[9px] font-black uppercase tracking-widest text-teal-600 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-full">${getLabelLayananKhusus(t.nama)}</span>`
             : '';
@@ -85,13 +85,13 @@ function filterTerapisName() {
     } else {
         container.classList.remove('hidden');
         list.innerHTML = `<div class="col-span-full p-4 bg-amber-50 text-amber-700 rounded-xl text-xs font-bold border border-amber-100 flex items-center gap-3">
-            <i class="fas fa-info-circle text-lg"></i> Maaf, tidak ada terapis ${selectedGender} yang tersedia saat ini.
+            <i class="fas fa-info-circle text-lg"></i> Maaf, tidak ada terapis ${BookingState.selectedGender} yang tersedia saat ini.
         </div>`;
     }
 }
 
 function selectSpecificTerapis(nama) {
-    selectedTerapisName = nama;
+    BookingState.selectedTerapisName = nama;
     renderLayanan();
     if (document.getElementById('tanggal').value) {
         checkAvailability();
@@ -100,7 +100,7 @@ function selectSpecificTerapis(nama) {
 }
 
 function renderLayanan() {
-    if (!selectedTerapisName) return;
+    if (!BookingState.selectedTerapisName) return;
     const container = document.getElementById('section-layanan');
     const list = document.getElementById('list-layanan');
 
@@ -114,7 +114,7 @@ function renderLayanan() {
     setTimeout(() => {
         list.innerHTML = "";
 
-        if (allLayanan.length === 0) {
+        if (BookingState.allLayanan.length === 0) {
             list.innerHTML = `
                 <div class="col-span-full p-4 bg-amber-50 text-amber-700 rounded-xl text-xs font-bold border border-amber-100 text-center">
                     <i class="fas fa-database mb-2 block text-lg"></i>
@@ -124,16 +124,16 @@ function renderLayanan() {
             return;
         }
 
-        const cleanTarget = normalizeName(selectedTerapisName);
-        const availableServices = layananByTerapisName.get(cleanTarget) || [];
+        const cleanTarget = normalizeName(BookingState.selectedTerapisName);
+        const availableServices = BookingState.layananByTerapisName.get(cleanTarget) || [];
 
         if (availableServices.length === 0) {
-            const debugInfo = allLayanan
+            const debugInfo = BookingState.allLayanan
                 .map(l => `${l.nama}(${Array.isArray(l.terapisKhusus) ? l.terapisKhusus.join(",") : ""})`)
                 .join(" | ");
             list.innerHTML = `
                 <div class="col-span-full p-6 bg-slate-50 text-slate-500 rounded-[1.5rem] text-[11px] font-bold text-center border-2 border-dashed border-slate-200">
-                    Maaf, Terapis <b class="text-slate-800">${selectedTerapisName}</b> tidak terdaftar untuk layanan manapun di Sheet.<br>
+                    Maaf, Terapis <b class="text-slate-800">${BookingState.selectedTerapisName}</b> tidak terdaftar untuk layanan manapun di Sheet.<br>
                     <button type="button" data-action="toggle-debug-detail" class="mt-2 text-emerald-600 underline hover:text-emerald-700 transition-colors">Klik untuk Lihat Detail Debug</button>
                     <div class="hidden mt-4 p-4 bg-white border rounded-xl font-mono text-[9px] text-left break-all shadow-inner">
                         <b>Data dari Sheet:</b><br>${debugInfo}<br><br>
@@ -169,34 +169,34 @@ function renderLayanan() {
 
 async function checkAvailability() {
     const tgl = document.getElementById('tanggal').value;
-    if (!tgl || !selectedTerapisName) return;
+    if (!tgl || !BookingState.selectedTerapisName) return;
 
     const gridWaktu = document.querySelector('#step-2 .grid');
     let currentSignal = null;
 
-    if (availabilityAbortController) {
-        availabilityAbortController.abort();
-        availabilityAbortController = null;
+    if (BookingState.availabilityAbortController) {
+        BookingState.availabilityAbortController.abort();
+        BookingState.availabilityAbortController = null;
     }
 
-    if (selectedLayanan && selectedLayanan.hariAktif && selectedLayanan.hariAktif.length > 0) {
+    if (BookingState.selectedLayanan && BookingState.selectedLayanan.hariAktif && BookingState.selectedLayanan.hariAktif.length > 0) {
         const parts = tgl.split('-').map(Number);
         const dObj = new Date(parts[0], parts[1] - 1, parts[2]);
         const day = dObj.getDay();
 
-        if (!selectedLayanan.hariAktif.includes(day)) {
+        if (!BookingState.selectedLayanan.hariAktif.includes(day)) {
             const daysMap = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-            const hariNama = selectedLayanan.hariAktif.map(h => daysMap[h]).join(", ");
+            const hariNama = BookingState.selectedLayanan.hariAktif.map(h => daysMap[h]).join(", ");
             gridWaktu.innerHTML = `
                 <div class="col-span-full p-6 bg-red-50 text-red-700 rounded-2xl border-2 border-red-100 text-center animate-fade-up">
                     <div class="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-2xl mx-auto mb-3"><i class="fas fa-calendar-times"></i></div>
                     <div class="font-black uppercase text-xs tracking-widest mb-1">Layanan Libur</div>
                     <p class="text-xs font-bold font-sans opacity-80 uppercase leading-relaxed">
-                        Mohon maaf, layanan <b class="text-red-600">${selectedLayanan.nama}</b><br>hanya tersedia pada hari: <span class="underline">${hariNama}</span>.
+                        Mohon maaf, layanan <b class="text-red-600">${BookingState.selectedLayanan.nama}</b><br>hanya tersedia pada hari: <span class="underline">${hariNama}</span>.
                     </p>
                 </div>
             `;
-            showCustomToast(`Layanan ${selectedLayanan.nama} libur di hari tersebut.`, "error");
+            showCustomToast(`Layanan ${BookingState.selectedLayanan.nama} libur di hari tersebut.`, "error");
             return;
         }
     }
@@ -209,16 +209,16 @@ async function checkAvailability() {
     `;
 
     try {
-        const requestKey = `${tgl}__${selectedTerapisName}`;
-        availabilityRequestKey = requestKey;
-        availabilityAbortController = new AbortController();
-        currentSignal = availabilityAbortController.signal;
+        const requestKey = `${tgl}__${BookingState.selectedTerapisName}`;
+        BookingState.availabilityRequestKey = requestKey;
+        BookingState.availabilityAbortController = new AbortController();
+        currentSignal = BookingState.availabilityAbortController.signal;
         const result = await apiRequestJson(
-            buildApiUrl('cekWaktu', { tanggal: tgl, terapis: selectedTerapisName }),
+            buildApiUrl('cekWaktu', { tanggal: tgl, terapis: BookingState.selectedTerapisName }),
             { signal: currentSignal, timeoutMs: 12000, retries: 0 }
         );
 
-        if (availabilityRequestKey !== requestKey) return;
+        if (BookingState.availabilityRequestKey !== requestKey) return;
 
         if (result.status === "success") {
             if (result.data.length > 0) {
@@ -267,8 +267,8 @@ async function checkAvailability() {
         if (e.name === 'AbortError') return;
         gridWaktu.innerHTML = '<div class="col-span-full text-center py-6 bg-red-50 rounded-2xl border border-red-100 text-red-500 font-bold"><i class="fas fa-wifi mb-2 block text-xl"></i> Gagal memuat jadwal jaringan Anda.</div>';
     } finally {
-        if (availabilityAbortController && availabilityAbortController.signal === currentSignal) {
-            availabilityAbortController = null;
+        if (BookingState.availabilityAbortController && BookingState.availabilityAbortController.signal === currentSignal) {
+            BookingState.availabilityAbortController = null;
         }
     }
 }

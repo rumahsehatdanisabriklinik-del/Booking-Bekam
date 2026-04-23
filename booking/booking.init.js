@@ -11,13 +11,13 @@ async function initBooking() {
 
     try {
         const applyInitData = (terapisData, layananData) => {
-            allTerapis = terapisData;
-            allLayanan = layananData || [];
+            BookingState.allTerapis = terapisData || [];
+            BookingState.allLayanan = layananData || [];
             buildBookingIndexes();
             document.getElementById('global-loader').classList.add('hide');
             listTerapisUI.innerHTML = '<div class="col-span-full text-emerald-500 text-[10px] font-black uppercase tracking-widest p-2 rounded-lg bg-emerald-50 text-center animate-pulse"><i class="fas fa-check-circle"></i> Database Siap</div>';
             setTimeout(() => {
-                if (!selectedGender) document.getElementById('section-nama-terapis').classList.add('hidden');
+                if (!BookingState.selectedGender) document.getElementById('section-nama-terapis').classList.add('hidden');
             }, 2000);
         };
 

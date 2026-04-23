@@ -100,9 +100,7 @@ window.AdminApp.cms.loadCMSData = async function loadCMSData(options = {}) {
 
     const loadPromise = (async () => {
         try {
-            const connector = window.GAS_URL.includes('?') ? '&' : '?';
-            const res = await fetch(`${window.GAS_URL}${connector}action=getLandingSettings`);
-            const result = await res.json();
+            const result = await apiGetJson('getLandingSettings', null, { timeoutMs: 20000, retries: 1, retryDelayMs: 500 });
 
             if (result.status === 'success') {
                 const data = result.data || {};
@@ -177,9 +175,7 @@ window.AdminApp.cms.loadLayananList = async function loadLayananList(options = {
 
     const loadPromise = (async () => {
         try {
-            const connector = window.GAS_URL.includes('?') ? '&' : '?';
-            const res = await fetch(`${window.GAS_URL}${connector}action=getLayananList`);
-            const result = await res.json();
+            const result = await apiGetJson('getLayananList', null, { timeoutMs: 20000, retries: 1, retryDelayMs: 500 });
 
             if (result.status === 'success') {
                 window.AdminState.cms.layanan = result.data || [];

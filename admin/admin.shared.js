@@ -138,13 +138,11 @@ window.AdminApp.auth.handleAdminAuthFailure = function handleAdminAuthFailure(me
 };
 
 window.AdminApp.auth.adminGet = async function adminGet(action, extraParams = {}) {
-    const connector = window.GAS_URL.includes('?') ? '&' : '?';
-    const params = new URLSearchParams({ action, ...extraParams });
+    const params = { ...extraParams };
     const token = window.AdminApp.auth.getAdminSessionToken();
-    if (token) params.set('sessionToken', token);
+    if (token) params.sessionToken = token;
 
-    const res = await fetch(`${window.GAS_URL}${connector}${params.toString()}`);
-    const result = await res.json();
+    const result = await apiGetJson(action, params, { timeoutMs: 20000, retries: 1, retryDelayMs: 500 });
     if (window.AdminApp.auth.isAuthError(result)) {
         window.AdminApp.auth.handleAdminAuthFailure(result.message);
         throw new Error(result.message);
@@ -157,12 +155,7 @@ window.AdminApp.auth.adminPost = async function adminPost(payload) {
     const token = window.AdminApp.auth.getAdminSessionToken();
     if (token) body.sessionToken = token;
 
-    const res = await fetch(`${window.GAS_URL}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-    });
-    const result = await res.json();
+    const result = await apiPostJson(body.action, body, { timeoutMs: 20000, retries: 1, retryDelayMs: 500 });
     if (window.AdminApp.auth.isAuthError(result)) {
         window.AdminApp.auth.handleAdminAuthFailure(result.message);
         throw new Error(result.message);
@@ -179,11 +172,7 @@ window.AdminApp.auth.doLogin = async function doLogin() {
     btn.disabled = true;
 
     try {
-        const result = await fetch(`${window.GAS_URL}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'authAdmin', pass })
-        }).then((response) => response.json());
+        const result = await apiPostJson('authAdmin', { pass }, { timeoutMs: 20000, retries: 1, retryDelayMs: 500 });
 
         if (result.status === 'success' && result.sessionToken) {
             localStorage.setItem(window.AdminConfig.sessionKey, result.sessionToken);
@@ -210,11 +199,7 @@ window.AdminApp.auth.logout = function logout() {
         return;
     }
 
-    fetch(`${window.GAS_URL}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'logoutAdmin', sessionToken: token })
-    }).finally(() => location.reload());
+    apiPostJson('logoutAdmin', { sessionToken: token }, { timeoutMs: 10000, retries: 0 }).finally(() => location.reload());
 };
 
 window.AdminApp.ui.toggleSidebar = function toggleSidebar(show) {

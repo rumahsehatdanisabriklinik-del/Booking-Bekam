@@ -23,18 +23,20 @@ if (usiaInput) {
     });
 }
 
-let allTerapis = [];
-let allLayanan = [];
-let selectedTerapisName = "";
-let selectedGender = "";
-let selectedLayanan = null;
-let layananByNama = new Map();
-let layananByTerapisName = new Map();
-let layananTanpaPerempuan = [];
-let namaTerapisKhususSet = new Set();
-let specialLabelsByTerapis = new Map();
-let availabilityAbortController = null;
-let availabilityRequestKey = "";
+const BookingState = window.BookingState = window.BookingState || {
+    allTerapis: [],
+    allLayanan: [],
+    selectedTerapisName: "",
+    selectedGender: "",
+    selectedLayanan: null,
+    layananByNama: new Map(),
+    layananByTerapisName: new Map(),
+    layananTanpaPerempuan: [],
+    namaTerapisKhususSet: new Set(),
+    specialLabelsByTerapis: new Map(),
+    availabilityAbortController: null,
+    availabilityRequestKey: ""
+};
 
 window.lastBookingData = null;
 
@@ -45,14 +47,14 @@ function normalizeName(value) {
 }
 
 function buildBookingIndexes() {
-    layananByNama = new Map();
-    layananByTerapisName = new Map();
-    layananTanpaPerempuan = [];
-    namaTerapisKhususSet = new Set();
-    specialLabelsByTerapis = new Map();
+    BookingState.layananByNama = new Map();
+    BookingState.layananByTerapisName = new Map();
+    BookingState.layananTanpaPerempuan = [];
+    BookingState.namaTerapisKhususSet = new Set();
+    BookingState.specialLabelsByTerapis = new Map();
 
     const namaTerapisPerempuan = new Set(
-        allTerapis
+        BookingState.allTerapis
             .filter(t => t.gender === "Perempuan")
             .map(t => normalizeName(t.nama))
     );
@@ -60,8 +62,8 @@ function buildBookingIndexes() {
     const layananUmum = [];
     const layananKhususByTerapis = new Map();
 
-    allLayanan.forEach(layanan => {
-        layananByNama.set(normalizeName(layanan.nama), layanan);
+    BookingState.allLayanan.forEach(layanan => {
+        BookingState.layananByNama.set(normalizeName(layanan.nama), layanan);
 
         const daftarTerapisKhusus = Array.isArray(layanan.terapisKhusus) ? layanan.terapisKhusus : [];
         if (daftarTerapisKhusus.length === 0) {
@@ -74,7 +76,7 @@ function buildBookingIndexes() {
         );
 
         if (tanpaTerapisPerempuan) {
-            layananTanpaPerempuan.push(layanan);
+            BookingState.layananTanpaPerempuan.push(layanan);
         }
 
         daftarTerapisKhusus.forEach(namaTerapis => {
@@ -89,21 +91,21 @@ function buildBookingIndexes() {
             layananList.push(layanan);
 
             if (tanpaTerapisPerempuan) {
-                namaTerapisKhususSet.add(cleanNama);
-                let labelList = specialLabelsByTerapis.get(cleanNama);
+                BookingState.namaTerapisKhususSet.add(cleanNama);
+                let labelList = BookingState.specialLabelsByTerapis.get(cleanNama);
                 if (!labelList) {
                     labelList = [];
-                    specialLabelsByTerapis.set(cleanNama, labelList);
+                    BookingState.specialLabelsByTerapis.set(cleanNama, labelList);
                 }
                 labelList.push(layanan.nama);
             }
         });
     });
 
-    allTerapis.forEach(terapis => {
+    BookingState.allTerapis.forEach(terapis => {
         const cleanNama = normalizeName(terapis.nama);
         const khusus = layananKhususByTerapis.get(cleanNama) || [];
-        layananByTerapisName.set(cleanNama, layananUmum.concat(khusus));
+        BookingState.layananByTerapisName.set(cleanNama, layananUmum.concat(khusus));
     });
 }
 

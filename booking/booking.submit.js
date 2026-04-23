@@ -12,13 +12,13 @@ function validateAll() {
     if (!layanan) { showCustomToast('Silakan pilih Layanan.', 'error'); scrollToElement('section-layanan'); return false; }
     if (!tgl) { showCustomToast('Silakan pilih Tanggal Kedatangan.', 'error'); document.getElementById('tanggal').focus(); return false; }
 
-    if (selectedLayanan && selectedLayanan.hariAktif && selectedLayanan.hariAktif.length > 0) {
+    if (BookingState.selectedLayanan && BookingState.selectedLayanan.hariAktif && BookingState.selectedLayanan.hariAktif.length > 0) {
         const parts = tgl.split('-').map(Number);
         const day = new Date(parts[0], parts[1] - 1, parts[2]).getDay();
-        if (!selectedLayanan.hariAktif.includes(day)) {
+        if (!BookingState.selectedLayanan.hariAktif.includes(day)) {
             const daysMap = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-            const hariNama = selectedLayanan.hariAktif.map(h => daysMap[h]).join(", ");
-            showCustomToast(`Layanan ${selectedLayanan.nama} hanya tersedia di hari: ${hariNama}`, 'error');
+            const hariNama = BookingState.selectedLayanan.hariAktif.map(h => daysMap[h]).join(", ");
+            showCustomToast(`Layanan ${BookingState.selectedLayanan.nama} hanya tersedia di hari: ${hariNama}`, 'error');
             scrollToElement('section-tanggal');
             return false;
         }
@@ -44,7 +44,7 @@ async function handleBookingSubmit(e) {
 
     const formData = {
         layanan: layananDecoded,
-        terapis_pref: selectedGender,
+        terapis_pref: BookingState.selectedGender,
         tanggal: document.getElementById('tanggal').value,
         waktu: document.querySelector('input[name="waktu"]:checked').value,
         nama: document.getElementById('nama').value,
@@ -60,7 +60,7 @@ async function handleBookingSubmit(e) {
         nama: formData.nama,
         nohp: formData.whatsapp,
         tanggal: formData.tanggal,
-        terapis: selectedTerapisName,
+        terapis: BookingState.selectedTerapisName,
         waktu: formData.waktu,
         jenisKelamin: (formData.terapis_pref === "Pria" ? "Laki-laki" : "Perempuan"),
         sesiBekam: formData.layanan,
@@ -81,7 +81,7 @@ async function handleBookingSubmit(e) {
 
         if (result.status === "success") {
             document.getElementById('succ-nama').textContent = formData.nama;
-            document.getElementById('succ-terapis').textContent = selectedTerapisName;
+            document.getElementById('succ-terapis').textContent = BookingState.selectedTerapisName;
             document.getElementById('succ-layanan').textContent = formData.layanan;
             document.getElementById('succ-tanggal').textContent = formData.tanggal;
             document.getElementById('succ-waktu').innerHTML = `<i class="far fa-clock mr-1"></i> ${formData.waktu} WIB`;
