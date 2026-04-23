@@ -73,12 +73,6 @@ async function openCheckinModal(row, payload, summaryText) {
         return;
     }
 
-    const localWindow = getLocalCheckinWindowState();
-    if (localWindow.state === 'early' || localWindow.state === 'expired') {
-        updateCheckinStatus(localWindow.message, true);
-        return;
-    }
-
     if (!('BarcodeDetector' in window) || !navigator.mediaDevices?.getUserMedia) {
         updateCheckinStatus('Browser ini belum mendukung scan kamera. Gunakan kolom kode manual di bawah.', true);
         return;
@@ -102,7 +96,7 @@ async function openCheckinModal(row, payload, summaryText) {
         await video.play();
 
         checkinScanLoopActive = true;
-        updateCheckinStatus('Arahkan kamera ke QR check-in di meja admin.');
+        updateCheckinStatus('Arahkan kamera ke QR check-in di meja admin. Sistem akan memberi tahu jika QR belum aktif.');
         requestAnimationFrame(scanClinicQrFrame);
     } catch (error) {
         console.error('Scanner start failed', error);
