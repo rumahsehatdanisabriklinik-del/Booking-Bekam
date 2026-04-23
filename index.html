@@ -843,10 +843,15 @@
                 return window.normalizeDriveImageUrl(url);
             }
             if (!url || typeof url !== 'string') return url;
-            if (!url.includes('drive.google.com/uc')) return url;
             try {
-                const match = url.match(/id=([a-zA-Z0-9_-]+)/);
-                if (match && match[1]) return `https://lh3.googleusercontent.com/d/${match[1]}`;
+                const trimmedUrl = url.trim();
+                const driveIdMatch =
+                    trimmedUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) ||
+                    trimmedUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) ||
+                    trimmedUrl.match(/lh3\.googleusercontent\.com\/d\/([a-zA-Z0-9_-]+)/);
+                if (driveIdMatch && driveIdMatch[1]) {
+                    return `https://drive.google.com/thumbnail?id=${driveIdMatch[1]}&sz=w1600`;
+                }
             } catch (e) {}
             return url;
         }
