@@ -114,6 +114,21 @@
         #detailView { opacity: 0; transform: translateY(20px); transition: all 0.5s ease-out; }
         #detailView.active { opacity: 1; transform: translateY(0); }
 
+        @media (max-width: 640px) {
+            body { padding-top: 5.75rem; }
+            .article-content { max-width: 100%; }
+            .article-content h1 { font-size: 2rem; margin: 2rem 0 0.85rem; }
+            .article-content h2 { font-size: 1.45rem; margin: 2rem 0 0.75rem; }
+            .article-content h3 { font-size: 1.12rem; margin: 1.5rem 0 0.65rem; }
+            .article-content p,
+            .article-content ul,
+            .article-content ol { font-size: 1rem; line-height: 1.75; }
+            .article-content p:first-child { font-size: 1.05rem; line-height: 1.7; }
+            .article-content blockquote { font-size: 1.08rem; line-height: 1.7; margin: 1.75rem 0; padding-left: 1rem; }
+            .article-content img,
+            .article-content figure { margin: 1.75rem 0; }
+        }
+
         @media print {
             nav, #mobileMenu, footer, [data-action="clear-hash"], [data-action="print-article"] { display: none !important; }
             body { padding-top: 0 !important; background: white !important; }
@@ -416,6 +431,12 @@
             return div.textContent || div.innerText || '';
         }
 
+        function decodeHtmlEntities(value) {
+            const div = document.createElement('div');
+            div.innerHTML = String(value || '');
+            return div.textContent || div.innerText || '';
+        }
+
         function getExcerpt(article) {
             const raw = article.ringkasan || stripHtml(article.isi || '');
             return String(raw || '').trim();
@@ -451,6 +472,15 @@
 
         function autoFormatPlainArticle(text) {
             const prepared = String(text || '')
+                .replace(/&lt;br\s*\/?&gt;/gi, '\n')
+                .replace(/<br\s*\/?>/gi, '\n')
+                .replace(/<\/?br\s*\/?>/gi, '\n')
+                .replace(/&nbsp;/gi, ' ')
+                .replace(/\r/g, '')
+                .replace(/\n{3,}/g, '\n\n')
+                .trim()
+                .replace(/^\s*[-*]\s+/gm, '• ')
+                .replace(/(?:^|\n)(\d+)\.\s*/g, '\n\n$1. ')
                 .replace(/\r/g, '')
                 .replace(/\s+((?:\d+\.\s*)?(?:Apa Itu|Manfaat|Melancarkan|Mengurangi|Menenangkan|Meningkatkan|Menjaga|Detoksifikasi|Bekam untuk|Berikut beberapa))/g, '\n\n$1')
                 .replace(/\s+(Migrain dan vertigo|Kolesterol tinggi|Asam urat|Hipertensi|Masalah pencernaan|Kelelahan kronis)/g, '\n$1');
@@ -478,8 +508,14 @@
         function formatArticleBody(input) {
             const raw = String(input || '').trim();
             if (!raw) return '<p>Konten artikel belum tersedia.</p>';
-            if (raw.includes('<')) {
-                const parts = raw.split(/(<figure[\s\S]*?<\/figure>|<img\b[^>]*>)/gi);
+            const decodedRaw = decodeHtmlEntities(raw);
+            const cleanedRaw = decodedRaw
+                .replace(/&lt;br\s*\/?&gt;/gi, '\n')
+                .replace(/<br\s*\/?>/gi, '\n')
+                .replace(/<\/?br\s*\/?>/gi, '\n');
+            if (/<[a-z][\s\S]*>/i.test(raw) || /<(br|p|h[1-6]|ul|ol|li|figure|img|blockquote)\b/i.test(cleanedRaw)) {
+                const htmlSource = /<[a-z][\s\S]*>/i.test(raw) ? raw : decodedRaw;
+                const parts = htmlSource.split(/(<figure[\s\S]*?<\/figure>|<img\b[^>]*>)/gi);
                 const html = parts.map((part) => {
                     if (!part.trim()) return '';
                     if (/^<(figure|img)\b/i.test(part.trim())) return part;
@@ -487,7 +523,7 @@
                 }).join('');
                 return typeof sanitizeAssistantHtml === 'function' ? sanitizeAssistantHtml(html) : html;
             }
-            return autoFormatPlainArticle(raw);
+            return autoFormatPlainArticle(cleanedRaw);
         }
 
         function slugify(text) {
