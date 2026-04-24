@@ -5,19 +5,6 @@ function updateCheckinStatus(message, isError = false) {
     el.className = `text-sm font-bold text-center ${isError ? 'text-red-500' : 'text-slate-500'}`;
 }
 
-function renderCheckinDebug(debugData) {
-    const wrap = document.getElementById('checkinDebugPanel');
-    const body = document.getElementById('checkinDebugContent');
-    if (!wrap || !body) return;
-    if (!debugData || typeof debugData !== 'object' || Object.keys(debugData).length === 0) {
-        wrap.classList.add('hidden');
-        body.textContent = '';
-        return;
-    }
-    wrap.classList.remove('hidden');
-    body.textContent = JSON.stringify(debugData, null, 2);
-}
-
 function parseLocalDateTime(value) {
     const raw = String(value || '').trim();
     if (!raw) return null;
@@ -75,13 +62,6 @@ async function openCheckinModal(row, payload, summaryText) {
     lastScannedClinicCode = "";
     lastScannedClinicCodeAt = 0;
     document.getElementById('manualClinicCode').value = '';
-    renderCheckinDebug({
-        stage: 'modal-opened',
-        row: row,
-        hasPayload: !!payload,
-        summary: summaryText || ''
-    });
-
     const modal = document.getElementById('checkinModal');
     modal.classList.remove('hidden');
     setTimeout(() => {
@@ -131,22 +111,9 @@ async function openCheckinModal(row, payload, summaryText) {
         updateCheckinStatus(checkinScanMode === 'barcode-detector'
             ? 'Arahkan kamera ke QR check-in di meja admin.'
             : 'Arahkan kamera ke QR check-in di meja admin. Mode scan kompatibel sedang aktif.');
-        renderCheckinDebug({
-            stage: 'scanner-ready',
-            row: currentCheckInRow,
-            scanMode: checkinScanMode,
-            hasPayload: !!currentCheckInPayload,
-            validFrom: currentCheckInWindow && currentCheckInWindow.validFrom ? currentCheckInWindow.validFrom : '',
-            expiresAt: currentCheckInWindow && currentCheckInWindow.expiresAt ? currentCheckInWindow.expiresAt : ''
-        });
         requestAnimationFrame(scanClinicQrFrame);
     } catch (error) {
         console.error('Scanner start failed', error);
-        renderCheckinDebug({
-            stage: 'scanner-start-failed',
-            row: currentCheckInRow,
-            message: error && error.message ? error.message : String(error || '')
-        });
         updateCheckinStatus('Kamera tidak bisa dibuka. Gunakan kode manual jika diperlukan.', true);
     }
 }
@@ -230,7 +197,6 @@ async function submitManualCheckin() {
 
 async function processPatientCheckin(clinicCode) {
     if (!currentCheckInPayload) {
-        renderCheckinDebug({ stage: 'missing-booking-token', row: currentCheckInRow });
         updateCheckinStatus('Token booking tidak ditemukan.', true);
         return;
     }
@@ -238,12 +204,6 @@ async function processPatientCheckin(clinicCode) {
 
     const localWindow = getLocalCheckinWindowState();
     if (localWindow.state === 'early' || localWindow.state === 'expired') {
-        renderCheckinDebug({
-            stage: `local-window-${localWindow.state}`,
-            row: currentCheckInRow,
-            validFrom: currentCheckInWindow && currentCheckInWindow.validFrom ? currentCheckInWindow.validFrom : '',
-            expiresAt: currentCheckInWindow && currentCheckInWindow.expiresAt ? currentCheckInWindow.expiresAt : ''
-        });
         updateCheckinStatus(localWindow.message, true);
         return;
     }
@@ -257,12 +217,6 @@ async function processPatientCheckin(clinicCode) {
 
     checkinScanLoopActive = false;
     checkinSubmitInFlight = true;
-    renderCheckinDebug({
-        stage: 'submitting-checkin',
-        row: currentCheckInRow,
-        scanMode: checkinScanMode,
-        clinicCodePreview: clinicCode ? clinicCode.substring(0, 24) : ''
-    });
     updateCheckinStatus('Memproses check-in ke server...');
 
     try {
@@ -277,21 +231,12 @@ async function processPatientCheckin(clinicCode) {
         });
 
         if (result.status === 'success') {
-            renderCheckinDebug(result.data && result.data.debug ? result.data.debug : {
-                stage: 'success',
-                row: currentCheckInRow
-            });
             stopCheckinScanner();
             showCustomToast(`Check-in berhasil untuk ${result.data?.nama || currentCheckInSummary}.`, 'success');
             closeCheckinModal();
             checkStatus();
         } else {
             const message = result.message || 'Check-in gagal diproses.';
-            renderCheckinDebug(result.data && result.data.debug ? result.data.debug : {
-                stage: 'server-error',
-                row: currentCheckInRow,
-                message: message
-            });
             updateCheckinStatus(message, true);
             const shouldResume = !/belum aktif|kedaluwarsa|tidak valid/i.test(message);
             if (shouldResume && checkinStream) {
@@ -301,11 +246,6 @@ async function processPatientCheckin(clinicCode) {
         }
     } catch (error) {
         console.error('Check-in submit failed', error);
-        renderCheckinDebug({
-            stage: 'network-error',
-            row: currentCheckInRow,
-            message: error && error.message ? error.message : String(error || '')
-        });
         updateCheckinStatus('Gagal terhubung ke server check-in.', true);
         if (checkinStream) {
             checkinScanLoopActive = true;

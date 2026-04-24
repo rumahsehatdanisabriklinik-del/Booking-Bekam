@@ -884,7 +884,9 @@ function selfCheckIn(dataForm) {
     }
     const tz = ss.getSpreadsheetTimeZone() || "Asia/Jakarta";
     const tanggal = rowData[0] instanceof Date ? Utilities.formatDate(rowData[0], tz, "yyyy-MM-dd") : (rowData[0] || "").toString().trim();
-    const waktu = normalisirWaktu(rowData[1]);
+    const waktu = rowData[1] instanceof Date
+      ? Utilities.formatDate(rowData[1], tz, "HH:mm")
+      : normalisirWaktu(rowData[1]);
     const statusSaatIni = (rowData[7] || "Terjadwal").toString().trim();
     const statusLower = statusSaatIni.toLowerCase();
     debug.stage = 'booking-found';
