@@ -253,6 +253,10 @@
                     <div id="checkinScannerOverlay" class="absolute inset-0 border-[10px] border-white/10 pointer-events-none"></div>
                 </div>
                 <div id="checkinScanStatus" class="text-sm font-bold text-slate-500 text-center">Menyiapkan kamera untuk memindai QR klinik...</div>
+                <div id="checkinDebugPanel" class="hidden rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2">Debug Check-In</div>
+                    <pre id="checkinDebugContent" class="text-[11px] leading-relaxed text-slate-700 whitespace-pre-wrap break-all max-h-40 overflow-auto"></pre>
+                </div>
                 <div class="space-y-2">
                     <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Fallback Kode Manual</label>
                     <textarea id="manualClinicCode" class="input-field resize-none rounded-2xl bg-slate-50 focus:bg-white" rows="2" placeholder="Tempel kode QR klinik jika kamera tidak didukung"></textarea>

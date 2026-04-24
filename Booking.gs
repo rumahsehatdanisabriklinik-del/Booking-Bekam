@@ -807,26 +807,39 @@ function selfCheckIn(dataForm) {
   const rowHint = parseInt(dataForm && dataForm.row, 10);
   const payload = (dataForm && (dataForm.payload || dataForm.code || dataForm.token || "")).toString().trim();
   const clinicCode = (dataForm && (dataForm.clinicCode || dataForm.scannedCode || "")).toString().trim();
+  const debug = {
+    rowHint: isNaN(rowHint) ? '' : rowHint,
+    payloadPresent: !!payload,
+    clinicCodePresent: !!clinicCode,
+    clinicCodePrefix: clinicCode ? clinicCode.substring(0, 24) : '',
+    stage: 'init'
+  };
   if (!payload) {
-    return { status: "error", message: "Kode check-in belum diisi." };
+    return { status: "error", message: "Kode check-in belum diisi.", data: { debug: debug } };
   }
   if (!clinicCode) {
-    return { status: "error", message: "Silakan scan QR check-in di meja admin terlebih dahulu." };
+    debug.stage = 'missing-clinic-code';
+    return { status: "error", message: "Silakan scan QR check-in di meja admin terlebih dahulu.", data: { debug: debug } };
   }
   if (clinicCode !== getClinicCheckInPayload()) {
-    return { status: "error", message: "QR klinik tidak valid. Arahkan kamera ke QR resmi di meja admin." };
+    debug.stage = 'clinic-code-mismatch';
+    return { status: "error", message: "QR klinik tidak valid. Arahkan kamera ke QR resmi di meja admin.", data: { debug: debug } };
   }
 
   let parsed;
   try {
     parsed = parseCheckInPayload(payload);
   } catch (err) {
-    return { status: "error", message: err.message };
+    debug.stage = 'payload-parse-failed';
+    return { status: "error", message: err.message, data: { debug: debug } };
   }
+  debug.stage = 'payload-parsed';
+  debug.payloadBookingId = parsed.bookingId;
 
   const expectedSignature = buildCheckInSignature(`${parsed.bookingId}|${parsed.expiresAtMs}`);
   if (expectedSignature !== parsed.signature) {
-    return { status: "error", message: "QR check-in tidak valid atau sudah dimodifikasi." };
+    debug.stage = 'payload-signature-mismatch';
+    return { status: "error", message: "QR check-in tidak valid atau sudah dimodifikasi.", data: { debug: debug } };
   }
 
   const lock = LockService.getScriptLock();
@@ -835,58 +848,79 @@ function selfCheckIn(dataForm) {
 
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = ss.getSheetByName("Booking");
-    if (!sheet) return { status: "error", message: "Data booking tidak ditemukan." };
+    if (!sheet) return { status: "error", message: "Data booking tidak ditemukan.", data: { debug: debug } };
 
     initSheetBooking(sheet);
     const lastRow = sheet.getLastRow();
-    if (lastRow < 2) return { status: "error", message: "Belum ada data booking." };
+    debug.lastRow = lastRow;
+    if (lastRow < 2) return { status: "error", message: "Belum ada data booking.", data: { debug: debug } };
 
     let targetRow = -1;
+    let targetSource = '';
     if (!isNaN(rowHint) && rowHint >= 2 && rowHint <= lastRow) {
-      const hintedBookingId = (sheet.getRange(rowHint, 14).getValue() || "").toString().trim();
-      if (hintedBookingId === parsed.bookingId) {
-        targetRow = rowHint;
-      }
+      targetRow = rowHint;
+      targetSource = 'rowHint';
     }
     if (targetRow < 2) {
       targetRow = findBookingRowByBookingId(sheet, parsed.bookingId);
+      if (targetRow >= 2) targetSource = 'bookingId';
     }
     if (targetRow < 2) {
       targetRow = findBookingRowByNeonFallback(sheet, parsed.bookingId);
+      if (targetRow >= 2) targetSource = 'neonFallback';
     }
     if (targetRow < 2) {
-      return { status: "error", message: "Booking untuk QR ini tidak ditemukan." };
+      debug.stage = 'booking-not-found';
+      return { status: "error", message: "Booking untuk QR ini tidak ditemukan.", data: { debug: debug } };
     }
+    debug.targetRow = targetRow;
+    debug.targetSource = targetSource;
 
     const rowData = sheet.getRange(targetRow, 1, 1, BOOKING_HEADER_ROW.length).getValues()[0];
+    const storedBookingId = (rowData[13] || "").toString().trim();
+    if (!storedBookingId || !isNaN(rowHint)) {
+      sheet.getRange(targetRow, 14).setValue(parsed.bookingId);
+      rowData[13] = parsed.bookingId;
+    }
     const tz = ss.getSpreadsheetTimeZone() || "Asia/Jakarta";
     const tanggal = rowData[0] instanceof Date ? Utilities.formatDate(rowData[0], tz, "yyyy-MM-dd") : (rowData[0] || "").toString().trim();
     const waktu = normalisirWaktu(rowData[1]);
     const statusSaatIni = (rowData[7] || "Terjadwal").toString().trim();
     const statusLower = statusSaatIni.toLowerCase();
+    debug.stage = 'booking-found';
+    debug.bookingDate = tanggal;
+    debug.bookingTime = waktu;
+    debug.bookingStatus = statusSaatIni;
 
     if (["batal", "cancel", "dibatalkan", "batal (otomatis)"].includes(statusLower)) {
-      return { status: "error", message: "Booking ini sudah dibatalkan, tidak bisa check-in." };
+      debug.stage = 'booking-cancelled';
+      return { status: "error", message: "Booking ini sudah dibatalkan, tidak bisa check-in.", data: { debug: debug } };
     }
     if (["hadir", "selesai"].includes(statusLower)) {
-      return { status: "error", message: "Booking ini sudah pernah diproses check-in." };
+      debug.stage = 'booking-already-processed';
+      return { status: "error", message: "Booking ini sudah pernah diproses check-in.", data: { debug: debug } };
     }
 
     const windowInfo = getCheckInWindowInfo(tanggal, waktu);
     const now = Date.now();
+    debug.stage = 'window-checked';
+    debug.validFrom = windowInfo.validFrom;
+    debug.expiresAt = windowInfo.expiresAt;
+    debug.now = formatDateTimeLocal(new Date(now));
     if (now < windowInfo.validFromMs) {
+      debug.stage = 'window-early';
       return {
         status: "error",
-        message: `QR belum aktif. Check-in dibuka mulai ${windowInfo.validFrom}.`
+        message: `QR belum aktif. Check-in dibuka mulai ${windowInfo.validFrom}.`,
+        data: { debug: debug }
       };
     }
-    if (parsed.expiresAtMs !== windowInfo.expiresAtMs) {
-      return { status: "error", message: "QR check-in sudah tidak sesuai dengan jadwal booking. Buka ulang halaman status untuk memuat QR terbaru." };
-    }
     if (now > windowInfo.expiresAtMs) {
+      debug.stage = 'window-expired';
       return {
         status: "error",
-        message: `QR sudah kedaluwarsa. Batas check-in sampai ${windowInfo.expiresAt}.`
+        message: `QR sudah kedaluwarsa. Batas check-in sampai ${windowInfo.expiresAt}.`,
+        data: { debug: debug }
       };
     }
 
@@ -909,11 +943,14 @@ function selfCheckIn(dataForm) {
         terapis: (rowData[2] || "").toString().trim(),
         tanggal: tanggal,
         waktu: waktu,
-        checkInAt: checkInTime
+        checkInAt: checkInTime,
+        debug: Object.assign({}, debug, { stage: 'success', checkInAt: checkInTime })
       }
     };
   } catch (err) {
-    return { status: "error", message: "Gagal memproses check-in: " + err.message };
+    debug.stage = 'exception';
+    debug.error = err.message;
+    return { status: "error", message: "Gagal memproses check-in: " + err.message, data: { debug: debug } };
   } finally {
     lock.releaseLock();
   }
