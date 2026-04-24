@@ -69,6 +69,7 @@
         .step-chip { padding: 0.9rem 0.95rem; border-radius: 1.25rem; background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); border: 1px solid #e2e8f0; }
         .step-chip strong { display: block; color: #0f172a; font-size: 0.82rem; font-weight: 800; }
         .step-chip span { display: block; margin-top: 0.2rem; color: #64748b; font-size: 0.72rem; font-weight: 600; line-height: 1.45; }
+        .hero-proof-stack { display: flex; flex-direction: column; gap: 0.5rem; }
         
         /* Custom Inputs */
         .input-field {
@@ -85,7 +86,7 @@
         .pill-label {
             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;
             padding: 1.25rem 1rem; border-radius: 1.25rem; border: 2px solid #e2e8f0;
-            background: white; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-align: center;
+            background: white; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-align: center; min-height: 4.5rem;
         }
         .pill-label:hover { border-color: #6ee7b7; background: #ecfdf5; transform: translateY(-3px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.08); }
         .radio-hidden:checked + .pill-label {
@@ -103,6 +104,7 @@
         
         .cta-shell { position: sticky; bottom: 0; margin: 2.5rem -1.25rem -1.25rem; padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom)); background: linear-gradient(180deg, rgba(248,250,252,0) 0%, rgba(248,250,252,0.94) 18%, rgba(248,250,252,1) 100%); backdrop-filter: blur(10px); }
         .cta-panel { border-radius: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.94); border: 1px solid rgba(226,232,240,0.95); box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08); }
+        .cta-note { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.55rem 0.8rem; border-radius: 999px; background: #ecfdf5; color: #047857; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
 
         /* Success Screen */
         #success-screen { display: none; }
@@ -128,7 +130,26 @@
         }
 
         @media (max-width: 639px) {
-            .step-flow { grid-template-columns: 1fr; }
+            .divider { margin: 2rem 0; }
+            .step-flow { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; margin-bottom: 1.25rem; }
+            .step-chip { padding: 0.75rem 0.65rem; border-radius: 1rem; }
+            .step-chip strong { font-size: 0.72rem; line-height: 1.35; }
+            .step-chip span { display: none; }
+            .hero-flow-card { display: none; }
+            .hero-proof-stack { gap: 0.4rem; }
+            .hero-proof-stack span { padding: 0.7rem 0.85rem; font-size: 0.7rem; }
+            .section-panel { padding: 1rem; border-radius: 1.5rem; }
+            .cta-shell { margin: 2rem -1.25rem -1.25rem; padding: 0.85rem 0.85rem calc(0.9rem + env(safe-area-inset-bottom)); }
+            .cta-panel { border-radius: 1.35rem; padding: 0.9rem; box-shadow: 0 14px 34px rgba(15, 23, 42, 0.12); }
+        }
+
+        @media (max-width: 420px) {
+            .mobile-back-link { padding-left: 0.85rem; padding-right: 0.85rem; font-size: 0.78rem; }
+            .mobile-back-link .back-copy { display: none; }
+            .gender-choice-grid { grid-template-columns: 1fr; }
+            .hero-proof-stack span:nth-child(n+2) { display: none; }
+            .step-flow { display: none; }
+            .cta-note { width: 100%; }
         }
     </style>
 </head>
@@ -146,8 +167,8 @@
 
     <!-- Top Navigation (Back) -->
     <div class="absolute top-4 left-4 sm:top-6 sm:left-6 z-20">
-        <a href="index.html" class="flex items-center gap-2 text-slate-500 hover:text-emerald-600 font-bold transition-all hover:-translate-x-1 glass px-4 py-2 rounded-full text-sm">
-            <i class="fas fa-arrow-left"></i> Kembali ke Beranda
+        <a href="index.html" class="mobile-back-link flex items-center gap-2 text-slate-500 hover:text-emerald-600 font-bold transition-all hover:-translate-x-1 glass px-4 py-2 rounded-full text-sm">
+            <i class="fas fa-arrow-left"></i> <span class="back-copy">Kembali ke Beranda</span>
         </a>
     </div>
 
@@ -180,13 +201,13 @@
                         </div>
                     </div>
                     <p class="mt-4 max-w-xl text-sm sm:text-base font-medium leading-relaxed text-emerald-50/90">Pilih terapis, ambil slot yang tersedia, lalu kirim konfirmasi WhatsApp dalam satu alur yang rapi dari ponsel Anda.</p>
-                    <div class="mt-5 flex flex-col gap-2 text-xs font-bold text-emerald-50/90 sm:flex-row sm:flex-wrap">
+                    <div class="hero-proof-stack mt-5 flex flex-col gap-2 text-xs font-bold text-emerald-50/90 sm:flex-row sm:flex-wrap">
                         <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-2"><i class="fas fa-bolt"></i> Proses sekitar 2 menit</span>
                         <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-2"><i class="fas fa-clock"></i> Slot tampil real-time</span>
                         <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-2"><i class="fab fa-whatsapp"></i> Konfirmasi langsung ke admin</span>
                     </div>
                 </div>
-                <div class="rounded-[1.75rem] border border-white/20 bg-slate-950/10 p-4 sm:p-5 backdrop-blur-md">
+                <div class="hero-flow-card rounded-[1.75rem] border border-white/20 bg-slate-950/10 p-4 sm:p-5 backdrop-blur-md">
                     <p class="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-100/80">Alur Booking</p>
                     <div class="mt-4 space-y-3 text-sm">
                         <div class="flex items-start gap-3">
@@ -236,7 +257,7 @@
                     <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2 pl-1">
                         <i class="fas fa-venus-mars text-emerald-500"></i> Pilih Jenis Kelamin Pasien <span class="text-red-500">*</span>
                     </h3>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="gender-choice-grid grid grid-cols-2 gap-4">
                         <label class="w-full">
                             <input type="radio" name="gender_terapis" value="Pria" class="radio-hidden">
                             <div class="pill-label !flex-row !justify-start !p-4 !gap-4">
@@ -361,7 +382,10 @@
                         <p class="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-700">Langkah Terakhir</p>
                         <p class="mt-2 text-sm font-semibold text-slate-600">Pastikan tanggal, jam, dan nomor WhatsApp sudah benar sebelum kirim booking.</p>
                     </div>
-                    <button type="submit" id="submitBtn" class="relative w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-black px-6 py-4 rounded-2xl shadow-xl shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-[0.98] transition-all flex items-center justify-center gap-3 group uppercase tracking-[0.22em] text-[11px] sm:max-w-[320px] sm:mx-auto">
+                    <div class="mb-4">
+                        <span class="cta-note"><i class="fas fa-bolt"></i> CTA booking utama</span>
+                    </div>
+                    <button type="submit" id="submitBtn" class="relative w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-black px-6 py-[1.05rem] rounded-2xl shadow-xl shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-[0.98] transition-all flex items-center justify-center gap-3 group uppercase tracking-[0.22em] text-[11px] sm:max-w-[320px] sm:mx-auto">
                         <i class="fab fa-whatsapp text-xl"></i>
                         <span class="relative z-10">Konfirmasi Booking</span>
                         <div class="absolute inset-0 h-full w-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
