@@ -79,3 +79,5 @@ bindBookingUIEvents();
 document.addEventListener('change', handleBookingFormChange);
 document.getElementById('tanggal').addEventListener('change', checkAvailability);
 document.getElementById('bookingForm').addEventListener('submit', handleBookingSubmit);
+document.addEventListener('DOMContentLoaded', updateBookingCtaState);
+document.getElementById('bookingForm').addEventListener('input', () => updateBookingCtaState());

@@ -37,6 +37,7 @@ async function handleBookingSubmit(e) {
 
     submitBtn.disabled = true;
     const originalBtnHTML = submitBtn.innerHTML;
+    updateBookingCtaState('submitting');
     submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin text-lg"></i> <span class="relative z-10 ml-2">Memproses Data...</span>';
 
     const layananEncoded = document.querySelector('input[name="layanan"]:checked').value;
@@ -102,5 +103,6 @@ async function handleBookingSubmit(e) {
     } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnHTML;
+        updateBookingCtaState();
     }
 }

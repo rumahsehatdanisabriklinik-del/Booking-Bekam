@@ -41,6 +41,11 @@ const BookingState = window.BookingState = window.BookingState || {
 window.lastBookingData = null;
 
 const submitBtn = document.getElementById('submitBtn');
+const ctaShell = document.getElementById('ctaShell');
+const bookingCtaSummary = document.getElementById('bookingCtaSummary');
+const ctaKicker = document.getElementById('ctaKicker');
+const ctaHelper = document.getElementById('ctaHelper');
+const ctaNote = document.getElementById('ctaNote');
 
 function normalizeName(value) {
     return (value || "").toString().trim().toLowerCase();
@@ -131,4 +136,70 @@ function handleBookingFormChange(event) {
     if (target.matches('input[name="waktu"]')) {
         scrollToElement('step-3');
     }
+
+    updateBookingCtaState();
+}
+
+function getSelectedBookingBits() {
+    const waktu = document.querySelector('input[name="waktu"]:checked');
+    const gender = BookingState.selectedGender || "";
+    const terapis = BookingState.selectedTerapisName || "";
+    const layanan = BookingState.selectedLayanan && BookingState.selectedLayanan.nama ? BookingState.selectedLayanan.nama : "";
+    const tanggal = document.getElementById('tanggal') ? document.getElementById('tanggal').value : "";
+    const nama = document.getElementById('nama') ? document.getElementById('nama').value.trim() : "";
+    const whatsapp = document.getElementById('whatsapp') ? document.getElementById('whatsapp').value.trim() : "";
+    return {
+        gender,
+        terapis,
+        layanan,
+        tanggal,
+        waktu: waktu ? waktu.value : "",
+        nama,
+        whatsapp
+    };
+}
+
+function updateBookingCtaState(mode = "default") {
+    const bits = getSelectedBookingBits();
+    const summaryReady = !!(bits.gender || bits.terapis || bits.layanan || bits.tanggal || bits.waktu);
+    const finalReady = !!(bits.gender && bits.terapis && bits.layanan && bits.tanggal && bits.waktu && bits.nama && bits.whatsapp);
+
+    if (bookingCtaSummary) {
+        bookingCtaSummary.hidden = !summaryReady;
+    }
+    const mapText = {
+        gender: bits.gender ? `Pasien ${bits.gender}` : "Belum dipilih",
+        terapis: bits.terapis || "Belum dipilih",
+        layanan: bits.layanan || "Belum dipilih",
+        jadwal: bits.tanggal && bits.waktu ? `${bits.tanggal} ${bits.waktu} WIB` : (bits.tanggal || bits.waktu ? `${bits.tanggal || "Tanggal"} ${bits.waktu ? bits.waktu + " WIB" : ""}`.trim() : "Belum dipilih")
+    };
+    const summaryGender = document.getElementById('ctaSummaryGender');
+    const summaryTerapis = document.getElementById('ctaSummaryTerapis');
+    const summaryLayanan = document.getElementById('ctaSummaryLayanan');
+    const summaryJadwal = document.getElementById('ctaSummaryJadwal');
+    if (summaryGender) summaryGender.textContent = mapText.gender;
+    if (summaryTerapis) summaryTerapis.textContent = mapText.terapis;
+    if (summaryLayanan) summaryLayanan.textContent = mapText.layanan;
+    if (summaryJadwal) summaryJadwal.textContent = mapText.jadwal;
+
+    if (mode === "submitting") {
+        if (ctaShell) ctaShell.dataset.progress = "submitting";
+        if (ctaKicker) ctaKicker.textContent = "Mengirim Booking";
+        if (ctaHelper) ctaHelper.textContent = "Mohon tunggu, sistem sedang mengunci slot dan mengirim data ke admin.";
+        if (ctaNote) ctaNote.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> booking sedang diproses';
+        return;
+    }
+
+    if (ctaShell) ctaShell.dataset.progress = finalReady ? "ready" : (summaryReady ? "progress" : "idle");
+    if (ctaKicker) ctaKicker.textContent = finalReady ? "Siap Dikirim" : (summaryReady ? "Lanjutkan Booking" : "Langkah Terakhir");
+    if (ctaHelper) ctaHelper.textContent = finalReady
+        ? "Semua data inti sudah lengkap. Tinggal kirim booking ke admin."
+        : (summaryReady
+            ? "Ringkasan booking sudah mulai terbentuk. Lengkapi data yang tersisa agar bisa langsung dikirim."
+            : "Pastikan tanggal, jam, dan nomor WhatsApp sudah benar sebelum kirim booking.");
+    if (ctaNote) ctaNote.innerHTML = finalReady
+        ? '<i class="fas fa-check-circle"></i> siap kirim booking'
+        : (summaryReady
+            ? '<i class="fas fa-arrow-down"></i> lengkapi data tersisa'
+            : '<i class="fas fa-bolt"></i> cta booking utama');
 }
