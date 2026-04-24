@@ -15,6 +15,7 @@ let checkinCanvasCtx = null;
 let checkinSubmitInFlight = false;
 let lastScannedClinicCode = "";
 let lastScannedClinicCodeAt = 0;
+let lastCheckinScanAttemptAt = 0;
 
 document.getElementById('year').textContent = new Date().getFullYear();
 

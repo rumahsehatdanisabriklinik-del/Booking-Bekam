@@ -46,6 +46,7 @@ function stopCheckinScanner() {
     checkinScanLoopActive = false;
     checkinScanMode = "idle";
     checkinDetector = null;
+    lastCheckinScanAttemptAt = 0;
     if (checkinStream) {
         checkinStream.getTracks().forEach(track => track.stop());
         checkinStream = null;
@@ -112,8 +113,8 @@ async function openCheckinModal(row, payload, summaryText) {
         checkinStream = await navigator.mediaDevices.getUserMedia({
             video: {
                 facingMode: { ideal: 'environment' },
-                width: { ideal: 1280 },
-                height: { ideal: 1280 }
+                width: { ideal: 640 },
+                height: { ideal: 640 }
             },
             audio: false
         });
@@ -168,6 +169,13 @@ async function scanClinicQrFrame() {
         return;
     }
 
+    const now = Date.now();
+    if (now - lastCheckinScanAttemptAt < 280) {
+        requestAnimationFrame(scanClinicQrFrame);
+        return;
+    }
+    lastCheckinScanAttemptAt = now;
+
     try {
         if (checkinScanMode === 'barcode-detector' && checkinDetector) {
             const barcodes = await checkinDetector.detect(video);
@@ -179,8 +187,14 @@ async function scanClinicQrFrame() {
                 }
             }
         } else if (typeof window.jsQR === 'function' && checkinCanvas && checkinCanvasCtx) {
-            const width = video.videoWidth || 0;
-            const height = video.videoHeight || 0;
+            const sourceWidth = video.videoWidth || 0;
+            const sourceHeight = video.videoHeight || 0;
+            const maxDimension = 480;
+            const scale = (sourceWidth > 0 && sourceHeight > 0)
+                ? Math.min(1, maxDimension / Math.max(sourceWidth, sourceHeight))
+                : 1;
+            const width = Math.max(1, Math.round(sourceWidth * scale));
+            const height = Math.max(1, Math.round(sourceHeight * scale));
             if (width > 0 && height > 0) {
                 checkinCanvas.width = width;
                 checkinCanvas.height = height;
