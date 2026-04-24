@@ -756,7 +756,55 @@ function formatDateTimeLocal(dateObj) {
   return Utilities.formatDate(dateObj, tz, "yyyy-MM-dd HH:mm");
 }
 
+function findBookingRowByBookingId(sheet, bookingId) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return -1;
+
+  const bookingIds = sheet.getRange(2, 14, lastRow - 1, 1).getValues();
+  for (let i = 0; i < bookingIds.length; i++) {
+    if ((bookingIds[i][0] || "").toString().trim() === bookingId) {
+      return i + 2;
+    }
+  }
+  return -1;
+}
+
+function findBookingRowByNeonFallback(sheet, bookingId) {
+  try {
+    const rows = queryNeon("SELECT hp, tanggal, jam FROM booking WHERE booking_id = ? LIMIT 1", [bookingId]);
+    if (!rows || rows.length === 0) return -1;
+
+    const match = rows[0] || {};
+    const targetHp = normalizeHp(match.hp || "");
+    const targetTanggal = (match.tanggal || "").toString().trim().substring(0, 10);
+    const targetWaktu = normalisirWaktu(match.jam || "");
+    if (!targetHp || !targetTanggal || !targetWaktu) return -1;
+
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const tz = ss.getSpreadsheetTimeZone() || "Asia/Jakarta";
+    const lastRow = sheet.getLastRow();
+    if (lastRow < 2) return -1;
+
+    const allRows = sheet.getRange(2, 1, lastRow - 1, BOOKING_HEADER_ROW.length).getValues();
+    for (let i = 0; i < allRows.length; i++) {
+      const rowData = allRows[i];
+      const rowTanggal = rowData[0] instanceof Date ? Utilities.formatDate(rowData[0], tz, "yyyy-MM-dd") : (rowData[0] || "").toString().trim();
+      const rowWaktu = normalisirWaktu(rowData[1]);
+      const rowHp = normalizeHp(rowData[5]);
+      if (rowTanggal === targetTanggal && rowWaktu === targetWaktu && rowHp === targetHp) {
+        const rowNumber = i + 2;
+        sheet.getRange(rowNumber, 14).setValue(bookingId);
+        return rowNumber;
+      }
+    }
+  } catch (e) {
+    console.error("Fallback cari booking via Neon gagal: " + e.message);
+  }
+  return -1;
+}
+
 function selfCheckIn(dataForm) {
+  const rowHint = parseInt(dataForm && dataForm.row, 10);
   const payload = (dataForm && (dataForm.payload || dataForm.code || dataForm.token || "")).toString().trim();
   const clinicCode = (dataForm && (dataForm.clinicCode || dataForm.scannedCode || "")).toString().trim();
   if (!payload) {
@@ -793,13 +841,18 @@ function selfCheckIn(dataForm) {
     const lastRow = sheet.getLastRow();
     if (lastRow < 2) return { status: "error", message: "Belum ada data booking." };
 
-    const bookingIds = sheet.getRange(2, 14, lastRow - 1, 1).getValues();
     let targetRow = -1;
-    for (let i = 0; i < bookingIds.length; i++) {
-      if ((bookingIds[i][0] || "").toString().trim() === parsed.bookingId) {
-        targetRow = i + 2;
-        break;
+    if (!isNaN(rowHint) && rowHint >= 2 && rowHint <= lastRow) {
+      const hintedBookingId = (sheet.getRange(rowHint, 14).getValue() || "").toString().trim();
+      if (hintedBookingId === parsed.bookingId) {
+        targetRow = rowHint;
       }
+    }
+    if (targetRow < 2) {
+      targetRow = findBookingRowByBookingId(sheet, parsed.bookingId);
+    }
+    if (targetRow < 2) {
+      targetRow = findBookingRowByNeonFallback(sheet, parsed.bookingId);
     }
     if (targetRow < 2) {
       return { status: "error", message: "Booking untuk QR ini tidak ditemukan." };

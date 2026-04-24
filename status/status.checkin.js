@@ -175,6 +175,7 @@ async function processPatientCheckin(clinicCode) {
 
     try {
         const result = await apiPostJson('selfCheckIn', {
+            row: currentCheckInRow,
             payload: currentCheckInPayload,
             clinicCode: clinicCode
         }, {
