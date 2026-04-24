@@ -31,6 +31,8 @@ function getLocalCheckinWindowState() {
 
 function stopCheckinScanner() {
     checkinScanLoopActive = false;
+    checkinScanMode = "idle";
+    checkinDetector = null;
     if (checkinStream) {
         checkinStream.getTracks().forEach(track => track.stop());
         checkinStream = null;
@@ -73,30 +75,42 @@ async function openCheckinModal(row, payload, summaryText) {
         return;
     }
 
-    if (!('BarcodeDetector' in window) || !navigator.mediaDevices?.getUserMedia) {
-        updateCheckinStatus('Browser ini belum mendukung scan kamera. Gunakan kolom kode manual di bawah.', true);
+    if (!navigator.mediaDevices?.getUserMedia) {
+        updateCheckinStatus('Browser ini belum mendukung akses kamera. Gunakan kolom kode manual di bawah.', true);
         return;
     }
 
     try {
-        const formats = await BarcodeDetector.getSupportedFormats();
-        if (!formats.includes('qr_code')) {
-            updateCheckinStatus('Browser tidak mendukung pembacaan QR. Gunakan kode manual.', true);
-            return;
+        checkinScanMode = 'jsqr';
+        if ('BarcodeDetector' in window) {
+            const formats = await BarcodeDetector.getSupportedFormats();
+            if (formats.includes('qr_code')) {
+                checkinDetector = new BarcodeDetector({ formats: ['qr_code'] });
+                checkinScanMode = 'barcode-detector';
+            }
         }
 
-        checkinDetector = new BarcodeDetector({ formats: ['qr_code'] });
         checkinStream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: { ideal: 'environment' } },
+            video: {
+                facingMode: { ideal: 'environment' },
+                width: { ideal: 1280 },
+                height: { ideal: 1280 }
+            },
             audio: false
         });
 
         const video = document.getElementById('checkinVideo');
         video.srcObject = checkinStream;
         await video.play();
+        if (!checkinCanvas) {
+            checkinCanvas = document.createElement('canvas');
+            checkinCanvasCtx = checkinCanvas.getContext('2d', { willReadFrequently: true });
+        }
 
         checkinScanLoopActive = true;
-        updateCheckinStatus('Arahkan kamera ke QR check-in di meja admin. Sistem akan memberi tahu jika QR belum aktif.');
+        updateCheckinStatus(checkinScanMode === 'barcode-detector'
+            ? 'Arahkan kamera ke QR check-in di meja admin.'
+            : 'Arahkan kamera ke QR check-in di meja admin. Mode scan kompatibel sedang aktif.');
         requestAnimationFrame(scanClinicQrFrame);
     } catch (error) {
         console.error('Scanner start failed', error);
@@ -114,7 +128,7 @@ function openCheckinModalSafe(row, encodedPayload, encodedSummary, windowInfo = 
 }
 
 async function scanClinicQrFrame() {
-    if (!checkinScanLoopActive || !checkinDetector) return;
+    if (!checkinScanLoopActive) return;
 
     const video = document.getElementById('checkinVideo');
     if (!video || video.readyState < 2) {
@@ -123,12 +137,31 @@ async function scanClinicQrFrame() {
     }
 
     try {
-        const barcodes = await checkinDetector.detect(video);
-        if (barcodes && barcodes.length > 0) {
-            const rawValue = (barcodes[0].rawValue || '').trim();
-            if (rawValue) {
-                await processPatientCheckin(rawValue);
-                return;
+        if (checkinScanMode === 'barcode-detector' && checkinDetector) {
+            const barcodes = await checkinDetector.detect(video);
+            if (barcodes && barcodes.length > 0) {
+                const rawValue = (barcodes[0].rawValue || '').trim();
+                if (rawValue) {
+                    await processPatientCheckin(rawValue);
+                    return;
+                }
+            }
+        } else if (typeof window.jsQR === 'function' && checkinCanvas && checkinCanvasCtx) {
+            const width = video.videoWidth || 0;
+            const height = video.videoHeight || 0;
+            if (width > 0 && height > 0) {
+                checkinCanvas.width = width;
+                checkinCanvas.height = height;
+                checkinCanvasCtx.drawImage(video, 0, 0, width, height);
+                const imageData = checkinCanvasCtx.getImageData(0, 0, width, height);
+                const qr = window.jsQR(imageData.data, width, height, {
+                    inversionAttempts: 'dontInvert'
+                });
+                const rawValue = (qr && qr.data ? qr.data : '').trim();
+                if (rawValue) {
+                    await processPatientCheckin(rawValue);
+                    return;
+                }
             }
         }
     } catch (error) {
