@@ -93,9 +93,11 @@ function renderSingleBooking(data, isLatest, delayIndex = 0) {
                 </div>`
         : '';
     const checkInInfo = data.checkIn && canCheckIn ? `<div class="mt-4 p-4 rounded-2xl bg-emerald-50 border border-emerald-100">
-                    <div class="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 mb-2">Jendela Check-In</div>
-                    <div class="text-xs font-bold text-slate-700">Aktif mulai ${data.checkIn.validFrom}</div>
-                    <div class="text-xs font-bold text-slate-500 mt-1">Berakhir ${data.checkIn.expiresAt}</div>
+                    <div class="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 mb-2">Jendela Check-In QR</div>
+                    <div class="text-xs font-bold text-slate-700">Jadwal booking tetap ${data.tanggal} jam ${data.waktu} WIB.</div>
+                    <div class="text-xs font-bold text-slate-700 mt-2">QR aktif mulai ${data.checkIn.validFrom}</div>
+                    <div class="text-xs font-bold text-slate-500 mt-1">QR berakhir ${data.checkIn.expiresAt}</div>
+                    <div class="text-[11px] text-slate-500 font-medium mt-2">Catatan: QR dibuka 45 menit sebelum jadwal dan ditutup 15 menit sesudah jadwal booking.</div>
                 </div>` : '';
 
     card.innerHTML = `
