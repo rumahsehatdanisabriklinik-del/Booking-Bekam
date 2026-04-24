@@ -112,6 +112,7 @@
         .booking-cta-summary[hidden] { display: none; }
         .booking-cta-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; margin-top: 0.75rem; }
         .booking-cta-item { min-width: 0; }
+        .booking-cta-item-full { grid-column: 1 / -1; }
         .booking-cta-label { display: block; font-size: 0.58rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #94a3b8; margin-bottom: 0.2rem; }
         .booking-cta-value { display: block; font-size: 0.8rem; font-weight: 800; color: #0f172a; line-height: 1.4; word-break: break-word; }
 
@@ -402,6 +403,10 @@
                                 <span id="ctaSummaryGender" class="booking-cta-value">-</span>
                             </div>
                             <div class="booking-cta-item">
+                                <span class="booking-cta-label">Nama</span>
+                                <span id="ctaSummaryNama" class="booking-cta-value">-</span>
+                            </div>
+                            <div class="booking-cta-item">
                                 <span class="booking-cta-label">Terapis</span>
                                 <span id="ctaSummaryTerapis" class="booking-cta-value">-</span>
                             </div>
@@ -412,6 +417,18 @@
                             <div class="booking-cta-item">
                                 <span class="booking-cta-label">Jadwal</span>
                                 <span id="ctaSummaryJadwal" class="booking-cta-value">-</span>
+                            </div>
+                            <div class="booking-cta-item">
+                                <span class="booking-cta-label">WhatsApp</span>
+                                <span id="ctaSummaryWhatsapp" class="booking-cta-value">-</span>
+                            </div>
+                            <div class="booking-cta-item">
+                                <span class="booking-cta-label">Usia</span>
+                                <span id="ctaSummaryUsia" class="booking-cta-value">-</span>
+                            </div>
+                            <div class="booking-cta-item booking-cta-item-full">
+                                <span class="booking-cta-label">Keluhan</span>
+                                <span id="ctaSummaryKeluhan" class="booking-cta-value">-</span>
                             </div>
                         </div>
                     </div>

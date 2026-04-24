@@ -45,8 +45,7 @@ function cekWaktuTersedia(tanggal, terapis) {
         let tglRow = (rowData[0] instanceof Date) ? Utilities.formatDate(rowData[0], tz, "yyyy-MM-dd") : rowData[0].toString().trim();
         let jamRow = normalisirWaktu(rowData[1]);
         let terapisRow = rowData[2].toString().trim().toLowerCase();
-        let statusRow = (rowData[7] || "").toString().trim().toLowerCase();
-        let isBatal = ["batal", "cancel", "canceled", "cancelled", "dibatalkan"].includes(statusRow);
+        let isBatal = !isStatusBookingAktif(rowData[7]);
 
         if (tglRow === tglPilih && terapisRow === terapisPilih && !isBatal) {
           if (jamRow && !waktuTerbooking.includes(jamRow)) waktuTerbooking.push(jamRow);
@@ -74,6 +73,49 @@ function cekWaktuTersedia(tanggal, terapis) {
   }
 
   return jamAktifNormal.filter(j => !waktuTerbooking.includes(j));
+}
+
+function isStatusBookingAktif(status) {
+  const statusNorm = (status || "").toString().trim().toLowerCase();
+  return !["batal", "cancel", "canceled", "cancelled", "dibatalkan", "batal (otomatis)"].includes(statusNorm);
+}
+
+function adaBookingAktifPadaSlot(tanggal, terapis, waktu) {
+  const tanggalPilih = (tanggal || "").toString().trim();
+  const terapisPilih = (terapis || "").toString().trim();
+  const waktuPilih = normalisirWaktu(waktu);
+  if (!tanggalPilih || !terapisPilih || !waktuPilih) return false;
+
+  try {
+    const sql = "SELECT 1 FROM booking WHERE tanggal = ?::DATE AND LOWER(TRIM(terapis)) = LOWER(TRIM(?)) AND jam = ? AND status NOT IN ('Batal', 'Cancel', 'Dibatalkan', 'Batal (Otomatis)') LIMIT 1";
+    const rows = queryNeon(sql, [tanggalPilih, terapisPilih, waktuPilih]);
+    if (Array.isArray(rows) && rows.length > 0) return true;
+  } catch (e) {
+    console.error("Gagal cek bentrok slot dari Neon: " + e.message);
+  }
+
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss ? ss.getSheetByName("Booking") : null;
+  if (!sheet) return false;
+
+  const allData = sheet.getDataRange().getValues();
+  const tz = ss.getSpreadsheetTimeZone();
+  const terapisNorm = terapisPilih.toLowerCase();
+
+  for (let i = 1; i < allData.length; i++) {
+    const rowData = allData[i];
+    const tglRow = (rowData[0] instanceof Date)
+      ? Utilities.formatDate(rowData[0], tz, "yyyy-MM-dd")
+      : (rowData[0] || "").toString().trim();
+    const jamRow = normalisirWaktu(rowData[1]);
+    const terapisRow = (rowData[2] || "").toString().trim().toLowerCase();
+
+    if (tglRow === tanggalPilih && jamRow === waktuPilih && terapisRow === terapisNorm && isStatusBookingAktif(rowData[7])) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 const CHECKIN_WINDOW_BEFORE_MINUTES = 45;
@@ -265,7 +307,12 @@ function simpanBookingData(dataForm) {
 
   const namaSani = nama.toString().replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const hpSani   = nohp.toString().replace(/[^0-9+]/g, "");
+  const waktuSani = normalisirWaktu(waktu);
   const keluhanSani = (keluhan || "").toString().replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  if (!waktuSani) {
+    return { status: "error", message: "Format jam booking tidak valid." };
+  }
 
   const cache = CacheService.getScriptCache();
   if (cache.get("spam_" + hpSani)) {
@@ -279,10 +326,14 @@ function simpanBookingData(dataForm) {
   try {
     lock.waitLock(30000); 
     
+    if (adaBookingAktifPadaSlot(tanggal, terapis, waktuSani)) {
+      return { status: "error", message: "Slot waktu ini sudah dipakai pasien lain. Silakan pilih jam lain." };
+    }
+
     const tersedia = cekWaktuTersedia(tanggal, terapis);
     if (typeof tersedia === "string") return { status: "error", message: tersedia };
     
-    if (!tersedia.includes(waktu.toString().trim())) {
+    if (!tersedia.includes(waktuSani)) {
       return { status: "error", message: "Slot waktu ini baru saja diambil pasien lain. Silakan pilih jam lain." };
     }
 
@@ -296,11 +347,14 @@ function simpanBookingData(dataForm) {
     initSheetBooking(sheet);
 
     bookingId = buatBookingId(tanggal, hpSani);
-    checkInPayload = buatCheckInPayload(bookingId, tanggal, waktu);
-    checkInWindow = getCheckInWindowInfo(tanggal, waktu);
+    checkInPayload = buatCheckInPayload(bookingId, tanggal, waktuSani);
+    checkInWindow = getCheckInWindowInfo(tanggal, waktuSani);
 
     // [Tanggal, Waktu, Terapis, JK, Nama, HP, Layanan, Status, Tensi, Keluhan, Tindakan, Rating, Ulasan, Booking ID, Check-In At, Sumber]
-    sheet.appendRow([tanggal, waktu, terapis, jenisKelamin, namaSani, hpSani, sesiBekam, "Terjadwal", "", keluhanSani, "", "", "", bookingId, "", ""]);
+    sheet.appendRow([tanggal, waktuSani, terapis, jenisKelamin, namaSani, hpSani, sesiBekam, "Terjadwal", "", keluhanSani, "", "", "", bookingId, "", ""]);
+    const appendedRow = sheet.getLastRow();
+    sheet.getRange(appendedRow, 6).setNumberFormat("@");
+    sheet.getRange(appendedRow, 6).setValue("'" + hpSani);
     
     // +++ SIMPAN KE NEON (REAL-TIME) +++
     try {
@@ -309,7 +363,7 @@ function simpanBookingData(dataForm) {
       
       // 2. Sync ke Booking
       const sqlB = `INSERT INTO booking (booking_id, nama, hp, tanggal, jam, terapis, layanan, status, catatan) VALUES (?, ?, ?, ?::DATE, ?, ?, ?, ?, ?)`;
-      executeNeon(sqlB, [bookingId, namaSani, hpSani, tanggal, waktu, terapis, sesiBekam, "Terjadwal", keluhanSani]);
+      executeNeon(sqlB, [bookingId, namaSani, hpSani, tanggal, waktuSani, terapis, sesiBekam, "Terjadwal", keluhanSani]);
       
     } catch(e) { console.error("Gagal sinkronisasi ke Neon: " + e.message); }
 
@@ -326,7 +380,7 @@ function simpanBookingData(dataForm) {
   try {
     const cfg = getSettingKlinik();
     try {
-      const startTime = new Date(`${tanggal}T${waktu}:00`);
+      const startTime = new Date(`${tanggal}T${waktuSani}:00`);
       const endTime   = new Date(startTime.getTime() + (90 * 60 * 1000));
       const cal = CalendarApp.getDefaultCalendar();
       cal.createEvent(`Bekam: ${namaSani}`, startTime, endTime, {
@@ -339,7 +393,7 @@ function simpanBookingData(dataForm) {
     if (adminEmail && adminEmail.includes("@")) {
       try {
         const subjek = `[BOOKING BARU] ${namaSani} - ${tanggal}`;
-        const bodyHTML = `<div style="font-family: Arial, sans-serif; max-width: 600px; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden;"><div style="background: #064e3b; color: white; padding: 20px; text-align: center;"><h2 style="margin: 0;">Reservasi Baru Masuk</h2></div><div style="padding: 20px; color: #333;"><p>Halo Admin <b>Rumah Sehat Dani Sabri</b>,</p><p>Ada pendaftaran reservasi baru melalui sistem online:</p><table style="width: 100%; border-collapse: collapse;"><tr><td style="padding: 8px 0; border-bottom: 1px solid #eee;"><b>Nama</b></td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">: ${namaSani}</td></tr><tr><td style="padding: 8px 0; border-bottom: 1px solid #eee;"><b>HP/WA</b></td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">: ${hpSani}</td></tr><tr><td style="padding: 8px 0; border-bottom: 1px solid #eee;"><b>Jadwal</b></td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">: ${tanggal} jam ${waktu}</td></tr><tr><td style="padding: 8px 0; border-bottom: 1px solid #eee;"><b>Terapis</b></td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">: ${terapis}</td></tr><tr><td style="padding: 8px 0; border-bottom: 1px solid #eee;"><b>Layanan</b></td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">: ${sesiBekam}</td></tr></table><div style="margin-top: 20px; text-align: center;"><a href="https://docs.google.com/spreadsheets/d/${SpreadsheetApp.getActiveSpreadsheet().getId()}" style="background: #10b981; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Buka Spreadsheet</a></div></div></div>`;
+        const bodyHTML = `<div style="font-family: Arial, sans-serif; max-width: 600px; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden;"><div style="background: #064e3b; color: white; padding: 20px; text-align: center;"><h2 style="margin: 0;">Reservasi Baru Masuk</h2></div><div style="padding: 20px; color: #333;"><p>Halo Admin <b>Rumah Sehat Dani Sabri</b>,</p><p>Ada pendaftaran reservasi baru melalui sistem online:</p><table style="width: 100%; border-collapse: collapse;"><tr><td style="padding: 8px 0; border-bottom: 1px solid #eee;"><b>Nama</b></td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">: ${namaSani}</td></tr><tr><td style="padding: 8px 0; border-bottom: 1px solid #eee;"><b>HP/WA</b></td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">: ${hpSani}</td></tr><tr><td style="padding: 8px 0; border-bottom: 1px solid #eee;"><b>Jadwal</b></td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">: ${tanggal} jam ${waktuSani}</td></tr><tr><td style="padding: 8px 0; border-bottom: 1px solid #eee;"><b>Terapis</b></td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">: ${terapis}</td></tr><tr><td style="padding: 8px 0; border-bottom: 1px solid #eee;"><b>Layanan</b></td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">: ${sesiBekam}</td></tr></table><div style="margin-top: 20px; text-align: center;"><a href="https://docs.google.com/spreadsheets/d/${SpreadsheetApp.getActiveSpreadsheet().getId()}" style="background: #10b981; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Buka Spreadsheet</a></div></div></div>`;
         MailApp.sendEmail({ to: adminEmail, subject: subjek, htmlBody: bodyHTML });
       } catch (e) { console.error("Gagal kirim email: " + e.message); }
     }
@@ -351,7 +405,7 @@ function simpanBookingData(dataForm) {
       const emailTerapis = dataTerapis ? dataTerapis.email : "";
 
       if (emailTerapis && emailTerapis.includes("@")) {
-        const subjekTerapis = `[JADWAL BARU] ${namaSani} - ${tanggal} Jam ${waktu}`;
+        const subjekTerapis = `[JADWAL BARU] ${namaSani} - ${tanggal} Jam ${waktuSani}`;
         const bodyTerapis = `
 <div style="font-family: Arial, sans-serif; max-width: 580px; border: 1px solid #d1fae5; border-radius: 12px; overflow: hidden;">
   <div style="background: #047857; color: white; padding: 20px; text-align: center;">
@@ -375,7 +429,7 @@ function simpanBookingData(dataForm) {
       </tr>
       <tr>
         <td style="padding: 10px 14px; font-weight: bold; border-bottom: 1px solid #f3f4f6;">⏰ Jam</td>
-        <td style="padding: 10px 14px; border-bottom: 1px solid #f3f4f6;">${waktu} WIB</td>
+        <td style="padding: 10px 14px; border-bottom: 1px solid #f3f4f6;">${waktuSani} WIB</td>
       </tr>
       <tr style="background: #ecfdf5;">
         <td style="padding: 10px 14px; font-weight: bold; border-bottom: 1px solid #d1fae5;">💆 Layanan</td>
@@ -397,7 +451,7 @@ function simpanBookingData(dataForm) {
     
     const waNumber = cfg.waAdmin;
     const mapsInfo = cfg.mapsLink ? `\n📍 *Maps*: ${cfg.mapsLink}` : "";
-    const pesanWA = `Halo Admin *Rumah Sehat Dani Sabri*,\n\nSaya ingin konfirmasi booking:\n📌 *Nama*: ${namaSani}\n📅 *Tanggal*: ${tanggal}\n⏰ *Waktu*: ${waktu}\n👨‍⚕️ *Terapis*: ${terapis}\n💆‍♂️ *Layanan*: ${sesiBekam}${mapsInfo}\n\nMohon diverifikasi segera ya. Terimakasih!`;
+    const pesanWA = `Halo Admin *Rumah Sehat Dani Sabri*,\n\nSaya ingin konfirmasi booking:\n📌 *Nama*: ${namaSani}\n📅 *Tanggal*: ${tanggal}\n⏰ *Waktu*: ${waktuSani}\n👨‍⚕️ *Terapis*: ${terapis}\n💆‍♂️ *Layanan*: ${sesiBekam}${mapsInfo}\n\nMohon diverifikasi segera ya. Terimakasih!`;
     const waUrl = `https://api.whatsapp.com/send?phone=${waNumber}&text=${encodeURIComponent(pesanWA)}`;
 
     return {
@@ -406,7 +460,7 @@ function simpanBookingData(dataForm) {
       data: {
         nama: namaSani,
         tanggal: tanggal,
-        waktu: waktu,
+        waktu: waktuSani,
         terapis: terapis,
         sesi: sesiBekam,
         whatsappUrl: waUrl,
@@ -428,7 +482,7 @@ function simpanBookingData(dataForm) {
       data: {
         nama: namaSani,
         tanggal: tanggal,
-        waktu: waktu,
+        waktu: waktuSani,
         terapis: terapis,
         sesi: sesiBekam,
         whatsappUrl: "",

@@ -148,6 +148,8 @@ function getSelectedBookingBits() {
     const tanggal = document.getElementById('tanggal') ? document.getElementById('tanggal').value : "";
     const nama = document.getElementById('nama') ? document.getElementById('nama').value.trim() : "";
     const whatsapp = document.getElementById('whatsapp') ? document.getElementById('whatsapp').value.trim() : "";
+    const usia = document.getElementById('usia') ? document.getElementById('usia').value.trim() : "";
+    const keluhan = document.getElementById('keluhan') ? document.getElementById('keluhan').value.trim() : "";
     return {
         gender,
         terapis,
@@ -155,7 +157,9 @@ function getSelectedBookingBits() {
         tanggal,
         waktu: waktu ? waktu.value : "",
         nama,
-        whatsapp
+        whatsapp,
+        usia,
+        keluhan
     };
 }
 
@@ -174,13 +178,21 @@ function updateBookingCtaState(mode = "default") {
         jadwal: bits.tanggal && bits.waktu ? `${bits.tanggal} ${bits.waktu} WIB` : (bits.tanggal || bits.waktu ? `${bits.tanggal || "Tanggal"} ${bits.waktu ? bits.waktu + " WIB" : ""}`.trim() : "Belum dipilih")
     };
     const summaryGender = document.getElementById('ctaSummaryGender');
+    const summaryNama = document.getElementById('ctaSummaryNama');
     const summaryTerapis = document.getElementById('ctaSummaryTerapis');
     const summaryLayanan = document.getElementById('ctaSummaryLayanan');
     const summaryJadwal = document.getElementById('ctaSummaryJadwal');
+    const summaryWhatsapp = document.getElementById('ctaSummaryWhatsapp');
+    const summaryUsia = document.getElementById('ctaSummaryUsia');
+    const summaryKeluhan = document.getElementById('ctaSummaryKeluhan');
     if (summaryGender) summaryGender.textContent = mapText.gender;
+    if (summaryNama) summaryNama.textContent = bits.nama || "Belum diisi";
     if (summaryTerapis) summaryTerapis.textContent = mapText.terapis;
     if (summaryLayanan) summaryLayanan.textContent = mapText.layanan;
     if (summaryJadwal) summaryJadwal.textContent = mapText.jadwal;
+    if (summaryWhatsapp) summaryWhatsapp.textContent = bits.whatsapp ? `+62 ${bits.whatsapp}` : "Belum diisi";
+    if (summaryUsia) summaryUsia.textContent = bits.usia ? `${bits.usia} tahun` : "Opsional";
+    if (summaryKeluhan) summaryKeluhan.textContent = bits.keluhan || "Belum ditulis";
 
     if (mode === "submitting") {
         if (ctaShell) ctaShell.dataset.progress = "submitting";
