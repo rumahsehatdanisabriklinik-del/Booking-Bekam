@@ -316,10 +316,11 @@
             }
 
             .hero-mobile-actions a {
-                min-height: 3.25rem;
-                padding: 0.9rem 1rem;
+                min-height: 2.9rem;
+                padding: 0.75rem 0.95rem;
                 border-radius: 1rem;
-                font-size: 0.95rem;
+                font-size: 0.85rem;
+                line-height: 1.2;
             }
 
             .hero-mobile-stats,
@@ -387,6 +388,30 @@
                 margin-bottom: 1.25rem !important;
             }
 
+            main a[href][class*="rounded"],
+            main button,
+            #mobileMenu a,
+            #chat-suggestions button {
+                font-size: 0.82rem !important;
+                line-height: 1.2 !important;
+            }
+
+            main a[href].w-full,
+            main a[href].inline-flex,
+            main a[href][class*="rounded"],
+            #mobileMenu a,
+            #chat-suggestions button {
+                min-height: 2.75rem !important;
+                padding-top: 0.7rem !important;
+                padding-bottom: 0.7rem !important;
+                border-radius: 0.95rem !important;
+            }
+
+            main a[href] i,
+            main button i {
+                font-size: 0.8rem !important;
+            }
+
             #benefits .grid.grid-cols-2 {
                 grid-template-columns: 1fr;
                 gap: 1rem;
@@ -443,9 +468,39 @@
             }
 
             #cta-booking .relative.p-8 {
-                padding: 1.5rem;
+                padding: 1.25rem;
                 grid-template-columns: 1fr;
-                gap: 1.5rem;
+                gap: 1.15rem;
+            }
+
+            #cta-booking,
+            #cta-booking * {
+                color: #ffffff !important;
+            }
+
+            #cta-booking span,
+            #cta-booking p {
+                color: rgba(236, 253, 245, 0.88) !important;
+            }
+
+            #cta-booking h1,
+            #cta-booking h2,
+            #cta-booking h3,
+            #cta-booking strong {
+                color: #ffffff !important;
+            }
+
+            #cta-booking .rounded-\[1\.25rem\] {
+                background: rgba(255, 255, 255, 0.1) !important;
+                border-color: rgba(167, 243, 208, 0.26) !important;
+            }
+
+            #cta-booking a[href="booking.html"] {
+                min-height: 3rem !important;
+                padding: 0.8rem 1rem !important;
+                font-size: 0.9rem !important;
+                border-radius: 1rem !important;
+                color: #ffffff !important;
             }
 
             section[aria-label],
