@@ -164,6 +164,18 @@
             text-shadow: 0 2px 18px rgba(6, 78, 59, 0.24);
         }
 
+        .hero-stat-card {
+            background: rgba(2, 44, 34, 0.74);
+            border: 1px solid rgba(167, 243, 208, 0.22);
+            box-shadow: 0 18px 36px rgba(2, 44, 34, 0.2);
+        }
+
+        .hero-info-card {
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(167, 243, 208, 0.7);
+            box-shadow: 0 18px 42px rgba(2, 44, 34, 0.16);
+        }
+
         .panel-copy-readable {
             color: rgba(6, 78, 59, 0.92);
             text-shadow: none;
@@ -526,6 +538,13 @@
             }
         }
 
+        @media (max-width: 900px) {
+            .hero-mobile-stats,
+            .hero-mobile-visual {
+                display: none;
+            }
+        }
+
         @media (max-width: 420px) {
             #cms-tagline {
                 font-size: 2.1rem;
@@ -651,15 +670,15 @@
                 <div class="pt-8 sm:pt-10 space-y-5 hero-mobile-stats">
                     <div class="premium-divider max-w-2xl"></div>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 max-w-3xl">
-                        <div class="rounded-2xl bg-white/12 border border-white/16 p-4 sm:p-5 shadow-lg shadow-emerald-950/20">
+                        <div class="hero-stat-card rounded-2xl p-4 sm:p-5">
                             <p class="text-white text-xl sm:text-2xl font-extrabold drop-shadow-[0_2px_10px_rgba(15,23,42,0.25)]">1.2K+</p>
                             <p class="text-[10px] sm:text-xs font-bold text-emerald-50 uppercase tracking-[0.22em] mt-1">Pasien Dilayani</p>
                         </div>
-                        <div class="rounded-2xl bg-white/12 border border-white/16 p-4 sm:p-5 shadow-lg shadow-emerald-950/20">
+                        <div class="hero-stat-card rounded-2xl p-4 sm:p-5">
                             <p class="text-white text-xl sm:text-2xl font-extrabold drop-shadow-[0_2px_10px_rgba(15,23,42,0.25)]">4.9/5</p>
                             <p class="text-[10px] sm:text-xs font-bold text-emerald-50 uppercase tracking-[0.22em] mt-1">Ulasan Pasien</p>
                         </div>
-                        <div class="rounded-2xl bg-white/12 border border-white/16 p-4 sm:p-5 col-span-2 sm:col-span-1 shadow-lg shadow-emerald-950/20">
+                        <div class="hero-stat-card rounded-2xl p-4 sm:p-5 col-span-2 sm:col-span-1">
                             <p class="text-white text-xl sm:text-2xl font-extrabold drop-shadow-[0_2px_10px_rgba(15,23,42,0.25)]">Syar'i</p>
                             <p class="text-[10px] sm:text-xs font-bold text-emerald-50 uppercase tracking-[0.22em] mt-1">Privasi Dijaga</p>
                         </div>
@@ -675,11 +694,11 @@
                             <img id="cms-hero-image-detail" src="https://images.unsplash.com/photo-1659080540643-7dcbbc530bd2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtdXNsaW0lMjB3b21hbiUyMGhpamFiJTIwdGhlcmFweSUyMHdlbGxuZXNzfGVufDF8fHx8MTc3NTQ1OTA5NXww&ixlib=rb-4.1.0&q=80&w=1080" class="w-full h-full object-cover animate-float" alt="Therapy Session Detail">
                         </div>
                         <div class="mt-5 sm:mt-6 grid grid-cols-2 gap-3">
-                            <div class="rounded-xl bg-white/94 px-4 py-4 shadow-lg shadow-slate-950/5">
+                            <div class="hero-info-card rounded-xl px-4 py-4">
                                 <p class="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-700">Amanah Layanan</p>
                                 <p class="mt-2 text-sm sm:text-base font-bold text-slate-900 leading-snug">Alat bersih, privasi terjaga, dan tindakan dijelaskan sebelum dimulai.</p>
                             </div>
-                            <div class="rounded-xl bg-white px-4 py-4 border border-emerald-200 shadow-xl shadow-emerald-900/8">
+                            <div class="hero-info-card rounded-xl px-4 py-4">
                                 <p class="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-800">Alur Ikhtiar</p>
                                 <p class="mt-2 text-sm sm:text-base font-bold text-slate-900 leading-snug">Booking, konfirmasi, dan kedatangan dibuat ringkas dan mudah diikuti.</p>
                             </div>
