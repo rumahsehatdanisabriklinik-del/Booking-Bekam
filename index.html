@@ -1175,6 +1175,41 @@
             img.dataset.fallbackSrc = normalizedUrl;
         }
 
+        function cleanCmsText(value) {
+            return String(value || '')
+                .replace(/<br\s*\/?>/gi, ' ')
+                .replace(/<[^>]+>/g, '')
+                .replace(/&nbsp;/gi, ' ')
+                .replace(/\s{2,}/g, ' ')
+                .trim();
+        }
+
+        function escapeCmsText(value) {
+            return cleanCmsText(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function renderCmsHeading(el, value, options = {}) {
+            if (!el || !value) return;
+            const text = cleanCmsText(value);
+            const words = text.split(/\s+/).filter(Boolean);
+            const splitFromEnd = Number.isFinite(options.splitFromEnd) ? options.splitFromEnd : 2;
+            const minWords = Number.isFinite(options.minWords) ? options.minWords : 5;
+            const accentClass = options.accentClass || '';
+            if (words.length >= minWords && splitFromEnd > 0 && splitFromEnd < words.length) {
+                const first = escapeCmsText(words.slice(0, -splitFromEnd).join(' '));
+                const last = escapeCmsText(words.slice(-splitFromEnd).join(' '));
+                const lastHtml = accentClass ? `<span class="${accentClass}">${last}</span>` : last;
+                el.innerHTML = `${first} <br class="hidden sm:block">${lastHtml}`;
+                return;
+            }
+            el.textContent = text;
+        }
+
         function bindLandingUIEvents() {
             document.addEventListener('click', (event) => {
                 const target = event.target.closest('[data-action]');
@@ -1236,16 +1271,7 @@
                     }
                     if(d.cms_tagline) {
                         const el = document.getElementById('cms-tagline');
-                        if(el) {
-                            let words = d.cms_tagline.split(" ");
-                            let styledTitle = d.cms_tagline;
-                            if (words.length > 2) {
-                                const lastTwo = words.slice(-2).join(" ");
-                                const rest = words.slice(0, -2).join(" ");
-                                styledTitle = `${rest} <br class='hidden sm:block'><span class="text-emerald-100">${lastTwo}</span>`;
-                            }
-                            el.innerHTML = styledTitle;
-                        }
+                        renderCmsHeading(el, d.cms_tagline, { splitFromEnd: 2, minWords: 5, accentClass: 'text-emerald-100' });
                     }
                     if(d.cms_deskripsi) {
                         const el = document.getElementById('cms-deskripsi');
@@ -1313,7 +1339,7 @@
 
                     // Header Keunggulan
                     if(d.cms_keunggulan_judul_kecil) document.getElementById('cms-keunggulan-judul-kecil').textContent = d.cms_keunggulan_judul_kecil;
-                    if(d.cms_keunggulan_judul_besar) document.getElementById('cms-keunggulan-judul-besar').innerHTML = d.cms_keunggulan_judul_besar;
+                    if(d.cms_keunggulan_judul_besar) renderCmsHeading(document.getElementById('cms-keunggulan-judul-besar'), d.cms_keunggulan_judul_besar, { splitFromEnd: 2, minWords: 5 });
                     if(d.cms_keunggulan_deskripsi) document.getElementById('cms-keunggulan-deskripsi').textContent = d.cms_keunggulan_deskripsi;
                     if(d.cms_keunggulan_poin1) document.getElementById('cms-keunggulan-poin1').textContent = d.cms_keunggulan_poin1;
                     if(d.cms_keunggulan_poin2) document.getElementById('cms-keunggulan-poin2').textContent = d.cms_keunggulan_poin2;
@@ -1326,7 +1352,7 @@
                     }
 
                     // CTA
-                    if(d.cms_cta_judul) document.getElementById('cms-cta-judul').innerHTML = d.cms_cta_judul;
+                    if(d.cms_cta_judul) renderCmsHeading(document.getElementById('cms-cta-judul'), d.cms_cta_judul, { splitFromEnd: 3, minWords: 6 });
                     if(d.cms_cta_deskripsi) document.getElementById('cms-cta-deskripsi').textContent = d.cms_cta_deskripsi;
 
                     // Team Section

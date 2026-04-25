@@ -82,13 +82,27 @@ window.AdminApp.cms.printClinicQrPoster = function printClinicQrPoster() {
     window.print();
 };
 
+window.AdminApp.cms.cleanCmsTextInput = function cleanCmsTextInput(value) {
+    return String(value || '')
+        .replace(/<br\s*\/?>/gi, ' ')
+        .replace(/<[^>]+>/g, '')
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/\s{2,}/g, ' ')
+        .trim();
+};
+
+window.AdminApp.cms.setCmsInputValue = function setCmsInputValue(key, value) {
+    const el = document.getElementById(key);
+    if (!el) return;
+    el.value = window.AdminApp.cms.cleanCmsTextInput(value);
+};
+
 window.AdminApp.cms.loadCMSData = async function loadCMSData(options = {}) {
     const force = Boolean(options.force);
     if (!force && window.AdminState.cms.hasLoadedSettings) {
         const data = window.AdminState.cms.settingsCache || {};
         Object.keys(data).forEach((key) => {
-            const el = document.getElementById(key);
-            if (el) el.value = data[key];
+            window.AdminApp.cms.setCmsInputValue(key, data[key]);
         });
         window.AdminApp.cms.renderClinicCheckinQr(window.AdminApp.cms.getClinicCheckinCode());
         return data;
@@ -108,8 +122,7 @@ window.AdminApp.cms.loadCMSData = async function loadCMSData(options = {}) {
                 window.AdminState.cms.hasLoadedSettings = true;
 
                 Object.keys(data).forEach((key) => {
-                    const el = document.getElementById(key);
-                    if (el) el.value = data[key];
+                    window.AdminApp.cms.setCmsInputValue(key, data[key]);
                 });
                 window.AdminApp.cms.renderClinicCheckinQr(window.AdminApp.cms.getClinicCheckinCode());
 
@@ -137,7 +150,7 @@ window.AdminApp.cms.saveCMS = async function saveCMS() {
     const inputs = document.querySelectorAll('#tab-cms input, #tab-cms textarea');
     inputs.forEach((input) => {
         if (input.id && input.id.startsWith('cms_')) {
-            updatedData[input.id] = input.value;
+            updatedData[input.id] = window.AdminApp.cms.cleanCmsTextInput(input.value);
         }
     });
 
