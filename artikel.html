@@ -477,17 +477,19 @@
                 .replace(/^\s*(?:gambar|image|foto)\s+dalam artikel\s*$/gim, '')
                 .replace(/^\s*(?:gambar|image|foto)(?:\s+(?:utama|\d+|dalam artikel))?\s*:?\s*(?:https?:\/\/|www\.)\S+\s*$/gim, '')
                 .replace(/^\s*(?:https?:\/\/|www\.)\S*(?:drive\.google|googleusercontent|unsplash|images?|\.jpg|\.jpeg|\.png|\.webp|\.gif)\S*\s*$/gim, '')
+                .replace(/(?:https?:\/\/|www\.)\S*(?:drive\.google|googleusercontent|unsplash|images?|\.jpg|\.jpeg|\.png|\.webp|\.gif)\S*/gi, '')
                 .replace(/&lt;br\s*\/?&gt;/gi, '\n')
                 .replace(/<br\s*\/?>/gi, '\n')
                 .replace(/<\/?br\s*\/?>/gi, '\n')
                 .replace(/&nbsp;/gi, ' ')
+                .replace(/\s*(✅|⚠️|❌|📍|📞|🧩|🔍)\s*/g, '\n$1 ')
                 .replace(/\r/g, '')
                 .replace(/\n{3,}/g, '\n\n')
                 .trim()
                 .replace(/^\s*[-*]\s+/gm, '• ')
                 .replace(/(?:^|\n)(\d+)\.\s*/g, '\n\n$1. ')
                 .replace(/\r/g, '')
-                .replace(/\s+((?:\d+\.\s*)?(?:Apa Itu|Manfaat|Melancarkan|Mengurangi|Menenangkan|Meningkatkan|Menjaga|Detoksifikasi|Bekam untuk|Berikut beberapa))/g, '\n\n$1')
+                .replace(/\s+((?:\d+\.\s*)?(?:Apa Itu|Manfaat|Kapan Harus|Metode|Ciri|Tempat|Melancarkan|Mengurangi|Menenangkan|Meningkatkan|Menjaga|Detoksifikasi|Bekam untuk|Berikut beberapa))/g, '\n\n$1')
                 .replace(/\s+(Migrain dan vertigo|Kolesterol tinggi|Asam urat|Hipertensi|Masalah pencernaan|Kelelahan kronis)/g, '\n$1');
 
             return prepared
@@ -495,8 +497,13 @@
                 .map((part) => part.trim())
                 .filter(Boolean)
                 .map((part) => {
+                    const known = splitKnownArticleHeading(part);
+                    if (known) {
+                        const body = known.body ? `<p>${escapeHtml(known.body).replace(/\n/g, '<br>')}</p>` : '';
+                        return `<h2>${escapeHtml(known.heading)}</h2>${body}`;
+                    }
                     const clean = escapeHtml(part).replace(/\n/g, '<br>');
-                    if (/^(Apa Itu|Manfaat|Bekam untuk|Berikut beberapa)/i.test(part)) {
+                    if (/^(Apa Itu|Manfaat|Kapan Harus|Metode|Ciri|Tempat|Bekam untuk|Berikut beberapa)/i.test(part)) {
                         return `<h2>${clean}</h2>`;
                     }
                     if (/^\d+\.\s+/.test(part)) {
@@ -508,6 +515,39 @@
                     return `<p>${clean}</p>`;
                 })
                 .join('');
+        }
+
+        function splitKnownArticleHeading(part) {
+            const value = String(part || '').trim();
+            const headings = [
+                'Apa Itu Ruqiah Syariah?',
+                'Apa Itu Ruqyah Syariah?',
+                'Manfaat Ruqiah Syariah',
+                'Manfaat Ruqyah Syariah',
+                'Kapan Harus Melakukan Ruqiah?',
+                'Kapan Harus Melakukan Ruqyah?',
+                'Metode Ruqiah Syariah yang Benar',
+                'Metode Ruqyah Syariah yang Benar',
+                'Ciri Ruqiah yang Tidak Sesuai Syariah',
+                'Ciri Ruqyah yang Tidak Sesuai Syariah',
+                'Tempat Ruqiah Syariah di Kota Wisata',
+                'Tempat Ruqyah Syariah di Kota Wisata'
+            ];
+            const hit = headings.find((heading) => value.toLowerCase().startsWith(heading.toLowerCase()));
+            if (!hit) return null;
+            return {
+                heading: hit,
+                body: value.slice(hit.length).trim()
+            };
+        }
+
+        function removeLeadingDuplicateTitle(text, title) {
+            const value = String(text || '').trim();
+            const articleTitle = String(title || '').trim();
+            if (!articleTitle) return value;
+            const normalize = (item) => item.toLowerCase().replace(/\s+/g, ' ').replace(/[^\w\s]/g, '').trim();
+            if (!normalize(value).startsWith(normalize(articleTitle))) return value;
+            return value.slice(articleTitle.length).replace(/^[\s:;.,-]+/, '').trim();
         }
 
         function stripArticleImageLinks(text) {
@@ -522,14 +562,15 @@
                 .replace(/^\s*(?:gambar|image|foto)\s+dalam artikel\s*$/gim, '')
                 .replace(/^\s*(?:gambar|image|foto)(?:\s+(?:utama|\d+|dalam artikel))?\s*:?\s*(?:https?:\/\/|www\.)\S+\s*$/gim, '')
                 .replace(/^\s*(?:https?:\/\/|www\.)\S*(?:drive\.google|googleusercontent|unsplash|images?|\.jpg|\.jpeg|\.png|\.webp|\.gif)\S*\s*$/gim, '')
+                .replace(/(?:https?:\/\/|www\.)\S*(?:drive\.google|googleusercontent|unsplash|images?|\.jpg|\.jpeg|\.png|\.webp|\.gif)\S*/gi, '')
                 .replace(/\n{3,}/g, '\n\n')
                 .trim();
         }
 
-        function formatArticleBody(input) {
+        function formatArticleBody(input, title) {
             const raw = String(input || '').trim();
             if (!raw) return '<p>Konten artikel belum tersedia.</p>';
-            const decodedRaw = stripArticleImageLinks(decodeHtmlEntities(raw));
+            const decodedRaw = removeLeadingDuplicateTitle(stripArticleImageLinks(decodeHtmlEntities(raw)), title);
             const cleanedRaw = decodedRaw
                 .replace(/&lt;br\s*\/?&gt;/gi, '\n')
                 .replace(/<br\s*\/?>/gi, '\n')
@@ -669,7 +710,7 @@
             const excerpt = getExcerpt(a);
             document.getElementById('detailExcerpt').textContent = excerpt;
             document.getElementById('detailReadTime').textContent = `${estimateReadTime(a.isi || excerpt)} menit baca`;
-            document.getElementById('detailBody').innerHTML = formatArticleBody(a.isi);
+            document.getElementById('detailBody').innerHTML = formatArticleBody(a.isi, a.judul);
             const heroImg = document.getElementById('detailHeroImg');
             const fotoUrl = normalizeImageUrl(a.foto || 'https://images.unsplash.com/photo-1505751172107-5d3d7a845366?w=1200');
             heroImg.style.backgroundImage = `url('${fotoUrl}')`;
