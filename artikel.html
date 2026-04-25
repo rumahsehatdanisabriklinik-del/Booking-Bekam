@@ -472,6 +472,11 @@
 
         function autoFormatPlainArticle(text) {
             const prepared = String(text || '')
+                .replace(/!\[[^\]]*\]\([^)]+\)/g, '')
+                .replace(/\[[^\]]*\]\((?:https?:\/\/|www\.)[^)]*(?:drive\.google|googleusercontent|unsplash|images?|\.jpg|\.jpeg|\.png|\.webp|\.gif)[^)]*\)/gi, '')
+                .replace(/^\s*(?:gambar|image|foto)\s+dalam artikel\s*$/gim, '')
+                .replace(/^\s*(?:gambar|image|foto)(?:\s+(?:utama|\d+|dalam artikel))?\s*:?\s*(?:https?:\/\/|www\.)\S+\s*$/gim, '')
+                .replace(/^\s*(?:https?:\/\/|www\.)\S*(?:drive\.google|googleusercontent|unsplash|images?|\.jpg|\.jpeg|\.png|\.webp|\.gif)\S*\s*$/gim, '')
                 .replace(/&lt;br\s*\/?&gt;/gi, '\n')
                 .replace(/<br\s*\/?>/gi, '\n')
                 .replace(/<\/?br\s*\/?>/gi, '\n')
@@ -505,21 +510,37 @@
                 .join('');
         }
 
+        function stripArticleImageLinks(text) {
+            return String(text || '')
+                .replace(/!\[[^\]]*\]\([^)]+\)/g, '')
+                .replace(/<a\b[^>]*href=["'][^"']*(?:drive\.google|googleusercontent|unsplash|images?|\.jpg|\.jpeg|\.png|\.webp|\.gif)[^"']*["'][^>]*>\s*(?:gambar|image|foto)[\s\S]*?<\/a>/gi, '')
+                .replace(/<a\b[^>]*href=["'][^"']*(?:drive\.google|googleusercontent|unsplash|images?|\.jpg|\.jpeg|\.png|\.webp|\.gif)[^"']*["'][^>]*>\s*(?:https?:\/\/|www\.)[\s\S]*?<\/a>/gi, '')
+                .replace(/<h[1-6]\b[^>]*>\s*(?:gambar|image|foto)\s+dalam artikel\s*<\/h[1-6]>/gi, '')
+                .replace(/<p>\s*(?:gambar|image|foto)\s+dalam artikel\s*<\/p>/gi, '')
+                .replace(/<p>\s*(?:gambar|image|foto)(?:\s+(?:utama|\d+|dalam artikel))?\s*:?\s*(?:https?:\/\/|www\.)[^<\s]+\s*<\/p>/gi, '')
+                .replace(/\[[^\]]*\]\((?:https?:\/\/|www\.)[^)]*(?:drive\.google|googleusercontent|unsplash|images?|\.jpg|\.jpeg|\.png|\.webp|\.gif)[^)]*\)/gi, '')
+                .replace(/^\s*(?:gambar|image|foto)\s+dalam artikel\s*$/gim, '')
+                .replace(/^\s*(?:gambar|image|foto)(?:\s+(?:utama|\d+|dalam artikel))?\s*:?\s*(?:https?:\/\/|www\.)\S+\s*$/gim, '')
+                .replace(/^\s*(?:https?:\/\/|www\.)\S*(?:drive\.google|googleusercontent|unsplash|images?|\.jpg|\.jpeg|\.png|\.webp|\.gif)\S*\s*$/gim, '')
+                .replace(/\n{3,}/g, '\n\n')
+                .trim();
+        }
+
         function formatArticleBody(input) {
             const raw = String(input || '').trim();
             if (!raw) return '<p>Konten artikel belum tersedia.</p>';
-            const decodedRaw = decodeHtmlEntities(raw);
+            const decodedRaw = stripArticleImageLinks(decodeHtmlEntities(raw));
             const cleanedRaw = decodedRaw
                 .replace(/&lt;br\s*\/?&gt;/gi, '\n')
                 .replace(/<br\s*\/?>/gi, '\n')
                 .replace(/<\/?br\s*\/?>/gi, '\n');
-            if (/<[a-z][\s\S]*>/i.test(raw) || /<(br|p|h[1-6]|ul|ol|li|figure|img|blockquote)\b/i.test(cleanedRaw)) {
-                const htmlSource = /<[a-z][\s\S]*>/i.test(raw) ? raw : decodedRaw;
+            if (/<(p|h[1-6]|ul|ol|li|figure|img|blockquote|a)\b/i.test(decodedRaw)) {
+                const htmlSource = stripArticleImageLinks(decodedRaw);
                 const parts = htmlSource.split(/(<figure[\s\S]*?<\/figure>|<img\b[^>]*>)/gi);
                 const html = parts.map((part) => {
                     if (!part.trim()) return '';
                     if (/^<(figure|img)\b/i.test(part.trim())) return part;
-                    return autoFormatPlainArticle(part);
+                    return part;
                 }).join('');
                 return typeof sanitizeAssistantHtml === 'function' ? sanitizeAssistantHtml(html) : html;
             }
